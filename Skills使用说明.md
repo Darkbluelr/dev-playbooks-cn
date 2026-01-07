@@ -12,6 +12,7 @@
 ## `devbooks-router`（Router）
 
 - 作用：把你的自然语言请求路由成下一步该用哪些 `devbooks-*` skills + 每个产物落点路径。
+- **图索引健康检查**：路由前自动调用 `mcp__ckb__getStatus` 检查 SCIP 索引状态，若不可用会提示生成索引。
 - 使用场景：
   - 你不确定当前属于 proposal/apply/review/archive 哪个阶段
   - 你不知道该先写 proposal / design / spec / tasks / tests 哪个
@@ -68,6 +69,9 @@
 ## `devbooks-impact-analysis`（Impact Analyst）
 
 - 作用：跨模块/跨文件/对外契约变更前做影响分析，把结论写回 `proposal.md` 的 Impact 部分。
+- **双模式分析**（借鉴 Augment Code）：
+  - **图基分析**（SCIP 可用时）：使用 `analyzeImpact`/`findReferences`/`getCallGraph` 进行高精度分析
+  - **文本搜索**（降级模式）：使用 `Grep`/`Glob` 进行关键字搜索
 - 使用场景：
   - 你要改很多文件 / 不确定受影响面 / 可能破坏兼容
   - “看起来只是改一处”，但担心跨模块漏改
@@ -146,33 +150,23 @@
 
 ---
 
-## `devbooks-spec-delta`（Spec Owner / Spec Delta）
+## `devbooks-spec-contract`（Spec & Contract Owner）【新】
 
-- 作用：产出规格 delta（Requirements/Scenarios），把设计验收点转成可追溯的规范条目。
+> 本 skill 合并了原 `devbooks-spec-delta` 和 `devbooks-contract-data` 的功能，减少选择困难。
+
+- 作用：定义对外行为规格与契约（Requirements/Scenarios/API/Schema/兼容策略），并建议或生成 contract tests。
 - 使用场景：
   - 对外行为/契约/数据不变量变化
-  - 需要“规格裁判”而不是仅靠实现细节
-- 使用话术：
-  ```text
-  你现在是 Spec Owner。请点名使用 `devbooks-spec-delta`（只写 Requirements/Scenarios，不写实现）。
-  先读：`openspec/changes/<change-id>/proposal.md`、`openspec/changes/<change-id>/design.md`（如有）
-  请写：`openspec/changes/<change-id>/specs/<capability>/spec.md`
-  ```
-
----
-
-## `devbooks-contract-data`（Contract & Data Owner）
-
-- 作用：定义对外契约与数据（API/事件/schema_version/幂等键/兼容策略/迁移与回放），并建议或生成 contract tests。
-- 使用场景：
   - OpenAPI/Proto/事件 envelope/schema/配置格式 变更
   - 需要补兼容策略、弃用策略、迁移与回放
 - 使用话术：
   ```text
-  你现在是 Contract & Data Owner。请点名使用 `devbooks-contract-data`（禁止写业务实现代码）。
-  先读：`openspec/changes/<change-id>/design.md`、`openspec/changes/<change-id>/specs/**`（如有），并在仓库内定位现有契约目录（如 `contracts/` / `openapi/` / `schema/`）。
-  请输出：契约与数据定义计划 + Contract Test IDs，并给出每个产物应落到的路径。
-  如果我明确要求“同时产出契约文件内容”，你再输出最小契约草案。
+  你现在是 Spec & Contract Owner。请点名使用 `devbooks-spec-contract`。
+  先读：`openspec/changes/<change-id>/proposal.md`、`openspec/changes/<change-id>/design.md`（如有）
+  请一次性输出：
+  - 规格 delta：`openspec/changes/<change-id>/specs/<capability>/spec.md`（Requirements/Scenarios）
+  - 契约计划：写入 `design.md` 的 Contract 章节（API 变更 + 兼容策略 + Contract Test IDs）
+  如有隐式变更风险，运行：`implicit-change-detect.sh`
   ```
 
 ---
@@ -221,6 +215,7 @@
 - 使用场景：
   - 需要 TDD/验收测试/追溯矩阵（Trace Matrix）
   - 需要 contract tests / 架构适配测试（fitness tests）
+- **输出管理**：测试输出超过 50 行时，只保留关键失败信息，完整日志落盘到 `evidence/`
 - 使用话术（必须新对话/独立实例）：
   ```text
   你现在是 Test Owner（必须独立对话/独立实例）。请点名使用 `devbooks-test-owner`，按 OpenSpec apply 阶段执行。
@@ -239,6 +234,12 @@
 - 作用：严格按 `tasks.md` 实现功能并跑闸门，禁止修改 `tests/**`，以测试/静态检查为唯一完成判据。
 - 使用场景：
   - 进入实现阶段：按计划逐项实现、修复测试失败、让闸门全绿
+- **热点感知**（借鉴 Augment Code）：开始任务前调用 `mcp__ckb__getHotspots` 检查目标文件是否为高风险区域，并输出热点报告
+  - 🔴 Critical：热点 Top 5 且修改核心逻辑 → 先重构再修改，必须增加测试
+  - 🟡 High：热点 Top 10 → 增加测试覆盖，代码审查重点关注
+  - 🟢 Normal：非热点 → 正常流程
+- **断点续做**：中断后继续时，Coder 会自动识别 tasks.md 中已完成的任务，从断点继续
+- **输出管理**：命令输出超过 50 行时，只保留首尾各 10 行 + 摘要，完整日志落盘到 `evidence/`
 - 使用话术（必须新对话/独立实例）：
   ```text
   你现在是 Coder（必须独立对话/独立实例）。请点名使用 `devbooks-coder`，按 OpenSpec apply 阶段执行。
@@ -253,6 +254,10 @@
 ## `devbooks-code-review`（Reviewer）
 
 - 作用：以 Reviewer 角色做可读性/一致性/依赖健康/坏味道审查，只输出可执行建议，不讨论业务正确性。
+- **热点优先审查**（借鉴 Augment Code）：审查前调用 `mcp__ckb__getHotspots` 获取项目热点，按风险排序审查
+  - 🔴 热点 Top 5：必须深度审查（测试覆盖、圈复杂度变化、依赖数量变化）
+  - 🟡 热点 Top 10：重点关注
+  - 🟢 非热点：常规审查
 - 使用场景：
   - PR 评审前/后做结构与可维护性把关
   - 想发现耦合、依赖方向、复杂度、坏味道
@@ -300,7 +305,11 @@
 
 ## `devbooks-delivery-workflow`（Delivery Workflow + Scripts）
 
-- 作用：把一次变更跑成“可追溯闭环”（Design→Plan→Trace→Verify→Implement→Archive），并提供确定性脚本 scaffold/check/evidence/codemod。
+- 作用：把一次变更跑成"可追溯闭环"（Design→Plan→Trace→Verify→Implement→Archive），并提供确定性脚本 scaffold/check/evidence/codemod。
+- **架构合规检查**（借鉴 Augment Code 依赖卫士）：`guardrail-check.sh` 新增选项
+  - `--check-layers`：检查分层约束违规（下层引用上层、common 引用 browser/node 等）
+  - `--check-cycles`：检查循环依赖
+  - `--check-hotspots`：警告热点文件变更
 - 使用场景：
   - 你想把重复步骤脚本化（避免漏文件、漏字段、漏校验）
   - 你想把“完成”锚定到可执行校验（而不是口头确认）
@@ -325,8 +334,13 @@
 
 ## `devbooks-brownfield-bootstrap`（Brownfield Bootstrapper）
 
-- 作用：存量项目初始化：当 `<truth-root>` 为空/缺失时生成项目画像、术语表、基线规格与最小验证锚点，避免“边补 specs 边改行为”。
-- 使用场景：
+- 作用：存量项目初始化：当 `<truth-root>` 为空/缺失时生成项目画像、术语表、基线规格与最小验证锚点，避免"边补 specs 边改行为"。
+- **COD 模型生成**（借鉴 Augment Code）：自动生成"代码地图"产物
+  - 模块依赖图：`<truth-root>/architecture/module-graph.md`（来自 `mcp__ckb__getArchitecture`）
+  - 技术债热点：`<truth-root>/architecture/hotspots.md`（来自 `mcp__ckb__getHotspots`）
+  - 领域概念：`<truth-root>/_meta/key-concepts.md`（来自 `mcp__ckb__listKeyConcepts`）
+  - 项目画像模板：三层架构（语法层/语义层/上下文层）
+- 使用场景:
   - 老项目想接入 DevBooks/OpenSpec，但没有当前真理与规格基线
   - 你想先把“现在是什么样”写清楚，再开始改动
 - 使用话术：
@@ -369,4 +383,38 @@
   - 小型项目（< 10K LOC）：每周手动运行
   - 中型项目（10K-100K LOC）：CI 定时每日运行
   - 大型项目（> 100K LOC）：PR 合并时触发
+
+---
+
+## `devbooks-index-bootstrap`（Index Bootstrapper）【新】
+
+- 作用：自动检测项目语言栈并生成 SCIP 索引，激活图基代码理解能力（调用图、影响分析、符号引用等）。
+- **触发条件**：
+  - 用户说"初始化索引/建立代码图谱/激活图分析"
+  - `mcp__ckb__getStatus` 返回 SCIP 后端 `healthy: false`
+  - 进入新项目且 `index.scip` 不存在
+- 使用场景：
+  - 想使用 `devbooks-impact-analysis` 的图基分析模式
+  - 想在 `devbooks-coder`/`devbooks-code-review` 中获得热点感知
+  - CKB MCP 工具报错"SCIP 后端不可用"
+- 使用话术：
+  ```text
+  请点名使用 `devbooks-index-bootstrap`。
+  目标：检测项目语言栈，生成 SCIP 索引，激活图基代码理解能力。
+  项目根目录：$(pwd)
+  ```
+- 手动生成索引（无需 Skill）：
+  ```bash
+  # TypeScript/JavaScript
+  npm install -g @anthropic-ai/scip-typescript
+  scip-typescript index --output index.scip
+
+  # Python
+  pip install scip-python
+  scip-python index . --output index.scip
+
+  # Go
+  go install github.com/sourcegraph/scip-go@latest
+  scip-go --output index.scip
+  ```
 

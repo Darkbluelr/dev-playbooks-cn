@@ -1,6 +1,12 @@
 ---
 name: devbooks-spec-delta
-description: devbooks-spec-delta：产出规格 delta（Requirements/Scenarios），把设计验收点转成可追溯的规范条目。用户说“写规格/spec delta/需求条目/场景/requirements/scenarios/规格变更”等时使用。
+description: devbooks-spec-delta：产出规格 delta（Requirements/Scenarios），把设计验收点转成可追溯的规范条目。用户说"写规格/spec delta/需求条目/场景/requirements/scenarios/规格变更"等时使用。
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
 ---
 
 # DevBooks：规格 Delta（Spec Delta）

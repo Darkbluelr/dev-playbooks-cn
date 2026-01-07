@@ -1,6 +1,12 @@
 ---
 name: devbooks-router
-description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 OpenSpec proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说“下一步怎么做/路由到合适 skill/按 openspec 跑闭环”等时使用。
+description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 OpenSpec proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说"下一步怎么做/路由到合适 skill/按 openspec 跑闭环"等时使用。
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Bash
+  - mcp__ckb__getStatus
 ---
 
 # DevBooks：工作流路由（Router）
@@ -20,6 +26,37 @@ description: devbooks-router：DevBooks 工作流路由与下一步建议：根�
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
 - 禁止猜测目录根
 - 禁止跳过规则文档阅读
+
+## 前置：图索引健康检查（自动）
+
+**在路由前自动执行**，检查 CKB 图索引状态：
+
+1. 调用 `mcp__ckb__getStatus` 检查 SCIP 后端
+2. 如果 `backends.scip.healthy = false`：
+   - 提示用户：「检测到代码图索引未激活，影响分析/调用图等图基能力不可用」
+   - 询问是否现在生成索引（约 1-5 分钟）
+   - 若用户同意，执行 `devbooks-index-bootstrap` 流程
+   - 若用户拒绝，继续路由但标注「图基能力降级」
+
+3. 如果 `backends.scip.healthy = true`：
+   - 静默通过，继续路由
+
+**检查脚本**（供参考）：
+```bash
+# 检测语言并生成索引
+if [ -f "tsconfig.json" ]; then
+  scip-typescript index --output index.scip
+elif [ -f "pyproject.toml" ]; then
+  scip-python index . --output index.scip
+elif [ -f "go.mod" ]; then
+  scip-go --output index.scip
+fi
+```
+
+**降级模式说明**：
+- 无索引时，`devbooks-impact-analysis` 退化为 Grep 文本搜索（准确度下降）
+- 无索引时，`devbooks-code-review` 无法获取调用图上下文
+- 建议在 Apply 阶段前完成索引生成
 
 ## 你要做的事
 

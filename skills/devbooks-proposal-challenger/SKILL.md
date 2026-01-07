@@ -1,6 +1,10 @@
 ---
 name: devbooks-proposal-challenger
-description: devbooks-proposal-challenger：对 proposal.md 发起质疑（Challenger），指出风险/遗漏/不一致并给结论，避免共识稀释与机械指标误导。用户说“质疑提案/挑刺/风险评估/提案对辩 challenger”等时使用。
+description: devbooks-proposal-challenger：对 proposal.md 发起质疑（Challenger），指出风险/遗漏/不一致并给结论，避免共识稀释与机械指标误导。用户说"质疑提案/挑刺/风险评估/提案对辩 challenger"等时使用。
+tools:
+  - Glob
+  - Grep
+  - Read
 ---
 
 # DevBooks：提案质疑（Proposal Challenger）

@@ -1,6 +1,12 @@
 ---
 name: devbooks-proposal-debate-workflow
-description: devbooks-proposal-debate-workflow：在 proposal 阶段执行“提案-质疑-裁决”三角对辩流程，强制三角色隔离并写回 Decision Log。用户说“提案对辩/三角色对抗/Challenger/Judge/proposal debate/decision log”等时使用。
+description: devbooks-proposal-debate-workflow：在 proposal 阶段执行"提案-质疑-裁决"三角对辩流程，强制三角色隔离并写回 Decision Log。用户说"提案对辩/三角色对抗/Challenger/Judge/proposal debate/decision log"等时使用。
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
 ---
 
 # DevBooks：提案对辩工作流（Proposal Debate）

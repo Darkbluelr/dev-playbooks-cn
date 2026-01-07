@@ -1,6 +1,12 @@
 ---
 name: devbooks-contract-data
 description: devbooks-contract-data：定义对外契约与数据（API/事件/schema_version/idempotency_key/兼容策略/迁移与回放），并建议或生成 contract tests。支持隐式变更检测（依赖/配置/构建变更）。用户说"定义契约/OpenAPI/事件协议/Schema/幂等键/兼容策略/数据迁移/隐式变更检测"等时使用。
+tools:
+  - Glob
+  - Grep
+  - Read
+  - Write
+  - Edit
 ---
 
 # DevBooks：契约与数据（Contract & Data）
