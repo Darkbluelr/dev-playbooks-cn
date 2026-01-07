@@ -89,9 +89,8 @@ fi
 按需追加（满足条件才加）：
 - **跨模块/影响不清晰**：`devbooks-impact-analysis`（建议写回 proposal Impact）
 - **风险/争议/取舍明显**：`devbooks-proposal-debate-workflow`（Author/Challenger/Judge，对辩后写回 Decision Log）
-- **对外行为/契约/数据不变量变化**：`devbooks-spec-delta` → `(<change-root>/<change-id>/specs/**)`
-  - 若需要“确定性创建 spec delta 文件/避免路径写错”：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
-- **API/Schema/事件 envelope/数据契约**：`devbooks-contract-data`
+- **对外行为/契约/数据不变量变化**：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + `design.md` Contract 章节
+  - 若需要"确定性创建 spec delta 文件/避免路径写错"：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
 - **模块边界/依赖方向/架构形态变化**：`devbooks-c4-map` → `(<truth-root>/architecture/c4.md)`
 
 硬约束提醒：

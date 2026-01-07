@@ -69,17 +69,16 @@
 **角色类：**
 - Router（下一步路由）：`devbooks-router` → 给出阶段判断 + 下一步该用哪个 Skill + 产物落点（支持 Prototype 模式）
 - Design（设计文档）：`devbooks-design-doc` → `openspec/changes/<id>/design.md`
-- Spec delta（规格 delta）：`devbooks-spec-delta` → `openspec/changes/<id>/specs/<capability>/spec.md`
+- Spec & Contract（规格与契约）：`devbooks-spec-contract` → `openspec/changes/<id>/specs/<capability>/spec.md` + 契约计划（合并了原 spec-delta + contract-data）
 - Plan（编码计划）：`devbooks-implementation-plan` → `openspec/changes/<id>/tasks.md`
-- Test（测试与追溯）：`devbooks-test-owner` → `openspec/changes/<id>/verification.md` + `tests/**`
+- Test（测试与追溯）：`devbooks-test-owner` → `openspec/changes/<id>/verification.md` + `tests/**`【输出管理：>50行截断】
 - Proposal Author（提案撰写）：`devbooks-proposal-author` → `openspec/changes/<id>/proposal.md`
 - Proposal Challenger（提案质疑）：`devbooks-proposal-challenger` → 质疑报告（不写入变更包）
 - Proposal Judge（提案裁决）：`devbooks-proposal-judge` → 裁决报告（写回 `proposal.md`）
-- Coder（实现）：`devbooks-coder` → 实现与验证（不改 tests）
+- Coder（实现）：`devbooks-coder` → 实现与验证（不改 tests）【断点续做 + 输出管理】
 - Reviewer（代码评审）：`devbooks-code-review` → Review Notes（不写入变更包）
 - Garden（规格园丁）：`devbooks-spec-gardener` → 归档前修剪 `openspec/specs/`
 - Impact（影响分析）：`devbooks-impact-analysis` → 写入 `openspec/changes/<id>/proposal.md` 的 Impact 部分
-- Contracts（契约与数据）：`devbooks-contract-data` → `contracts/**` + contract tests
 - C4 map（架构地图）：`devbooks-c4-map` → `openspec/specs/architecture/c4.md`
 - Backport（回写设计）：`devbooks-design-backport` → 回写 `openspec/changes/<id>/design.md`
 
@@ -107,7 +106,7 @@
 | Proposal Challenger | `devbooks-proposal-challenger` | 质疑报告（风险/遗漏/不一致）|
 | Proposal Judge | `devbooks-proposal-judge` | 裁决报告（Approved/Revise/Rejected → 写回 proposal.md）|
 | Design Owner | `devbooks-design-doc` | `design.md`（What/Constraints + AC-xxx）|
-| Spec Owner | `devbooks-spec-delta` | `specs/<capability>/spec.md`（Requirements/Scenarios）|
+| Spec & Contract Owner | `devbooks-spec-contract` | `specs/<capability>/spec.md` + 契约计划（合并了原 spec-delta + contract-data）|
 | Planner | `devbooks-implementation-plan` | `tasks.md`（编码计划，不得参考 tests/）|
 | Impact Analyst | `devbooks-impact-analysis` | 影响分析（写入 proposal.md 的 Impact 部分）|
 
@@ -119,7 +118,7 @@
   → devbooks-proposal-challenger（质疑）
   → devbooks-proposal-judge（裁决）
   → devbooks-design-doc（设计文档）
-  → devbooks-spec-delta（规格增量，如有对外变更）
+  → devbooks-spec-contract（规格与契约增量，如有对外变更）
   → devbooks-implementation-plan（编码计划）
   → openspec validate <id> --strict
 ```

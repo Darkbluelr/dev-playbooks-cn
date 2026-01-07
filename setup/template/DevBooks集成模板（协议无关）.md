@@ -59,14 +59,13 @@
 - Proposal Judge：`devbooks-proposal-judge` → 裁决写回 `proposal.md`
 - Impact Analyst：`devbooks-impact-analysis` → 影响分析（建议写入 proposal 的 Impact 部分）
 - Design Owner：`devbooks-design-doc` → `(<change-root>/<change-id>/design.md)`
-- Spec Owner：`devbooks-spec-delta` → `(<change-root>/<change-id>/specs/**)`
+- Spec & Contract Owner：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + 契约计划（合并了原 spec-delta + contract-data）
 - Planner：`devbooks-implementation-plan` → `(<change-root>/<change-id>/tasks.md)`
-- Test Owner：`devbooks-test-owner` → `(<change-root>/<change-id>/verification.md)` + `tests/**`
-- Coder：`devbooks-coder` → 实现（禁改 tests）
+- Test Owner：`devbooks-test-owner` → `(<change-root>/<change-id>/verification.md)` + `tests/**`【输出管理：>50行截断】
+- Coder：`devbooks-coder` → 实现（禁改 tests）【断点续做 + 输出管理】
 - Reviewer：`devbooks-code-review` → 评审意见
 - Spec Gardener：`devbooks-spec-gardener` → 归档前修剪 `(<truth-root>/**)`
 - C4 Map Maintainer：`devbooks-c4-map` → `(<truth-root>/architecture/c4.md)`
-- Contract & Data Owner：`devbooks-contract-data` → 契约与数据定义 + contract tests
 - Design Backport：`devbooks-design-backport` → 回写设计缺口/冲突
 
 ### 工作流类

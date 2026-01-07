@@ -177,7 +177,7 @@ bash skills/devbooks-federation/scripts/federation-notify.sh \
 ## 与其他 Skills 的协作
 
 - `devbooks-impact-analysis`：检测到跨仓库影响时自动调用本 Skill
-- `devbooks-contract-data`：契约定义变更时同步触发
+- `devbooks-spec-contract`：契约定义变更时同步触发（合并了原 spec-delta + contract-data）
 - `devbooks-proposal-author`：在 proposal.md 中自动标记 Cross-Repo Impact
 
 ## 注意事项

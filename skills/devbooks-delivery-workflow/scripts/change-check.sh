@@ -448,12 +448,12 @@ check_implicit_changes() {
 
   local implicit_report="${change_dir}/evidence/implicit-changes.json"
 
-  # Check if implicit-change-detect.sh is available
+  # Check if implicit-change-detect.sh is available (now in devbooks-spec-contract)
   local detect_script
-  detect_script="$(dirname "$0")/../devbooks-contract-data/scripts/implicit-change-detect.sh"
+  detect_script="$(dirname "$0")/../devbooks-spec-contract/scripts/implicit-change-detect.sh"
   if [[ ! -x "$detect_script" ]]; then
     # Try alternate location
-    detect_script="$(dirname "$0")/../../devbooks-contract-data/scripts/implicit-change-detect.sh"
+    detect_script="$(dirname "$0")/../../devbooks-spec-contract/scripts/implicit-change-detect.sh"
   fi
 
   # If report doesn't exist and we can run detection, suggest it
