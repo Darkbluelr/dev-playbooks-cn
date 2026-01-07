@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Local runtime data (do not commit)
+.ckb/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+.vscode/
+
+# Env
+.env
+.env.*
+

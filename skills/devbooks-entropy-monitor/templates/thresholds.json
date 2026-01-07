@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "description": "Entropy thresholds configuration for DevBooks entropy-monitor",
+  "last_updated": "YYYY-MM-DD",
+  "updated_by": "YOUR_NAME",
+
+  "structural": {
+    "_comment": "Static code complexity metrics",
+    "complexity_mean": {
+      "value": 10,
+      "description": "Average cyclomatic complexity per function",
+      "action": "Refactor complex functions into smaller units"
+    },
+    "complexity_p95": {
+      "value": 20,
+      "description": "95th percentile cyclomatic complexity",
+      "action": "Review and simplify extremely complex functions"
+    },
+    "file_lines_p95": {
+      "value": 500,
+      "description": "95th percentile file line count",
+      "action": "Split large files into focused modules"
+    },
+    "function_lines_p95": {
+      "value": 50,
+      "description": "95th percentile function line count",
+      "action": "Extract helper functions from long methods"
+    }
+  },
+
+  "change": {
+    "_comment": "Git history analysis metrics",
+    "hotspot_ratio": {
+      "value": 0.1,
+      "description": "Ratio of frequently-changed files (>5 changes in period)",
+      "action": "Investigate and refactor hotspot files"
+    },
+    "coupling_ratio": {
+      "value": 0.3,
+      "description": "Ratio of files that change together",
+      "action": "Review architectural boundaries"
+    },
+    "churn_ratio": {
+      "value": 0.5,
+      "description": "Ratio of code added then removed within period",
+      "action": "Improve upfront design and planning"
+    }
+  },
+
+  "test": {
+    "_comment": "Test quality metrics",
+    "flaky_ratio": {
+      "value": 0.01,
+      "description": "Ratio of tests with inconsistent results",
+      "action": "Fix or quarantine flaky tests immediately"
+    },
+    "coverage_min": {
+      "value": 0.7,
+      "description": "Minimum code coverage ratio",
+      "action": "Add tests for uncovered critical paths"
+    },
+    "test_code_ratio_min": {
+      "value": 0.5,
+      "description": "Minimum test lines / production lines ratio",
+      "action": "Increase test investment"
+    }
+  },
+
+  "dependency": {
+    "_comment": "External dependency health metrics",
+    "outdated_ratio": {
+      "value": 0.2,
+      "description": "Ratio of dependencies >2 major versions behind",
+      "action": "Schedule dependency update sprint"
+    },
+    "vulnerabilities": {
+      "value": 0,
+      "description": "Number of high/critical security vulnerabilities",
+      "action": "Fix security issues immediately"
+    },
+    "depth_p95": {
+      "value": 10,
+      "description": "95th percentile of transitive dependency depth",
+      "action": "Evaluate alternative lighter dependencies"
+    }
+  },
+
+  "alert_levels": {
+    "_comment": "When to escalate alerts",
+    "warning": {
+      "description": "Single threshold exceeded",
+      "action": "Document in next sprint planning"
+    },
+    "critical": {
+      "description": "Multiple thresholds exceeded or 2x single threshold",
+      "action": "Create immediate remediation proposal"
+    }
+  }
+}

@@ -1,0 +1,149 @@
+---
+name: devbooks-router
+description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 OpenSpec proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说“下一步怎么做/路由到合适 skill/按 openspec 跑闭环”等时使用。
+---
+
+# DevBooks：工作流路由（Router）
+
+## 前置：配置发现（协议无关）
+
+- `<truth-root>`：当前真理目录根
+- `<change-root>`：变更包目录根
+
+执行前**必须**按以下顺序查找配置（找到后停止）：
+1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
+2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
+3. `project.md`（如存在）→ template 协议，使用默认映射
+4. 若仍无法确定 → **停止并询问用户**
+
+**关键约束**：
+- 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
+- 禁止猜测目录根
+- 禁止跳过规则文档阅读
+
+## 你要做的事
+
+把用户的自然语言请求映射成：
+1) 现在处于哪个阶段（proposal / apply / review / archive）
+2) 本次变更的“必产物”（proposal/design/tasks/verification）与“按需产物”（spec deltas/contract/c4/evidence）
+3) 下一步该用哪个（或哪些）`devbooks-*` Skills
+4) 每个产物应落到哪个文件路径
+
+## 输出要求（强制）
+
+1) **先问清楚 2 个最小关键问题**（若上下文里已有答案则不问）：
+   - `<change-id>` 是什么？
+   - `<truth-root>` / `<change-root>` 在该项目最终取值是什么？
+2) 给出“下一步路由结果”（3–6 条即可）：
+   - 每条包含：要用的 Skill + 产物路径 + 为什么需要
+3) 如果用户明确要你“直接开始产出文件内容”，再进入对应 Skill 的输出模式。
+
+## 路由规则（质量优先默认）
+
+### A) Proposal（提案阶段）
+
+触发信号：用户说“提案/为什么要改/范围/风险/坏味道重构/要不要做/先别写代码”等。
+
+默认路由：
+- `devbooks-proposal-author` → `(<change-root>/<change-id>/proposal.md)`（必须）
+- `devbooks-design-doc` → `(<change-root>/<change-id>/design.md)`（非小改动必须；只写 What/Constraints + AC-xxx）
+- `devbooks-implementation-plan` → `(<change-root>/<change-id>/tasks.md)`（必须；只从设计推导）
+
+按需追加（满足条件才加）：
+- **跨模块/影响不清晰**：`devbooks-impact-analysis`（建议写回 proposal Impact）
+- **风险/争议/取舍明显**：`devbooks-proposal-debate-workflow`（Author/Challenger/Judge，对辩后写回 Decision Log）
+- **对外行为/契约/数据不变量变化**：`devbooks-spec-delta` → `(<change-root>/<change-id>/specs/**)`
+  - 若需要“确定性创建 spec delta 文件/避免路径写错”：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
+- **API/Schema/事件 envelope/数据契约**：`devbooks-contract-data`
+- **模块边界/依赖方向/架构形态变化**：`devbooks-c4-map` → `(<truth-root>/architecture/c4.md)`
+
+硬约束提醒：
+- proposal 阶段禁止写实现代码；实现发生在 apply 阶段并以测试/闸门为完成判据。
+- 若需要“确定性落盘骨架/避免漏文件”：优先运行 `devbooks-delivery-workflow` 的脚本
+  - `change-scaffold.sh <change-id> ...`
+  - `change-check.sh <change-id> --mode proposal ...`
+
+### B) Apply（实现阶段：Test Owner / Coder）
+
+触发信号：用户说“开始实现/跑测试/修复失败/按 tasks 做/让闸门全绿”等。
+
+默认路由（强制角色隔离）：
+- Test Owner（独立对话/独立实例）：`devbooks-test-owner`
+  - 产物：`(<change-root>/<change-id>/verification.md)` + `tests/**`
+  - 先跑出 **Red** 基线，并记录证据（如 `(<change-root>/<change-id>/evidence/**)`）
+- Coder（独立对话/独立实例）：`devbooks-coder`
+  - 输入：`tasks.md` + 测试报错 + 代码库
+  - 禁止修改 `tests/**`
+
+apply 阶段的确定性检查（推荐）：
+- Test Owner：`change-check.sh <change-id> --mode apply --role test-owner ...`
+- Test Owner（证据落盘）：`change-evidence.sh <change-id> --label red-baseline -- <test-command>`
+- Coder：`change-check.sh <change-id> --mode apply --role coder ...`（会额外检查 git diff 下 `tests/**` 未被修改）
+
+LSC（大规模同质化修改）建议：
+- 先用 `change-codemod-scaffold.sh <change-id> --name <codemod-name> ...` 生成 codemod 脚本骨架，再用脚本批量变更并记录 evidence
+
+### C) Review（评审阶段）
+
+触发信号：用户说“review/坏味道/可维护性/依赖风险/一致性”等。
+
+默认路由：
+- `devbooks-code-review`（输出可执行建议；不改业务结论、不改 tests）
+
+### D) Archive（归档阶段）
+
+触发信号：用户说"归档/合并 specs/关账/收尾"等。
+
+默认路由：
+- 若本次产生了 spec delta：`devbooks-spec-gardener`（先修剪 `<truth-root>/**` 再归档合并）
+- 若需要回写设计决策：`devbooks-design-backport`（按需）
+
+归档前的确定性检查（推荐）：
+- `change-check.sh <change-id> --mode strict ...`（要求：proposal 已 Approved、tasks 全勾选、trace matrix 无 TODO、结构守门决策已填写）
+
+### E) Prototype（原型模式）
+
+> 来源：《人月神话》第11章"未雨绸缪" — "第一个开发的系统并不合用...为舍弃而计划"
+
+触发信号：用户说"先做原型/快速验证/spike/--prototype/扔掉式原型/Plan to Throw One Away"等。
+
+**原型模式适用场景**：
+- 技术方案不确定，需要快速验证可行性
+- 第一次做某类功能，预期会重写
+- 需要探索 API/库/框架的实际行为
+
+**默认路由（原型轨道约束）**：
+
+1. 创建原型骨架：
+   - `change-scaffold.sh <change-id> --prototype ...`
+   - 产物：`(<change-root>/<change-id>/prototype/)`
+
+2. Test Owner（独立对话）使用 `devbooks-test-owner --prototype`：
+   - 产物：`(<change-root>/<change-id>/prototype/characterization/)`
+   - 生成**表征测试**（记录实际行为）而非验收测试
+   - **不需要 Red 基线**——表征测试断言的是"现状"
+
+3. Coder（独立对话）使用 `devbooks-coder --prototype`：
+   - 输出路径：`(<change-root>/<change-id>/prototype/src/)`
+   - 允许绕过 lint/复杂度阈值
+   - **禁止直接落到仓库 `src/`**
+
+**硬约束（必须遵守）**：
+- 原型代码与生产代码**物理隔离**（不同目录）
+- Test Owner 与 Coder 仍必须**独立对话/独立实例**（角色隔离不变）
+- 原型提升到生产需要**显式触发** `prototype-promote.sh <change-id>`
+
+**原型提升到生产的前置条件**：
+1. 创建生产级 `design.md`（从原型学习中提炼 What/Constraints/AC-xxx）
+2. Test Owner 产出验收测试 `verification.md`（替代表征测试）
+3. 完成 `prototype/PROTOTYPE.md` 中的提升检查清单
+4. 运行 `prototype-promote.sh <change-id>` 并通过所有闸门
+
+**原型丢弃流程**：
+1. 记录学习到的关键洞察到 `proposal.md` 的 Decision Log
+2. 删除 `prototype/` 目录
+
+## OpenSpec 命令适配（可选）
+
+某些工具会以 `/openspec-proposal`、`/openspec-apply`、`/openspec-archive`（或 `/openspec:proposal` 等）作为入口。  
+当你检测到用户在跑 OpenSpec 流程时：按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。

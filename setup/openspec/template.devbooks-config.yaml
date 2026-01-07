@@ -1,0 +1,53 @@
+# .devbooks/config.yaml
+# DevBooks Protocol Discovery Configuration
+#
+# 此文件由 DevBooks setup 自动生成，用于让 AI 自动发现项目配置。
+# 请勿删除或随意修改，除非你清楚每个字段的含义。
+
+# 协议类型：openspec | template | custom
+protocol: openspec
+
+# 目录根映射
+# - truth_root: 当前真理源（规格/设计的最终版本）
+# - change_root: 变更包目录（每次变更的所有产物）
+truth_root: openspec/specs/
+change_root: openspec/changes/
+
+# 规则文档位置
+# AI 在执行任何 Skill 前必须先阅读此文档
+agents_doc: openspec/project.md
+
+# 项目画像（可选）
+# 包含技术栈、命令、约定、闸门等信息
+project_profile: openspec/specs/_meta/project-profile.md
+
+# 协议约束
+constraints:
+  # apply 阶段是否必须指定角色
+  # 为 true 时，/openspec:apply 必须带 role 参数，否则显示菜单等待用户输入
+  apply_requires_role: true
+
+  # apply 阶段可用角色
+  apply_roles:
+    - test-owner    # 产出 verification.md + tests/（先跑 Red 基线）
+    - coder         # 按 tasks.md 实现，让闸门 Green（禁止改 tests）
+    - reviewer      # 输出评审意见（不改代码）
+
+  # Test Owner 与 Coder 是否必须独立对话
+  # 为 true 时，禁止在同一会话内既写 tests 又写实现
+  role_isolation: true
+
+  # Coder 是否禁止修改 tests/
+  coder_no_tests: true
+
+  # 是否启用结构质量守门
+  # 为 true 时，遇到代理指标驱动要求必须停线评估
+  structural_guardrails: true
+
+# 提案阶段配置（可选）
+proposal:
+  # 是否启用三角对辩（Author/Challenger/Judge）
+  enable_debate: true
+
+  # 是否需要 Impact Analysis（跨模块变更）
+  require_impact_analysis: true
