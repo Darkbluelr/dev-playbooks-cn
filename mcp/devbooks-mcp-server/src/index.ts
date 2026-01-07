@@ -130,6 +130,25 @@ class DevBooksMcpServer {
             },
           },
         },
+        {
+          name: "devbooks_smart_analyze",
+          description: "智能分析请求，提取符号和文件，返回推荐的 CKB 工具调用",
+          inputSchema: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "用户的原始请求",
+              },
+              files: {
+                type: "array",
+                items: { type: "string" },
+                description: "相关文件列表（可选）",
+              },
+            },
+            required: ["query"],
+          },
+        },
       ],
     }));
 
@@ -203,6 +222,9 @@ class DevBooksMcpServer {
 
         case "devbooks_get_hotspots":
           return this.handleGetHotspots(args as { limit?: number });
+
+        case "devbooks_smart_analyze":
+          return this.handleSmartAnalyze(args as { query: string; files?: string[] });
 
         default:
           throw new Error(`Unknown tool: ${name}`);
@@ -553,6 +575,168 @@ class DevBooksMcpServer {
         },
       ],
     };
+  }
+
+  private async handleSmartAnalyze(args: { query: string; files?: string[] }) {
+    const context = await this.getProjectContext();
+    const query = args.query.toLowerCase();
+
+    // 提取潜在的符号名（函数名、类名等）
+    const symbolPatterns = [
+      /(?:function|函数|方法|class|类)\s+[`"']?(\w+)[`"']?/gi,
+      /(\w+)\s*\(\s*\)/g,  // function calls
+      /(?:修改|修复|重构|删除|添加)\s*[`"']?(\w+)[`"']?/gi,
+    ];
+
+    const extractedSymbols: string[] = [];
+    for (const pattern of symbolPatterns) {
+      let match;
+      while ((match = pattern.exec(args.query)) !== null) {
+        if (match[1] && match[1].length > 2) {
+          extractedSymbols.push(match[1]);
+        }
+      }
+    }
+
+    // 提取文件路径
+    const filePatterns = [
+      /[\w\-\/]+\.(ts|tsx|js|jsx|py|go|rs|java)/gi,
+      /src\/[\w\-\/]+/gi,
+      /lib\/[\w\-\/]+/gi,
+    ];
+
+    const extractedFiles: string[] = args.files || [];
+    for (const pattern of filePatterns) {
+      let match;
+      while ((match = pattern.exec(args.query)) !== null) {
+        extractedFiles.push(match[0]);
+      }
+    }
+
+    // 检测意图类型
+    const intentType = this.detectIntentType(query);
+
+    // 构建推荐的 CKB 工具调用
+    const recommendations: Array<{
+      tool: string;
+      reason: string;
+      priority: "high" | "medium" | "low";
+      suggestedParams?: Record<string, unknown>;
+    }> = [];
+
+    // 根据意图类型推荐工具
+    if (intentType.includes("impact") || intentType.includes("refactor")) {
+      recommendations.push({
+        tool: "mcp__ckb__analyzeImpact",
+        reason: "评估代码修改的影响范围",
+        priority: "high",
+        suggestedParams: extractedSymbols.length > 0
+          ? { symbolId: `搜索 ${extractedSymbols[0]}` }
+          : undefined,
+      });
+    }
+
+    if (intentType.includes("reference") || intentType.includes("usage")) {
+      recommendations.push({
+        tool: "mcp__ckb__findReferences",
+        reason: "查找符号的所有引用位置",
+        priority: "high",
+      });
+    }
+
+    if (intentType.includes("call") || intentType.includes("dependency")) {
+      recommendations.push({
+        tool: "mcp__ckb__getCallGraph",
+        reason: "分析调用关系和依赖",
+        priority: "medium",
+      });
+    }
+
+    if (extractedSymbols.length > 0) {
+      recommendations.push({
+        tool: "mcp__ckb__searchSymbols",
+        reason: `搜索符号: ${extractedSymbols.join(", ")}`,
+        priority: "high",
+        suggestedParams: { query: extractedSymbols[0] },
+      });
+    }
+
+    // 检查热点重叠
+    const hotspotFiles = context.hotspots.map(h => h.split(" ")[0]);
+    const hotspotOverlap = extractedFiles.filter(f =>
+      hotspotFiles.some(hf => f.includes(hf) || hf.includes(f))
+    );
+
+    // 构建结果
+    const result = {
+      analysis: {
+        intentTypes: intentType,
+        extractedSymbols,
+        extractedFiles,
+        isCodeRelated: this.detectCodeIntent(args.query),
+      },
+      context: {
+        hasScipIndex: context.hasScipIndex,
+        indexAge: context.indexAge,
+        language: context.language,
+      },
+      hotspotWarning: hotspotOverlap.length > 0 ? {
+        message: "部分文件为热点区域，请谨慎修改",
+        files: hotspotOverlap,
+      } : null,
+      recommendations,
+      nextSteps: this.buildNextSteps(recommendations, context),
+    };
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  private detectIntentType(query: string): string[] {
+    const intents: string[] = [];
+
+    if (/影响|impact|范围|scope/i.test(query)) intents.push("impact");
+    if (/重构|refactor|优化/i.test(query)) intents.push("refactor");
+    if (/引用|reference|使用|usage|调用/i.test(query)) intents.push("reference");
+    if (/调用图|call.*graph|依赖|depend/i.test(query)) intents.push("call");
+    if (/修复|fix|bug|错误/i.test(query)) intents.push("bugfix");
+    if (/添加|add|新增|implement/i.test(query)) intents.push("feature");
+    if (/删除|remove|移除/i.test(query)) intents.push("remove");
+
+    return intents.length > 0 ? intents : ["general"];
+  }
+
+  private buildNextSteps(
+    recommendations: Array<{ tool: string; reason: string; priority: string }>,
+    context: ProjectContext
+  ): string[] {
+    const steps: string[] = [];
+
+    // 索引检查
+    if (!context.hasScipIndex) {
+      steps.push("1. 先运行 devbooks_ensure_index 生成 SCIP 索引以启用图分析");
+    } else if (context.indexAge && context.indexAge > 24) {
+      steps.push("1. 建议运行 devbooks_ensure_index --force 更新过期的索引");
+    }
+
+    // 根据推荐添加步骤
+    const highPriority = recommendations.filter(r => r.priority === "high");
+    highPriority.forEach((r, i) => {
+      steps.push(`${steps.length + 1}. 调用 ${r.tool}: ${r.reason}`);
+    });
+
+    // 通用建议
+    if (context.hotspots.length > 0) {
+      steps.push(`${steps.length + 1}. 注意热点文件风险，考虑增加测试覆盖`);
+    }
+
+    return steps;
   }
 
   async run() {

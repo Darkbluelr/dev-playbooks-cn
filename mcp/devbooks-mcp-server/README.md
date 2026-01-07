@@ -72,6 +72,48 @@ mcpServers:
 **参数**：
 - `limit` (可选): 返回的热点数量，默认 10
 
+### devbooks_smart_analyze
+
+智能分析请求，提取符号和文件，返回推荐的 CKB 工具调用。
+
+**参数**：
+- `query` (必需): 用户的原始请求
+- `files` (可选): 相关文件列表
+
+**返回**：
+- 意图类型识别（impact/refactor/bugfix 等）
+- 提取的符号和文件
+- 推荐的 CKB 工具调用及参数
+- 热点文件警告
+- 建议的下一步操作
+
+**示例输出**：
+```json
+{
+  "analysis": {
+    "intentTypes": ["refactor", "impact"],
+    "extractedSymbols": ["getUserById"],
+    "extractedFiles": ["src/user.ts"]
+  },
+  "recommendations": [
+    {
+      "tool": "mcp__ckb__analyzeImpact",
+      "reason": "评估代码修改的影响范围",
+      "priority": "high"
+    },
+    {
+      "tool": "mcp__ckb__searchSymbols",
+      "reason": "搜索符号: getUserById",
+      "priority": "high"
+    }
+  ],
+  "nextSteps": [
+    "1. 调用 mcp__ckb__analyzeImpact: 评估代码修改的影响范围",
+    "2. 调用 mcp__ckb__searchSymbols: 搜索符号: getUserById"
+  ]
+}
+```
+
 ## 工作原理
 
 ```
