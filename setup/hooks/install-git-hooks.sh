@@ -48,8 +48,8 @@ echo_info "检测到项目语言：$LANG"
 # 生成 post-commit hook
 cat > "$HOOKS_DIR/post-commit" << 'HOOK_EOF'
 #!/bin/bash
-# DevBooks: 自动 SCIP 索引更新 Hook
-# 在每次 commit 后异步重建索引
+# DevBooks: 自动 SCIP 索引 + COD 模型更新 Hook
+# 在每次 commit 后异步重建索引和更新 COD 产物
 
 LOCK_FILE="/tmp/scip-index-$(pwd | md5sum | cut -d' ' -f1).lock"
 
@@ -63,6 +63,7 @@ index_project() {
     touch "$LOCK_FILE"
     trap "rm -f $LOCK_FILE" EXIT
 
+    # 1. 更新 SCIP 索引
     if [ -f "package.json" ]; then
         if command -v scip-typescript &> /dev/null; then
             echo "[DevBooks] 更新 TypeScript/JavaScript 索引..."
@@ -78,6 +79,21 @@ index_project() {
             echo "[DevBooks] 更新 Go 索引..."
             scip-go --output index.scip 2>/dev/null
         fi
+    fi
+
+    # 2. 更新 COD 模型（如果脚本存在）
+    COD_SCRIPT=""
+    if [ -f ".devbooks/scripts/cod-update.sh" ]; then
+        COD_SCRIPT=".devbooks/scripts/cod-update.sh"
+    elif [ -f "$HOME/.claude/skills/devbooks-brownfield-bootstrap/scripts/cod-update.sh" ]; then
+        COD_SCRIPT="$HOME/.claude/skills/devbooks-brownfield-bootstrap/scripts/cod-update.sh"
+    elif [ -f "$HOME/.codex/skills/devbooks-brownfield-bootstrap/scripts/cod-update.sh" ]; then
+        COD_SCRIPT="$HOME/.codex/skills/devbooks-brownfield-bootstrap/scripts/cod-update.sh"
+    fi
+
+    if [ -n "$COD_SCRIPT" ] && [ -x "$COD_SCRIPT" ]; then
+        echo "[DevBooks] 更新 COD 模型..."
+        bash "$COD_SCRIPT" --project-root "$(pwd)" --quiet 2>/dev/null
     fi
 }
 

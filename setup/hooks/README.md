@@ -65,7 +65,7 @@ cp /path/to/dev-playbooks/setup/hooks/claude-hooks-template.yaml .claude/setting
 
 | Hook | 触发时机 | 行为 |
 |------|---------|------|
-| `post-commit` | 每次提交后 | 后台异步更新 SCIP 索引 |
+| `post-commit` | 每次提交后 | 后台异步更新 SCIP 索引 + COD 模型 |
 | `post-merge` | 每次 pull 后 | 同上 |
 | `post-checkout` | 切换分支后 | 同上 |
 

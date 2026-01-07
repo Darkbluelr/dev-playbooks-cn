@@ -1,0 +1,100 @@
+# DevBooks COD 模型自动更新 GitHub Actions 模板
+# 用途：在代码变更后自动更新 COD 产物（模块依赖图、热点、领域概念）
+#
+# 安装方式：
+#   cp this-file .github/workflows/devbooks-cod-update.yml
+#
+# 产物落点：
+#   - <truth-root>/architecture/module-graph.md
+#   - <truth-root>/architecture/hotspots.md
+#   - <truth-root>/_meta/key-concepts.md
+
+name: DevBooks COD Update
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'src/**'
+      - 'lib/**'
+      - 'app/**'
+      - 'packages/**'
+
+env:
+  TRUTH_ROOT: 'specs'  # 或 'openspec/specs'
+
+jobs:
+  update-cod:
+    name: Update COD Artifacts
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史用于热点分析
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Dependencies
+        run: |
+          # 安装 tree（用于目录结构）
+          sudo apt-get update && sudo apt-get install -y tree jq
+
+      - name: Download COD Update Script
+        run: |
+          mkdir -p .devbooks/scripts
+          curl -sL https://raw.githubusercontent.com/your-org/dev-playbooks/main/skills/devbooks-brownfield-bootstrap/scripts/cod-update.sh \
+            -o .devbooks/scripts/cod-update.sh
+          chmod +x .devbooks/scripts/cod-update.sh
+
+      - name: Run COD Update
+        run: |
+          .devbooks/scripts/cod-update.sh \
+            --project-root "$(pwd)" \
+            --truth-root "$TRUTH_ROOT" \
+            --force
+
+      - name: Check for Changes
+        id: check
+        run: |
+          if git diff --quiet "$TRUTH_ROOT/"; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit COD Updates
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "DevBooks Bot"
+          git config user.email "devbooks-bot@example.com"
+
+          git add "$TRUTH_ROOT/architecture/" "$TRUTH_ROOT/_meta/" || true
+          git commit -m "chore(cod): auto-update COD artifacts
+
+          Updated by DevBooks COD workflow.
+
+          Files updated:
+          $(git diff --cached --name-only | head -10)
+          "
+
+          git push
+
+      - name: Generate Summary
+        run: |
+          echo "## COD Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check.outputs.changed }}" == "true" ]; then
+            echo "✅ COD 产物已更新并提交" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 更新的文件" >> $GITHUB_STEP_SUMMARY
+            git diff --name-only HEAD~1 "$TRUTH_ROOT/" 2>/dev/null | while read f; do
+              echo "- \`$f\`" >> $GITHUB_STEP_SUMMARY
+            done
+          else
+            echo "ℹ️ COD 产物无变化" >> $GITHUB_STEP_SUMMARY
+          fi
