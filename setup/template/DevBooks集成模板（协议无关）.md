@@ -78,3 +78,46 @@
 ### 度量类
 
 - Entropy Monitor：`devbooks-entropy-monitor` → 系统熵度量（结构熵/变更熵/测试熵/依赖熵）+ 重构预警
+
+### 索引类
+
+- Index Bootstrap：`devbooks-index-bootstrap` → 自动生成 SCIP 索引，激活图基分析能力
+
+---
+
+## 自动 Skill 路由规则（无感集成）
+
+> 以下规则让 AI 根据用户意图自动选择 Skill，无需用户显式点名。
+
+### 意图识别与自动路由
+
+| 用户意图模式 | 自动使用的 Skills |
+|------------|------------------|
+| "修复 Bug"、"定位问题"、"为什么报错" | `devbooks-impact-analysis` → `devbooks-coder` |
+| "重构"、"优化代码"、"消除重复" | `devbooks-code-review` → `devbooks-coder` |
+| "新功能"、"添加 XX"、"实现 XX" | `devbooks-router` → 完整闭环 |
+| "写测试"、"补测试" | `devbooks-test-owner` |
+| "继续"、"下一步" | 检查 `tasks.md` → `devbooks-coder` |
+| "评审"、"Review" | `devbooks-code-review` |
+
+### 图基分析自动启用
+
+**前置检查**：调用 `mcp__ckb__getStatus` 检查索引状态
+- 可用时：自动使用 `analyzeImpact`/`findReferences`/`getCallGraph`/`getHotspots`
+- 不可用时：降级为 `Grep`/`Glob` 文本搜索
+
+### 热点文件自动警告
+
+执行 `devbooks-coder` 或 `devbooks-code-review` 前**必须**调用 `mcp__ckb__getHotspots`：
+- 🔴 Critical（Top 5）：输出警告 + 建议增加测试
+- 🟡 High（Top 10）：输出提示 + 重点审查
+- 🟢 Normal：正常执行
+
+### 变更包状态自动识别
+
+| 状态 | 自动建议 |
+|-----|---------|
+| 只有 `proposal.md` | → `devbooks-design-doc` |
+| 有 `design.md` 无 `tasks.md` | → `devbooks-implementation-plan` |
+| 有 `tasks.md` 未完成 | → `devbooks-coder` |
+| tasks 全部完成 | → `devbooks-code-review` 或归档 |

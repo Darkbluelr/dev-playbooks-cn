@@ -229,3 +229,68 @@
 - 对架构/跨模块/对外契约变更：先使用 `devbooks-impact-analysis` Skill 做影响分析，再进入 proposal。
 - 任何新功能/破坏性变更/架构改动：必须先创建 `openspec/changes/<id>/`（proposal/design/tasks/spec deltas/verification），审核通过后才可实现。
 - `docs/` 仅用于对外说明；开发使用说明、验收追溯、MANUAL-* 清单优先写入本次变更包的 `verification.md`。
+
+---
+
+## 3) 自动 Skill 路由规则（无感集成）
+
+> 以下规则让 AI 根据用户意图自动选择 Skill，无需用户显式点名。
+
+### 意图识别与自动路由
+
+当用户的请求符合以下模式时，**无需用户点名 Skill**，直接按对应流程执行：
+
+| 用户意图模式 | 自动使用的 Skills | 说明 |
+|------------|------------------|------|
+| "修复 Bug"、"定位问题"、"为什么报错"、"这个错误" | `devbooks-impact-analysis` → `devbooks-coder` | 先做影响分析定位根因 |
+| "重构"、"优化代码"、"改进"、"消除重复" | `devbooks-code-review` → `devbooks-coder` | 先审查再实现 |
+| "新功能"、"添加 XX 功能"、"实现 XX" | `devbooks-router` → 完整闭环 | 走 proposal 流程 |
+| "写测试"、"补测试"、"测试覆盖" | `devbooks-test-owner` | 直接进入测试角色 |
+| "继续"、"接着做"、"下一步" | 检查 `tasks.md` 进度 → `devbooks-coder` | 断点续做 |
+| "评审"、"Review"、"代码审查" | `devbooks-code-review` | 直接进入评审 |
+| "这个项目怎么跑"、"技术栈是什么" | `devbooks-brownfield-bootstrap` | 生成项目画像 |
+
+### 图基分析自动启用
+
+**前置检查**（每次对话开始时自动执行）：
+1. 调用 `mcp__ckb__getStatus` 检查 SCIP 索引状态
+2. 如果 `backends.scip.healthy = false`：
+   - 提示：「图基分析不可用，影响分析/调用图/热点检测将降级为文本搜索」
+   - 建议：「运行 `devbooks-index-bootstrap` 生成索引以获得更精确的分析」
+
+**自动使用图基工具的场景**：
+| 场景 | 自动调用的工具 |
+|-----|--------------|
+| 影响分析 | `mcp__ckb__analyzeImpact` + `mcp__ckb__findReferences` |
+| 追踪调用链 | `mcp__ckb__getCallGraph` + `mcp__ckb__traceUsage` |
+| 热点检查 | `mcp__ckb__getHotspots` |
+| 架构概览 | `mcp__ckb__getArchitecture` |
+
+### 热点文件自动警告
+
+在以下场景**必须**先检查热点：
+1. 开始 `devbooks-coder` 任务前
+2. 进行 `devbooks-code-review` 前
+3. 执行 `devbooks-impact-analysis` 时
+
+**热点风险等级与处理**：
+| 等级 | 判定条件 | 自动行为 |
+|-----|---------|---------|
+| 🔴 Critical | 热点 Top 5 且修改核心逻辑 | 强制输出警告 + 建议增加测试覆盖 |
+| 🟡 High | 热点 Top 10 | 输出提示 + 建议代码审查重点关注 |
+| 🟢 Normal | 非热点 | 正常执行 |
+
+### 变更包上下文自动识别
+
+当检测到 `openspec/changes/` 目录存在时：
+1. 自动识别最近的变更包（按修改时间排序）
+2. 读取 `tasks.md` 识别进度（已完成/进行中/待做）
+3. 根据变更包状态自动建议下一步：
+
+| 变更包状态 | 自动建议 |
+|-----------|---------|
+| 只有 `proposal.md` | 使用 `devbooks-design-doc` 写设计 |
+| 有 `design.md` 无 `tasks.md` | 使用 `devbooks-implementation-plan` 生成计划 |
+| 有 `tasks.md` 无 `verification.md` | 提示：「Test Owner 需要先写测试」 |
+| 有 `verification.md` 且 tasks 未完成 | 使用 `devbooks-coder` 继续实现 |
+| tasks 全部完成 | 建议 `devbooks-code-review` 或归档 |

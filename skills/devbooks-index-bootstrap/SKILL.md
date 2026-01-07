@@ -86,16 +86,52 @@ rust-analyzer scip . > index.scip
 
 ## 索引维护建议
 
-生成索引后，建议用户配置自动更新（二选一）：
+生成索引后，建议配置自动更新以保持索引最新：
 
-1. **Git Hook（本地开发）**：
-   ```bash
-   echo 'scip-typescript index --output index.scip &' >> .git/hooks/post-commit
-   chmod +x .git/hooks/post-commit
-   ```
+### 方式一：使用 DevBooks Git Hooks（推荐）
 
-2. **CI Pipeline（团队协作）**：
-   在 CI 中生成并上传 index.scip 作为 artifact
+```bash
+# 安装自动索引 Hooks
+bash ~/.claude/skills/devbooks-delivery-workflow/../../../setup/hooks/install-git-hooks.sh .
+
+# 或使用完整路径
+bash /path/to/dev-playbooks/setup/hooks/install-git-hooks.sh /path/to/project
+```
+
+安装后，每次 `git commit`、`git pull`、`git checkout` 都会自动更新索引。
+
+### 方式二：手动 Git Hook
+
+```bash
+# 创建 post-commit hook
+cat > .git/hooks/post-commit << 'EOF'
+#!/bin/bash
+if command -v scip-typescript &> /dev/null; then
+  scip-typescript index --output index.scip &
+fi
+EOF
+chmod +x .git/hooks/post-commit
+```
+
+### 方式三：CI Pipeline（团队协作）
+
+```yaml
+# .github/workflows/index.yml
+on:
+  push:
+    paths: ['src/**', 'lib/**']
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g @anthropic-ai/scip-typescript
+      - run: scip-typescript index --output index.scip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scip-index
+          path: index.scip
+```
 
 ## 注意事项
 
