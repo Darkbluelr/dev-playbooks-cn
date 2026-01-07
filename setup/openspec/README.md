@@ -100,3 +100,20 @@ Skill 读取 .devbooks/config.yaml
 ```
 
 这解决了之前"Skills 与 OpenSpec 独立运行"的问题。
+
+## 自动化配置（可选但推荐）
+
+安装后可额外配置自动化：
+
+1. **Git Hooks**：每次 commit/pull 后自动更新 SCIP 索引 + COD 模型
+   ```bash
+   bash setup/hooks/install-git-hooks.sh .
+   ```
+
+2. **CI/CD 集成**：PR 时自动架构合规检查
+   ```bash
+   cp templates/ci/devbooks-guardrail.yml .github/workflows/
+   cp templates/ci/devbooks-cod-update.yml .github/workflows/
+   ```
+
+详见 `setup/hooks/README.md` 和 `templates/ci/README.md`

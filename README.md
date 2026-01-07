@@ -20,6 +20,7 @@ DevBooks 是一套面向 **Claude Code / Codex CLI** 的「代理式 AI 编程�
 
 - OpenSpec 项目：`setup/openspec/README.md`
 - 协议无关模板：`setup/template/DevBooks集成模板（协议无关）.md`
+- 自动化配置（Git Hooks / CI/CD）：`setup/hooks/README.md`
 - 总览：`setup/README.md`
 
 ## 文档索引
@@ -36,5 +37,6 @@ DevBooks 是一套面向 **Claude Code / Codex CLI** 的「代理式 AI 编程�
 - `prompts/`：Codex CLI 的 prompt 入口（可选安装）
 - `setup/`：上下文协议适配器与集成模板
 - `scripts/`：安装与辅助脚本
+- `templates/`：CI/CD 模板、联邦配置模板、GitHub 模板等
 - `mcp/`：MCP 配置与说明
 

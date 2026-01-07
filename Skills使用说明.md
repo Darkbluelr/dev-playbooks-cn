@@ -418,3 +418,30 @@
   scip-go --output index.scip
   ```
 
+---
+
+## `devbooks-federation`（Federation Analyst）【新】
+
+- 作用：跨仓库联邦分析与契约同步。检测契约变更、分析跨仓库影响、通知下游消费者。
+- **触发条件**：
+  - 用户说"跨仓库影响/联邦分析/契约同步/上下游依赖/多仓库"
+  - 变更涉及 `federation.yaml` 中定义的契约文件
+- 使用场景：
+  - 多仓库项目，需要分析变更对下游的影响
+  - 对外 API/契约变更，需要通知消费者
+  - 想建立跨仓库的影响追溯
+- 前置条件：
+  - 项目根目录存在 `.devbooks/federation.yaml`（从 `templates/federation.yaml` 复制）
+- 使用话术：
+  ```text
+  请点名使用 `devbooks-federation`。
+  目标：分析本次变更的跨仓库影响，检测契约变更，生成影响报告。
+  项目根目录：$(pwd)
+  变更文件：<变更的文件列表>
+  ```
+- 脚本支持：
+  ```bash
+  # 检查联邦契约变更
+  bash ~/.claude/skills/devbooks-federation/scripts/federation-check.sh --project-root "$(pwd)"
+  ```
+

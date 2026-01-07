@@ -82,6 +82,28 @@
 ### 索引类
 
 - Index Bootstrap：`devbooks-index-bootstrap` → 自动生成 SCIP 索引，激活图基分析能力
+- Federation：`devbooks-federation` → 跨仓库联邦分析与契约同步（多仓库项目时）
+
+---
+
+## CI/CD 集成（可选）
+
+将 `templates/ci/` 中的模板复制到项目 `.github/workflows/`：
+
+- `devbooks-guardrail.yml`：PR 时自动检查复杂度、热点、分层违规、循环依赖
+- `devbooks-cod-update.yml`：Push 后自动更新 COD 模型（模块图、热点、概念）
+
+---
+
+## 跨仓库联邦（可选）
+
+多仓库项目可配置 `.devbooks/federation.yaml` 定义上下游依赖关系：
+
+```bash
+cp templates/federation.yaml .devbooks/federation.yaml
+```
+
+详见 `skills/devbooks-federation/SKILL.md`
 
 ---
 
