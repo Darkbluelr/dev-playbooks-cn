@@ -16,7 +16,8 @@
 5. [Context7](#context7)
 6. [GitHub MCP Server](#github-mcp-server)
 7. [Playwright MCP](#playwright-mcp)
-8. [配置位置](#配置位置)
+8. [DevBooks MCP Server](#devbooks-mcp-server)
+9. [配置位置](#配置位置)
 
 ---
 
@@ -32,6 +33,7 @@
 | **context7** | 代码文档 | User Scope | 实时获取最新的库文档和代码示例 |
 | **github** | GitHub集成 | User Scope | GitHub仓库、Issues、PR管理和自动化 |
 | **playwright** | 浏览器自动化 | User Scope | 网页自动化测试、爬取和交互 |
+| **devbooks** | 代码上下文 | User/Project Scope | 自动注入 Augment 风格的代码分析上下文 |
 
 **配置文件**：`~/.claude.json` (顶层 `mcpServers` 字段)
 
@@ -1663,6 +1665,173 @@ npx clear-npx-cache
 # 重新安装浏览器
 npx playwright install
 ```
+
+---
+
+## DevBooks MCP Server
+
+### 基本信息
+
+- **位置**：`mcp/devbooks-mcp-server`
+- **类型**：代码上下文增强
+- **安装方式**：本地构建
+- **功能**：自动注入 Augment 风格的代码分析上下文
+
+### 功能特性
+
+- **意图检测**：自动识别代码相关请求 vs 普通问答
+- **上下文注入**：为代码请求自动注入热点、索引状态等信息
+- **自动索引**：检测并自动生成 SCIP 索引
+- **热点感知**：基于 Git 历史识别高风险文件
+
+### 配置
+
+#### 构建
+
+```bash
+cd mcp/devbooks-mcp-server
+npm install
+npm run build
+```
+
+#### User Scope 配置
+
+```json
+{
+  "mcpServers": {
+    "devbooks": {
+      "command": "node",
+      "args": [
+        "/path/to/dev-playbooks/mcp/devbooks-mcp-server/dist/index.js"
+      ]
+    }
+  }
+}
+```
+
+#### 开发模式配置
+
+```json
+{
+  "mcpServers": {
+    "devbooks": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/path/to/dev-playbooks/mcp/devbooks-mcp-server/src/index.ts"
+      ]
+    }
+  }
+}
+```
+
+### 可用工具
+
+#### devbooks_analyze_context
+
+分析当前项目上下文，返回 Augment 风格的代码分析信息。
+
+**参数**：
+- `query` (必需): 用户的原始请求（用于意图检测）
+- `targetFiles` (可选): 要分析的目标文件路径
+
+**返回**：
+- 是否为代码相关请求
+- 项目语言、索引状态
+- 热点文件列表
+- 增强上下文字符串
+
+#### devbooks_ensure_index
+
+确保 SCIP 索引存在，如果不存在则自动生成。
+
+**参数**：
+- `force` (可选): 强制重新生成索引
+
+**支持的语言**：
+- TypeScript/JavaScript (scip-typescript)
+- Python (scip-python)
+- Go (scip-go)
+
+#### devbooks_get_hotspots
+
+获取项目热点文件（近30天高频修改）。
+
+**参数**：
+- `limit` (可选): 返回的热点数量，默认 10
+
+### 意图检测模式
+
+服务器使用正则表达式检测请求是否与代码相关：
+
+**代码意图关键词**：
+- 修复/fix/bug/错误/问题
+- 重构/refactor/优化/改进
+- 添加/新增/实现/add/implement
+- 修改/更新/change/update
+- 分析/analyze/影响/impact
+- 文件扩展名 (.ts/.tsx/.js/.py/.go 等)
+
+**非代码意图（排除）**：
+- 天气/weather
+- 翻译/translate
+- 聊天/chat
+
+### 工作原理
+
+```
+用户请求 → DevBooks MCP Server
+              ↓
+         意图检测
+              ↓
+      ┌───────┴───────┐
+      ↓               ↓
+  代码请求         非代码请求
+      ↓               ↓
+  注入上下文       直接返回
+      ↓
+  调用 CKB MCP 工具
+```
+
+### 与 CKB MCP 配合
+
+DevBooks MCP Server 在上下文中建议使用 CKB 工具：
+- `mcp__ckb__analyzeImpact` - 影响分析
+- `mcp__ckb__findReferences` - 引用查找
+- `mcp__ckb__getCallGraph` - 调用图
+
+### 使用示例
+
+**分析代码上下文**：
+```
+使用 devbooks 分析上下文：我要修复用户登录的 bug
+```
+
+**确保索引**：
+```
+使用 devbooks 确保 SCIP 索引存在
+```
+
+**获取热点**：
+```
+使用 devbooks 获取项目热点文件
+```
+
+### 优势对比
+
+| 特性 | DevBooks MCP | CKB | Augment Code |
+|------|--------------|-----|--------------|
+| 意图检测 | ✅ | ❌ | ✅ |
+| 上下文注入 | ✅ | ❌ | ✅ |
+| 热点感知 | ✅ | ✅ | ✅ |
+| 自动索引 | ✅ | ❌ | ✅ |
+| 零配置 | ❌ | ❌ | ✅ |
+
+### 限制
+
+1. **不是真正的拦截**：MCP Server 提供工具，但 AI 是否调用取决于其判断
+2. **需要索引器**：自动生成索引需要安装对应的 scip-* 工具
+3. **Git 依赖**：热点检测依赖 Git 历史
 
 ---
 
