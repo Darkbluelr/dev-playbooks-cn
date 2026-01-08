@@ -1,85 +1,121 @@
 #!/bin/bash
-# Augment-style context injection hook
-# 在用户提交时自动检测意图并注入上下文
+# Augment-style context injection hook v2
+# 自动检测意图 + 注入相关代码片段
 
-set -e
+# 配置
+MAX_SNIPPETS=3
+MAX_LINES=25
 
-# 读取 stdin 的 JSON 输入
+# 读取输入
 INPUT=$(cat)
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
+PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null)
+CWD="${WORKING_DIRECTORY:-$(pwd)}"
 
-# 如果没有 prompt，直接退出
-if [ -z "$PROMPT" ]; then
-  echo '{}'
-  exit 0
-fi
+[ -z "$PROMPT" ] && { echo '{}'; exit 0; }
 
-# 代码意图检测（简化版）
+# ==================== 意图检测 ====================
 is_code_intent() {
-  local query="$1"
-  # 代码相关关键词
-  if echo "$query" | grep -qiE '修复|fix|bug|错误|重构|refactor|优化|添加|新增|实现|implement|删除|remove|修改|update|分析|analyze|影响|impact|引用|reference|调用|call|依赖|depend|\.ts|\.tsx|\.js|\.py|\.go|src/|lib/'; then
-    return 0
-  fi
-  # 非代码意图排除
-  if echo "$query" | grep -qiE '天气|weather|翻译|translate|写邮件|email|闲聊|chat'; then
-    return 1
-  fi
-  return 1
+  echo "$1" | grep -qiE '修复|fix|bug|错误|重构|refactor|优化|添加|新增|实现|implement|删除|remove|修改|update|change|分析|analyze|影响|impact|引用|reference|调用|call|依赖|depend|函数|function|方法|method|类|class|模块|module|\.ts|\.tsx|\.js|\.py|\.go|src/|lib/'
 }
 
-# 获取热点文件
-get_hotspots() {
-  local cwd="${WORKING_DIRECTORY:-$(pwd)}"
-  if [ -d "$cwd/.git" ]; then
-    git -C "$cwd" log --since="30 days ago" --name-only --pretty=format: 2>/dev/null | \
-      grep -v '^$' | \
-      grep -vE 'node_modules|dist|build|\.lock' | \
-      sort | uniq -c | sort -rn | head -5 | \
-      awk '{print "  🔥 " $2 " (" $1 " changes)"}' || true
-  fi
+is_non_code() {
+  echo "$1" | grep -qiE '^(天气|weather|翻译|translate|写邮件|email|闲聊|chat|你好|hello|hi)'
 }
 
-# 检查 SCIP 索引
-check_index() {
-  local cwd="${WORKING_DIRECTORY:-$(pwd)}"
-  if [ -f "$cwd/index.scip" ]; then
-    local age_hours=$(( ($(date +%s) - $(stat -f %m "$cwd/index.scip" 2>/dev/null || stat -c %Y "$cwd/index.scip" 2>/dev/null)) / 3600 ))
-    if [ "$age_hours" -gt 24 ]; then
-      echo "⚠️ SCIP 索引已过期（${age_hours}h），建议更新"
-    else
-      echo "✅ SCIP 索引可用，图分析已启用"
-    fi
+# ==================== 符号提取 ====================
+extract_symbols() {
+  local q="$1"
+  {
+    # camelCase (如 getUserById)
+    echo "$q" | grep -oE '\b[a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*\b'
+    # PascalCase (如 UserService)
+    echo "$q" | grep -oE '\b[A-Z][a-zA-Z0-9]*[a-z][a-zA-Z0-9]*\b'
+    # 反引号内容
+    echo "$q" | grep -oE '\`[^\`]+\`' | tr -d '\`'
+    # 文件路径
+    echo "$q" | grep -oE '[a-zA-Z0-9_/\-]+\.(ts|tsx|js|jsx|py|go)'
+  } | grep -v '^$' | sort -u | head -$MAX_SNIPPETS
+}
+
+# ==================== 代码搜索 ====================
+search_symbol() {
+  local sym="$1"
+  [ -z "$sym" ] && return
+
+  if command -v rg &>/dev/null; then
+    rg -n -C 4 --max-count=1 \
+      -g '!node_modules' -g '!dist' -g '!build' -g '!.git' -g '!*.lock' \
+      -g '*.ts' -g '*.tsx' -g '*.js' -g '*.jsx' -g '*.py' -g '*.go' \
+      "$sym" "$CWD" 2>/dev/null | head -$MAX_LINES
   else
-    echo "⚠️ SCIP 索引不存在，使用 devbooks_ensure_index 生成"
+    grep -rn --include='*.ts' --include='*.js' --include='*.py' \
+      -A 3 -B 2 "$sym" "$CWD" 2>/dev/null | \
+      grep -v 'node_modules\|dist\|build' | head -$MAX_LINES
   fi
 }
 
-# 主逻辑
-if is_code_intent "$PROMPT"; then
-  INDEX_STATUS=$(check_index)
-  HOTSPOTS=$(get_hotspots)
+# ==================== 热点/索引 ====================
+get_hotspots() {
+  [ -d "$CWD/.git" ] || return
+  git -C "$CWD" log --since="30 days ago" --name-only --pretty=format: 2>/dev/null | \
+    grep -v '^$' | grep -vE 'node_modules|dist|build|\.lock|\.md$' | \
+    sort | uniq -c | sort -rn | head -5 | \
+    awk '{printf "  🔥 %s (%d changes)\n", $2, $1}'
+}
 
-  CONTEXT="[DevBooks 自动上下文注入]
-
-$INDEX_STATUS"
-
-  if [ -n "$HOTSPOTS" ]; then
-    CONTEXT="$CONTEXT
-
-🔥 热点文件（近30天高频修改）：
-$HOTSPOTS"
+check_index() {
+  if [ -f "$CWD/index.scip" ]; then
+    echo "✅ SCIP 索引可用"
+  else
+    echo "⚠️ SCIP 索引不存在"
   fi
+}
 
-  CONTEXT="$CONTEXT
+# ==================== 主逻辑 ====================
+is_non_code "$PROMPT" && { echo '{}'; exit 0; }
+is_code_intent "$PROMPT" || { echo '{}'; exit 0; }
 
-💡 推荐：
-  - 使用 mcp__ckb__analyzeImpact 分析影响
-  - 使用 mcp__ckb__findReferences 查找引用
-  - 修改热点文件时增加测试覆盖"
+# 构建上下文
+CONTEXT="[DevBooks 自动上下文注入]
 
-  # 输出 JSON，additionalContext 会被注入到提示词中
-  jq -n --arg ctx "$CONTEXT" '{"additionalContext": $ctx}'
-else
-  echo '{}'
+$(check_index)"
+
+# 搜索代码片段
+SNIPPETS=""
+SYMBOLS=$(extract_symbols "$PROMPT")
+
+if [ -n "$SYMBOLS" ]; then
+  while IFS= read -r symbol; do
+    [ -z "$symbol" ] && continue
+    snippet=$(search_symbol "$symbol")
+    if [ -n "$snippet" ]; then
+      SNIPPETS="${SNIPPETS}
+
+🔍 $symbol:
+\`\`\`
+$snippet
+\`\`\`"
+    fi
+  done <<< "$SYMBOLS"
 fi
+
+if [ -n "$SNIPPETS" ]; then
+  CONTEXT="${CONTEXT}
+
+📦 相关代码：$SNIPPETS"
+fi
+
+# 热点
+HOTSPOTS=$(get_hotspots)
+[ -n "$HOTSPOTS" ] && CONTEXT="${CONTEXT}
+
+🔥 热点文件：
+$HOTSPOTS"
+
+# 工具建议
+CONTEXT="${CONTEXT}
+
+💡 可用工具：analyzeImpact / findReferences / getCallGraph"
+
+# 输出
+jq -n --arg ctx "$CONTEXT" '{"additionalContext": $ctx}'
