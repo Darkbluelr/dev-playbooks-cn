@@ -1,0 +1,57 @@
+# DevBooks Embedding - 本地模型配置示例
+# 适用于不想使用 OpenAI API 的场景
+
+enabled: true
+
+api:
+  # 本地 Embedding 服务（如 Ollama、text-embeddings-inference）
+  model: BAAI/bge-small-zh-v1.5
+  api_key: ""  # 本地服务通常不需要
+  base_url: http://localhost:8080/v1
+  timeout: 60
+  batch_size: 20  # 本地服务通常批量较小
+
+vector_db:
+  storage_path: .devbooks/embeddings/
+  dimension: 512  # bge-small-zh-v1.5 的维度
+  index_type: flat
+
+chunking:
+  by_symbol: true
+  max_chunk_tokens: 256  # 本地模型通常上下文更小
+  overlap_tokens: 30
+  include_comments: true
+  include_imports: false
+
+filters:
+  include_extensions:
+    - .ts
+    - .js
+    - .py
+    - .go
+
+  exclude_dirs:
+    - node_modules
+    - dist
+    - build
+    - .git
+
+search:
+  top_k: 10
+  similarity_threshold: 0.6  # 本地模型阈值可能需要调整
+  include_snippet: true
+  snippet_max_lines: 15
+
+logging:
+  level: INFO
+  log_file: .devbooks/embeddings/embedding.log
+
+performance:
+  max_concurrent_requests: 2  # 本地服务并发较低
+  cache_size_mb: 50
+  enable_compression: true
+
+experimental:
+  use_local_model: true
+  local_model_path: ~/.cache/huggingface/models/bge-small-zh-v1.5
+  enable_semantic_nav: true

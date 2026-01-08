@@ -4,6 +4,10 @@
 # Local runtime data (do not commit)
 .ckb/
 
+# DevBooks Embedding
+.devbooks/embeddings/
+.devbooks/*.log
+
 # Python
 __pycache__/
 *.py[cod]
