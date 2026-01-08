@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "command": ".claude/hooks/augment-context.sh",
+        "timeout": 5000
+      }
+    ]
+  }
+}
