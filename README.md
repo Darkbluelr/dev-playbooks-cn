@@ -118,8 +118,6 @@ setup/           # 上下文协议适配器与集成模板
 scripts/         # 安装与辅助脚本
 docs/            # 提示词文档
 tools/           # 辅助脚本（复杂度计算、熵度量等）
-templates/       # CI/CD、GitHub、联邦配置模板
-mcp/             # MCP 配置文档
 ```
 
 ---

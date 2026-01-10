@@ -431,7 +431,7 @@
   - 对外 API/契约变更，需要通知消费者
   - 想建立跨仓库的影响追溯
 - 前置条件：
-  - 项目根目录存在 `.devbooks/federation.yaml`（从 `templates/federation.yaml` 复制）
+  - 项目根目录存在 `.devbooks/federation.yaml`（从 `skills/devbooks-federation/templates/federation.yaml` 复制）
 - 使用话术：
   ```text
   请点名使用 `devbooks-federation`。

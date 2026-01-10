@@ -99,7 +99,7 @@
 多仓库项目可配置 `.devbooks/federation.yaml` 定义上下游依赖关系：
 
 ```bash
-cp templates/federation.yaml .devbooks/federation.yaml
+cp skills/devbooks-federation/templates/federation.yaml .devbooks/federation.yaml
 ```
 
 详见 `skills/devbooks-federation/SKILL.md`

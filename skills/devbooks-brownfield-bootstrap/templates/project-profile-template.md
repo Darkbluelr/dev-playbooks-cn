@@ -1,7 +1,5 @@
 # 项目画像模板（Project Profile Template）
 
-> 借鉴 Augment Code 的上下文三层架构：语法层 → 语义层 → 上下文层
-
 ---
 
 ## A) 语法层（Syntax Layer）
