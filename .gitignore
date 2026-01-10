@@ -4,6 +4,7 @@
 # Local runtime data (do not commit)
 .ckb/
 .claude/
+CLAUDE.md
 
 # DevBooks local config (keep template, ignore user-specific)
 .devbooks/embeddings/
