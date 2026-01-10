@@ -88,19 +88,7 @@ rust-analyzer scip . > index.scip
 
 生成索引后，建议配置自动更新以保持索引最新：
 
-### 方式一：使用 DevBooks Git Hooks（推荐）
-
-```bash
-# 安装自动索引 Hooks
-bash ~/.claude/skills/devbooks-delivery-workflow/../../../setup/hooks/install-git-hooks.sh .
-
-# 或使用完整路径
-bash /path/to/dev-playbooks/setup/hooks/install-git-hooks.sh /path/to/project
-```
-
-安装后，每次 `git commit`、`git pull`、`git checkout` 都会自动更新索引。
-
-### 方式二：手动 Git Hook
+### 方式一：Git Hook（推荐）
 
 ```bash
 # 创建 post-commit hook
@@ -138,3 +126,49 @@ jobs:
 - 大型项目首次索引可能需要 1-5 分钟
 - 索引文件建议加入 `.gitignore`（或作为 CI artifact 共享）
 - 索引过期不影响功能，只是图数据可能不完整
+
+## CKB 索引检测路径
+
+DevBooks 会自动检测以下路径来判断索引是否可用：
+
+| 路径 | 说明 |
+|------|------|
+| `$CWD/index.scip` | SCIP 索引文件（推荐） |
+| `$CWD/.git/ckb/` | CKB 本地缓存目录 |
+| `$CWD/.devbooks/embeddings/index.tsv` | DevBooks Embedding 索引 |
+
+任一路径存在即认为索引可用，Hook 输出会显示 `✅ 索引可用`。
+
+## 常见问题
+
+### Q: 为什么提示「可启用 CKB 加速代码分析」？
+
+A: 这表示当前项目没有可用的代码索引。运行此 Skill 生成索引后，可启用以下高级功能：
+- `mcp__ckb__searchSymbols` - 符号搜索
+- `mcp__ckb__findReferences` - 引用查找
+- `mcp__ckb__getCallGraph` - 调用图分析
+- `mcp__ckb__analyzeImpact` - 影响分析
+
+### Q: macOS 上 grep 不支持 `-P` 选项怎么办？
+
+A: 安装 GNU grep：
+```bash
+brew install grep
+# 使用 ggrep 替代 grep
+```
+
+### Q: 索引文件太大怎么办？
+
+A: 建议将 `index.scip` 加入 `.gitignore`，在 CI 中生成并作为 artifact 共享：
+```bash
+echo "index.scip" >> .gitignore
+```
+
+### Q: 如何验证索引是否生效？
+
+A: 使用 CKB 状态检查工具：
+```
+# 在 Claude Code 中
+mcp__ckb__getStatus
+```
+应返回 `scip: { healthy: true }`。

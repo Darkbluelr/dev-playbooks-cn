@@ -3,10 +3,16 @@
 
 # Local runtime data (do not commit)
 .ckb/
+.claude/
 
-# DevBooks Embedding
+# DevBooks local config (keep template, ignore user-specific)
 .devbooks/embeddings/
 .devbooks/*.log
+
+# Project self-test artifacts (not part of the library)
+AGENTS.md
+openspec/
+tests/
 
 # Python
 __pycache__/
@@ -27,4 +33,3 @@ node_modules/
 # Env
 .env
 .env.*
-

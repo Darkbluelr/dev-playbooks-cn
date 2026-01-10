@@ -35,7 +35,7 @@ tools:
 
 ## COD 模型生成（Code Overview & Dependencies）
 
-**借鉴 Augment Code 的 COD 模型**，在初始化时自动生成项目的"代码地图"：
+在初始化时自动生成项目的"代码地图"（需要 CKB MCP Server 可用，否则跳过）：
 
 ### 自动生成产物
 

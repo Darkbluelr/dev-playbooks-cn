@@ -90,6 +90,13 @@
 **度量类：**
 - Entropy Monitor（熵度量）：`devbooks-entropy-monitor` → 系统熵度量（结构熵/变更熵/测试熵/依赖熵）+ 重构预警 → `openspec/specs/_meta/entropy/`
 
+**工具类（v3.0 新增）：**
+- Graph-RAG 上下文：`./tools/graph-rag-context.sh` → 向量搜索 + CKB 图遍历的智能上下文检索
+- 调用链追踪：`./tools/call-chain-tracer.sh` → 2-4 跳多跳调用链分析
+- Bug 候选定位：`./tools/bug-locator.sh` → 多维信号聚合（调用链 40% + 历史 30% + 热点 15% + 模式 15%）
+- LLM 重排序：`./tools/context-reranker.sh` → 可选的 LLM 语义重排序（需 API Key）
+- Embedding 索引：`./tools/devbooks-embedding.sh` → 多提供商支持（OpenAI > Azure > Ollama）
+
 ### OpenSpec 三阶段与 DevBooks 角色映射
 
 > OpenSpec 有 proposal/apply/archive 三阶段命令。DevBooks 为每个阶段提供角色隔离与质量闸门。

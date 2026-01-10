@@ -28,6 +28,11 @@
    - `/openspec:apply` 必须指定角色（test-owner / coder / reviewer）
    - 未指定角色时显示菜单等待用户输入
 
+4. **DevBooks Skills**
+   - 变更管理工作流（proposal → apply → archive）
+   - 角色隔离执行（Test Owner / Coder / Reviewer）
+   - 热点感知（需要 CKB MCP Server 可用）
+
 ## 你会改动哪些东西（最小且可持续）
 
 只修改三处可持久化文件（避免被 `openspec update` 覆盖）：
@@ -105,15 +110,10 @@ Skill 读取 .devbooks/config.yaml
 
 安装后可额外配置自动化：
 
-1. **Git Hooks**：每次 commit/pull 后自动更新 SCIP 索引 + COD 模型
-   ```bash
-   bash setup/hooks/install-git-hooks.sh .
-   ```
-
-2. **CI/CD 集成**：PR 时自动架构合规检查
+1. **CI/CD 集成**：PR 时自动架构合规检查
    ```bash
    cp templates/ci/devbooks-guardrail.yml .github/workflows/
    cp templates/ci/devbooks-cod-update.yml .github/workflows/
    ```
 
-详见 `setup/hooks/README.md` 和 `templates/ci/README.md`
+详见 `templates/ci/README.md`

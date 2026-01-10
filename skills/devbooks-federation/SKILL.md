@@ -189,5 +189,4 @@ bash skills/devbooks-federation/scripts/federation-notify.sh \
 
 ## 参考
 
-- [Augment Code Federation](https://docs.augmentcode.com/federation) - 灵感来源
 - [API Versioning Best Practices](https://swagger.io/resources/articles/best-practices-in-api-versioning/)

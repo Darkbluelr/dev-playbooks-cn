@@ -47,7 +47,7 @@ tools:
 
 ## 架构合规检查（依赖卫士）
 
-**借鉴 Augment Code 的依赖卫士（Dependency Guard）**，在合并前进行架构合规检查。
+在合并前进行架构合规检查，防止依赖方向违规。
 
 ### guardrail-check.sh 完整选项
 

@@ -8,9 +8,6 @@ tools:
   - Write
   - Edit
   - Bash
-  - mcp__ckb__getStatus
-  - mcp__ckb__getHotspots
-  - mcp__ckb__findReferences
 ---
 
 # DevBooks：实现负责人（Coder）
@@ -30,39 +27,6 @@ tools:
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
 - 禁止猜测目录根
 - 禁止跳过规则文档阅读
-
-## 热点感知（Hotspot Awareness）
-
-**借鉴 Augment Code 的热点计算**：在修改代码前，检查目标文件是否为"技术债热点"。
-
-### 热点检查流程
-
-1) **开始任务前**调用 `mcp__ckb__getHotspots(limit=20)` 获取热点列表
-2) **对比 tasks.md** 中涉及的文件与热点列表
-3) **如果目标文件在热点中**：
-   - 输出警告：`⚠️ 热点警告：{file} 是高风险区域（高变更频率 × 高复杂度）`
-   - 建议：考虑更细粒度的修改、增加测试覆盖、或先做小步重构
-
-### 热点风险等级
-
-| 等级 | 判定条件 | 建议操作 |
-|------|----------|----------|
-| 🔴 Critical | 热点 Top 5 且本次修改核心逻辑 | 先重构再修改，必须增加测试 |
-| 🟡 High | 热点 Top 10 | 增加测试覆盖，代码审查重点关注 |
-| 🟢 Normal | 非热点 | 正常流程 |
-
-### 输出格式
-
-在开始编码前输出热点报告：
-
-```markdown
-## 热点检查报告
-
-| 文件 | 热点排名 | 风险等级 | 建议 |
-|------|----------|----------|------|
-| src/order/process.ts | #3 | 🔴 Critical | 先重构，增加测试 |
-| src/utils/format.ts | #12 | 🟢 Normal | 正常修改 |
-```
 
 ## 断点续做协议（Plan Persistence）
 
@@ -115,7 +79,7 @@ tools:
 - **禁止修改 `verification.md`**（由 Test Owner 维护）
 - **禁止修改 `.devbooks/`、`build/`、工程配置文件**（除非 proposal.md 明确声明）
 
-### 代码质量约束（借鉴 VS Code）
+### 代码质量约束
 
 #### 禁止提交的模式
 

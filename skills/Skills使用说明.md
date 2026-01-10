@@ -69,7 +69,7 @@
 ## `devbooks-impact-analysis`（Impact Analyst）
 
 - 作用：跨模块/跨文件/对外契约变更前做影响分析，把结论写回 `proposal.md` 的 Impact 部分。
-- **双模式分析**（借鉴 Augment Code）：
+- **双模式分析**：
   - **图基分析**（SCIP 可用时）：使用 `analyzeImpact`/`findReferences`/`getCallGraph` 进行高精度分析
   - **文本搜索**（降级模式）：使用 `Grep`/`Glob` 进行关键字搜索
 - 使用场景：
@@ -234,7 +234,7 @@
 - 作用：严格按 `tasks.md` 实现功能并跑闸门，禁止修改 `tests/**`，以测试/静态检查为唯一完成判据。
 - 使用场景：
   - 进入实现阶段：按计划逐项实现、修复测试失败、让闸门全绿
-- **热点感知**（借鉴 Augment Code）：开始任务前调用 `mcp__ckb__getHotspots` 检查目标文件是否为高风险区域，并输出热点报告
+- **热点感知**：开始任务前调用 `mcp__ckb__getHotspots` 检查目标文件是否为高风险区域，并输出热点报告
   - 🔴 Critical：热点 Top 5 且修改核心逻辑 → 先重构再修改，必须增加测试
   - 🟡 High：热点 Top 10 → 增加测试覆盖，代码审查重点关注
   - 🟢 Normal：非热点 → 正常流程
@@ -254,7 +254,7 @@
 ## `devbooks-code-review`（Reviewer）
 
 - 作用：以 Reviewer 角色做可读性/一致性/依赖健康/坏味道审查，只输出可执行建议，不讨论业务正确性。
-- **热点优先审查**（借鉴 Augment Code）：审查前调用 `mcp__ckb__getHotspots` 获取项目热点，按风险排序审查
+- **热点优先审查**：审查前调用 `mcp__ckb__getHotspots` 获取项目热点，按风险排序审查
   - 🔴 热点 Top 5：必须深度审查（测试覆盖、圈复杂度变化、依赖数量变化）
   - 🟡 热点 Top 10：重点关注
   - 🟢 非热点：常规审查
@@ -306,7 +306,7 @@
 ## `devbooks-delivery-workflow`（Delivery Workflow + Scripts）
 
 - 作用：把一次变更跑成"可追溯闭环"（Design→Plan→Trace→Verify→Implement→Archive），并提供确定性脚本 scaffold/check/evidence/codemod。
-- **架构合规检查**（借鉴 Augment Code 依赖卫士）：`guardrail-check.sh` 新增选项
+- **架构合规检查**：`guardrail-check.sh` 新增选项
   - `--check-layers`：检查分层约束违规（下层引用上层、common 引用 browser/node 等）
   - `--check-cycles`：检查循环依赖
   - `--check-hotspots`：警告热点文件变更
@@ -335,7 +335,7 @@
 ## `devbooks-brownfield-bootstrap`（Brownfield Bootstrapper）
 
 - 作用：存量项目初始化：当 `<truth-root>` 为空/缺失时生成项目画像、术语表、基线规格与最小验证锚点，避免"边补 specs 边改行为"。
-- **COD 模型生成**（借鉴 Augment Code）：自动生成"代码地图"产物
+- **COD 模型生成**：自动生成"代码地图"产物
   - 模块依赖图：`<truth-root>/architecture/module-graph.md`（来自 `mcp__ckb__getArchitecture`）
   - 技术债热点：`<truth-root>/architecture/hotspots.md`（来自 `mcp__ckb__getHotspots`）
   - 领域概念：`<truth-root>/_meta/key-concepts.md`（来自 `mcp__ckb__listKeyConcepts`）
