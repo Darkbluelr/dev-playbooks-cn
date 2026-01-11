@@ -695,6 +695,79 @@ check_env_match() {
 }
 
 # =============================================================================
+# AC-008: Documentation Impact Check
+# Verify documentation impact is declared and fulfilled
+# =============================================================================
+check_docs_impact() {
+  # Only run in archive/strict modes
+  if [[ "$mode" != "archive" && "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  if [[ ! -f "$design_file" ]]; then
+    return 0
+  fi
+
+  # Check if Documentation Impact section exists
+  if ! rg -n "^## Documentation Impact|^## 文档影响" "$design_file" >/dev/null; then
+    if [[ "$mode" == "strict" ]]; then
+      err "design.md 缺少 '## Documentation Impact/文档影响' 章节 (AC-008)"
+    else
+      warn "design.md 缺少 '## Documentation Impact/文档影响' 章节（建议添加）"
+    fi
+    return 0
+  fi
+
+  # Check for "无需更新" declaration - if checked, skip further checks
+  if rg -n "^\- \[x\] 本次变更为内部重构|^\- \[x\] 本次变更仅修复" "$design_file" >/dev/null; then
+    # Declared as no doc update needed, skip
+    return 0
+  fi
+
+  # Check for P0 documentation updates that are NOT checked in the checklist
+  # Look for unchecked P0 items in the table
+  local has_p0_docs=false
+  if rg -n "\| P0 \|" "$design_file" >/dev/null 2>&1; then
+    has_p0_docs=true
+  fi
+
+  if [[ "$has_p0_docs" == true ]]; then
+    # Check if documentation update checklist items are completed
+    local unchecked_items
+    unchecked_items=$(rg -n "^\- \[ \] 新增脚本|^\- \[ \] 新增配置|^\- \[ \] 新增工作流|^\- \[ \] API" "$design_file" || true)
+
+    if [[ -n "$unchecked_items" && "$mode" == "strict" ]]; then
+      err "文档更新检查清单有未完成项 (AC-008)"
+      echo "  未完成项:" >&2
+      printf "%s\n" "$unchecked_items" | head -3 | sed 's/^/    /' >&2
+    fi
+  fi
+
+  # In strict mode, verify declared docs are actually modified
+  if [[ "$mode" == "strict" ]] && command -v git >/dev/null 2>&1; then
+    if git -C "$project_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      # Extract declared P0 docs from design.md
+      local declared_docs
+      declared_docs=$(rg -o "\| (README\.md|docs/[^|]+\.md|使用说明[^|]*\.md|CHANGELOG\.md) \|" "$design_file" 2>/dev/null | sed 's/| //g; s/ |//g' | sort -u || true)
+
+      if [[ -n "$declared_docs" ]]; then
+        # Get changed files
+        local changed_files
+        changed_files=$(git -C "$project_root" diff --name-only HEAD 2>/dev/null || git -C "$project_root" diff --name-only 2>/dev/null || true)
+
+        while IFS= read -r doc; do
+          [[ -n "$doc" ]] || continue
+          # Check if the declared doc is in the changed files
+          if ! printf "%s\n" "$changed_files" | grep -qF "$doc"; then
+            warn "声明需更新但未修改: $doc (建议检查)"
+          fi
+        done <<< "$declared_docs"
+      fi
+    fi
+  fi
+}
+
+# =============================================================================
 # AC-003: Role Boundary Check (Enhanced from check_no_tests_changed)
 # Enforce role-specific file modification boundaries
 # Refactored: split into per-role helper functions for maintainability
@@ -886,6 +959,7 @@ else
   check_test_failure_in_evidence  # AC-007: No failures in Green evidence
   check_skip_approval          # AC-005: P0 skip requires approval
   check_env_match              # AC-006: Environment declaration required
+  check_docs_impact            # AC-008: Documentation impact declared and fulfilled
 fi
 
 if [[ $errors -gt 0 ]]; then

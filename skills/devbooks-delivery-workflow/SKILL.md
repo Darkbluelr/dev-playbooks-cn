@@ -45,6 +45,48 @@ tools:
 - 大规模机械变更（LSC）codemod 脚本骨架：`change-codemod-scaffold.sh <change-id> --name <codemod-name> --project-root <repo-root> --change-root <change-root>`
 - 卫生检查（临时文件/进程清理）：`hygiene-check.sh <change-id> --project-root <repo-root> --change-root <change-root>`
 
+## 质量闸门脚本（v2）
+
+以下脚本用于强化质量闸门，拦截"假完成"：
+
+- 角色交接检查：`handoff-check.sh <change-id> --project-root <repo-root> --change-root <change-root>`
+- 环境声明检查：`env-match-check.sh <change-id> --project-root <repo-root> --change-root <change-root>`
+- 审计全量扫描：`audit-scope.sh <directory> --format <markdown|json>`
+- 进度仪表板：`progress-dashboard.sh <change-id> --project-root <repo-root> --change-root <change-root>`
+- v2 闸门迁移：`migrate-to-v2-gates.sh <change-id> --project-root <repo-root> --change-root <change-root>`
+
+### change-check.sh v2 新增检查项
+
+| 检查项 | 触发模式 | 说明 | AC |
+|--------|----------|------|-----|
+| `check_evidence_closure()` | archive, strict | 验证 `evidence/green-final/` 存在且非空 | AC-001 |
+| `check_task_completion_rate()` | strict | 验证任务完成率 100%（支持 SKIP-APPROVED） | AC-002 |
+| `check_role_boundaries()` | apply --role | 验证角色边界（扩展自 check_no_tests_changed） | AC-003 |
+| `check_skip_approval()` | strict | 验证 P0 任务跳过有审批记录 | AC-005 |
+| `check_env_match()` | archive, strict | 调用 env-match-check.sh 检查环境声明 | AC-006 |
+| `check_test_failure_in_evidence()` | archive, strict | 检测 Green 证据中的失败模式 | AC-007 |
+
+### change-check.sh 基础检查项
+
+| 检查项 | 触发模式 | 说明 |
+|--------|----------|------|
+| `check_proposal()` | 所有模式 | 检查 proposal.md 格式与决策状态 |
+| `check_design()` | 所有模式 | 检查 design.md 结构（AC 列表、Problem Context 等） |
+| `check_tasks()` | 所有模式 | 检查 tasks.md 结构（主线计划区、断点区） |
+| `check_verification()` | 所有模式 | 检查 verification.md 四大必填节 |
+| `check_spec_deltas()` | 所有模式 | 检查 specs/ 目录下 spec delta 格式 |
+| `check_implicit_changes()` | apply, archive, strict | 检测隐式变更（依赖、配置、构建） |
+
+### 角色边界约束
+
+| 角色 | 禁止修改 |
+|------|----------|
+| Coder | `tests/**`、`verification.md`、`.devbooks/` |
+| Test Owner | `src/**` |
+| Reviewer | 代码文件（`.ts`、`.js`、`.py`、`.sh` 等） |
+
+详细说明参见：`docs/quality-gates-guide.md`
+
 ## 架构合规检查（依赖卫士）
 
 在合并前进行架构合规检查，防止依赖方向违规。

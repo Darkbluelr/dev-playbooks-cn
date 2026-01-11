@@ -136,6 +136,7 @@ tools/           # 辅助脚本（复杂度计算、熵度量等）
 ### 其他文档
 
 - Skills 速查表：`Skills使用说明.md`
+- 质量闸门指南：`docs/quality-gates-guide.md`
 - MCP 配置：`mcp/mcp-servers.md`、`mcp/mcp_claude.md`、`mcp/mcp_codex.md`
 
 ---
@@ -156,6 +157,29 @@ DEVBOOKS_SCRIPTS="$HOME/.claude/skills/devbooks-delivery-workflow/scripts"
 - 生成变更包骨架：`"$DEVBOOKS_SCRIPTS/change-scaffold.sh" <change-id> ...`
 - 一键校验：`"$DEVBOOKS_SCRIPTS/change-check.sh" <change-id> --mode strict ...`
 - 证据落盘：`"$DEVBOOKS_SCRIPTS/change-evidence.sh" <change-id> ...`
+
+---
+
+## 质量闸门（v2）
+
+DevBooks 提供质量闸门机制，拦截"假完成"并确保变更包的真实质量：
+
+| 闸门 | 触发模式 | 检查内容 |
+|------|----------|----------|
+| Green 证据检查 | archive, strict | `evidence/green-final/` 存在且非空 |
+| 任务完成率检查 | strict | tasks.md 所有任务完成或有 SKIP-APPROVED |
+| 测试失败拦截 | archive, strict | Green 证据中无失败模式 |
+| P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
+| 角色边界检查 | apply --role | Coder 禁改 tests/，Test Owner 禁改 src/ |
+
+**核心脚本**：
+- `change-check.sh`：一键校验（支持 `--mode proposal|apply|archive|strict`）
+- `handoff-check.sh`：角色交接握手检查
+- `env-match-check.sh`：测试环境声明检查
+- `audit-scope.sh`：审计全量扫描
+- `progress-dashboard.sh`：进度仪表板
+
+详细说明参见：`docs/quality-gates-guide.md`
 
 ---
 
