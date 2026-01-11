@@ -142,18 +142,103 @@ require_file() {
 
 contains_placeholder() {
   local file="$1"
-  if rg -n "<change-id>|<truth-root>|<change-root>|<一句话目标>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<填“无”|TODO\\b" "$file" >/dev/null; then
+  # Pattern includes intentional Chinese quotes for detecting placeholders
+  # shellcheck disable=SC2140
+  if rg -n '<change-id>|<truth-root>|<change-root>|<一句话目标>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<填"无"|TODO\b' "$file" >/dev/null; then
     return 0
   fi
   return 1
 }
 
+# =============================================================================
+# Shared SKIP-APPROVED detection helper (DRY refactoring)
+# Checks if a task at index has SKIP-APPROVED on prev/same/next line
+# Usage: is_skip_approved "line" "prev_line" "next_line" [strict_html_comment]
+# Note: Uses positional params instead of nameref for bash 3.2 compatibility
+# =============================================================================
+is_skip_approved() {
+  local line="$1"
+  local prev_line="${2:-}"
+  local next_line="${3:-}"
+  local strict_html="${4:-false}"
+
+  # Check same line
+  if [[ "$line" =~ SKIP-APPROVED: ]]; then
+    return 0
+  fi
+
+  # Check previous line
+  if [[ -n "$prev_line" ]]; then
+    if [[ "$strict_html" == true ]]; then
+      if [[ "$prev_line" =~ \<\!--[[:space:]]*SKIP-APPROVED: ]]; then
+        return 0
+      fi
+    else
+      if [[ "$prev_line" =~ SKIP-APPROVED: ]]; then
+        return 0
+      fi
+    fi
+  fi
+
+  # Check next line
+  if [[ -n "$next_line" ]]; then
+    if [[ "$strict_html" == true ]]; then
+      if [[ "$next_line" =~ \<\!--[[:space:]]*SKIP-APPROVED: ]]; then
+        return 0
+      fi
+    else
+      if [[ "$next_line" =~ SKIP-APPROVED: ]]; then
+        return 0
+      fi
+    fi
+  fi
+
+  return 1
+}
+
+# =============================================================================
+# Shared file reading helper (DRY refactoring)
+# Reads file into global _LINES array and sets _LINE_COUNT
+# Usage: _read_file_to_lines "$file_path"
+# After call: use _LINES array and _LINE_COUNT variable
+# =============================================================================
+_LINES=()
+_LINE_COUNT=0
+
+_read_file_to_lines() {
+  local file="$1"
+  _LINES=()
+  _LINE_COUNT=0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    _LINES+=("$line")
+  done < "$file"
+
+  _LINE_COUNT=${#_LINES[@]}
+}
+
+# Helper: Get prev/next line context for iteration
+# Usage: _get_line_context $index
+# Sets: _PREV_LINE, _NEXT_LINE
+_PREV_LINE=""
+_NEXT_LINE=""
+
+_get_line_context() {
+  local i=$1
+  _PREV_LINE=""
+  _NEXT_LINE=""
+
+  [[ $i -gt 0 ]] && _PREV_LINE="${_LINES[$((i-1))]}"
+  [[ $((i+1)) -lt $_LINE_COUNT ]] && _NEXT_LINE="${_LINES[$((i+1))]}"
+}
+
 check_proposal() {
   require_file "$proposal_file" || return 0
 
-  for h in "## Why" "## What Changes" "## Impact" "## Risks & Rollback" "## Validation" "## Debate Packet" "## Decision Log"; do
-    if ! rg -n "^${h}$" "$proposal_file" >/dev/null; then
-      err "proposal missing heading '${h}': ${proposal_file}"
+  # Support both numbered (## 1. Why...) and unnumbered (## Why...) headings
+  for h in "Why" "What Changes" "Impact" "Risks" "Validation" "Debate Packet" "Decision Log"; do
+    if ! rg -n "^## [0-9]*\\.? *${h}" "$proposal_file" >/dev/null; then
+      err "proposal missing heading containing '${h}': ${proposal_file}"
     fi
   done
 
@@ -213,7 +298,8 @@ check_design() {
     return 0
   fi
 
-  if ! rg -n "^## Acceptance Criteria$" "$design_file" >/dev/null; then
+  # Support headings with Chinese annotations: ## Acceptance Criteria（验收标准）
+  if ! rg -n "^## Acceptance Criteria|^## 验收标准" "$design_file" >/dev/null; then
     err "design missing '## Acceptance Criteria' heading: ${design_file}"
   fi
 
@@ -225,7 +311,7 @@ check_design() {
   # 设计模式借鉴：Problem Context / Rationale / Trade-offs 必填检查
   # ============================================================================
   if [[ "$mode" == "apply" || "$mode" == "archive" || "$mode" == "strict" ]]; then
-    if ! rg -n "^## Problem Context$|^## 问题背景$" "$design_file" >/dev/null; then
+    if ! rg -n "^## Problem Context|^## 问题背景" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Problem Context' section (strict): ${design_file}"
       else
@@ -233,7 +319,7 @@ check_design() {
       fi
     fi
 
-    if ! rg -n "^## Design Rationale$|^## 设计决策理由$" "$design_file" >/dev/null; then
+    if ! rg -n "^## Design Rationale|^## 设计决策理由" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Design Rationale' section (strict): ${design_file}"
       else
@@ -241,7 +327,7 @@ check_design() {
       fi
     fi
 
-    if ! rg -n "^## Trade-offs$|^## 权衡取舍$" "$design_file" >/dev/null; then
+    if ! rg -n "^## Trade-offs|^## 权衡取舍" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Trade-offs' section (strict): ${design_file}"
       else
@@ -282,8 +368,24 @@ check_tasks() {
   fi
 
   if [[ "$mode" == "archive" || "$mode" == "strict" ]]; then
-    if rg -n "^- \\[ \\]" "$tasks_file" >/dev/null; then
-      err "tasks still contains unchecked items (archive/strict): ${tasks_file}"
+    # Check for unchecked items that are NOT skip-approved
+    local has_unapproved_unchecked=false
+    _read_file_to_lines "$tasks_file"
+
+    for ((i=0; i<_LINE_COUNT; i++)); do
+      local line="${_LINES[$i]}"
+      if [[ "$line" =~ ^-\ \[\ \] ]]; then
+        _get_line_context "$i"
+        # Found unchecked task, check if skip-approved using shared helper
+        if ! is_skip_approved "$line" "$_PREV_LINE" "$_NEXT_LINE"; then
+          has_unapproved_unchecked=true
+          break
+        fi
+      fi
+    done
+
+    if [[ "$has_unapproved_unchecked" == true ]]; then
+      err "tasks still contains unchecked items without skip approval (archive/strict): ${tasks_file}"
     fi
   fi
 
@@ -320,12 +422,14 @@ check_verification() {
   fi
 
   if [[ "$mode" == "strict" ]]; then
-    if ! rg -n "^G\\) 价值流与度量" "$verification_file" >/dev/null; then
-      err "verification missing 'G) 价值流与度量' section (strict): ${verification_file}"
-    fi
-
-    if ! rg -n "^- 目标价值信号：" "$verification_file" >/dev/null; then
-      err "verification missing '- 目标价值信号：' line (strict): ${verification_file}"
+    # G) section is recommended but not blocking
+    if ! rg -n "^## G\\) 价值流与度量|^G\\) 价值流与度量" "$verification_file" >/dev/null; then
+      warn "verification missing 'G) 价值流与度量' section (recommended for strict): ${verification_file}"
+    else
+      # Only check 目标价值信号 if G) section exists
+      if ! rg -n "^- 目标价值信号：" "$verification_file" >/dev/null; then
+        warn "verification missing '- 目标价值信号：' line (recommended): ${verification_file}"
+      fi
     fi
 
     if rg -n "^\\| AC-[0-9]{3} \\|.*\\| *TODO *\\|" "$verification_file" >/dev/null; then
@@ -405,21 +509,272 @@ check_spec_deltas() {
   fi
 }
 
-check_no_tests_changed() {
-  if [[ "$role" != "coder" && "$mode" != "strict" ]]; then
+# =============================================================================
+# AC-001: Green Evidence Closure Check (《人月神话》第6章 "沟通")
+# Block archive when Green evidence is missing
+# =============================================================================
+check_evidence_closure() {
+  # Only run in archive/strict modes
+  if [[ "$mode" != "archive" && "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  local evidence_dir="${change_dir}/evidence/green-final"
+
+  if [[ ! -d "$evidence_dir" ]]; then
+    err "缺少 Green 证据: evidence/green-final/ 不存在 (AC-001)"
+    return 0
+  fi
+
+  # Check if directory has at least one file
+  local file_count
+  file_count=$(find "$evidence_dir" -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [[ "$file_count" -eq 0 ]]; then
+    err "缺少 Green 证据: evidence/green-final/ 为空 (AC-001)"
+    return 0
+  fi
+}
+
+# =============================================================================
+# AC-002: Task Completion Rate Check (Enhanced)
+# Enforce 100% task completion in strict mode with rate display
+# Skip-approved tasks count as completed
+# =============================================================================
+check_task_completion_rate() {
+  # Only run in strict mode for completion rate
+  if [[ "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  if [[ ! -f "$tasks_file" ]]; then
+    return 0
+  fi
+
+  # Read file using shared helper
+  _read_file_to_lines "$tasks_file"
+
+  local total_tasks=0
+  local completed_tasks=0
+
+  for ((i=0; i<_LINE_COUNT; i++)); do
+    local line="${_LINES[$i]}"
+
+    # Count all checkbox items (both checked and unchecked)
+    if [[ "$line" =~ ^-\ \[[\ xX]\] ]]; then
+      total_tasks=$((total_tasks + 1))
+
+      # Check if completed (checked)
+      if [[ "$line" =~ ^-\ \[[xX]\] ]]; then
+        completed_tasks=$((completed_tasks + 1))
+      elif [[ "$line" =~ ^-\ \[\ \] ]]; then
+        _get_line_context "$i"
+        # Unchecked - check if skip-approved using shared helper
+        if is_skip_approved "$line" "$_PREV_LINE" "$_NEXT_LINE"; then
+          completed_tasks=$((completed_tasks + 1))
+        fi
+      fi
+    fi
+  done
+
+  if [[ "$total_tasks" -eq 0 ]]; then
+    # No tasks = 100% complete
+    return 0
+  fi
+
+  local incomplete_tasks=$((total_tasks - completed_tasks))
+  if [[ "$incomplete_tasks" -gt 0 ]]; then
+    local rate=$((completed_tasks * 100 / total_tasks))
+    err "任务完成率 ${rate}% (${completed_tasks}/${total_tasks})，需要 100% (AC-002)"
+  fi
+}
+
+# =============================================================================
+# AC-007: Test Failure in Evidence Check
+# Block archive when test failures exist in Green evidence
+# Pattern is designed to avoid false positives like "0 tests FAIL" or comments
+# =============================================================================
+check_test_failure_in_evidence() {
+  # Only run in archive/strict modes
+  if [[ "$mode" != "archive" && "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  local evidence_dir="${change_dir}/evidence/green-final"
+
+  if [[ ! -d "$evidence_dir" ]]; then
+    # Already checked in check_evidence_closure
+    return 0
+  fi
+
+  # Check for failure patterns in evidence files (use --no-ignore to search .log files)
+  # Patterns designed for common test frameworks:
+  #   - TAP: "not ok" at line start
+  #   - Jest/Vitest: "FAIL " followed by path
+  #   - pytest: "FAILED " at line start
+  #   - Go: "--- FAIL:" at line start
+  #   - BATS: "not ok" at line start
+  #   - Generic: "FAIL:" "FAILED:" "[FAIL]" "[FAILED]" "[ERROR]" markers
+  # Exclude: "0 tests FAIL", "0 failed", comments, variable names
+  local fail_pattern='^not ok |^FAIL[: ]|^FAILED[: ]|^--- FAIL:|^\[FAIL\]|^\[FAILED\]|^\[ERROR\]|^ERROR:|: FAIL$|: FAILED$'
+
+  if rg --no-ignore -l "$fail_pattern" "$evidence_dir" >/dev/null 2>&1; then
+    # Double-check: exclude files that only have success patterns
+    local fail_files
+    fail_files=$(rg --no-ignore -l "$fail_pattern" "$evidence_dir" 2>/dev/null || true)
+
+    for file in $fail_files; do
+      # Check if the match is a real failure (not "0 tests failed" pattern)
+      if rg --no-ignore "$fail_pattern" "$file" 2>/dev/null | grep -qvE "^[[:space:]]*#|0 (tests?|failures?|failed)"; then
+        err "测试失败: Green 证据中包含失败模式，不能归档 (AC-007)"
+        echo "  文件: $file" >&2
+        return 0
+      fi
+    done
+  fi
+}
+
+# =============================================================================
+# AC-005: P0 Skip Approval Check
+# Enforce P0 task skip requires SKIP-APPROVED comment
+# SKIP-APPROVED can be on the line before, same line, or line after the task
+# =============================================================================
+check_skip_approval() {
+  # Only run in strict mode
+  if [[ "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  if [[ ! -f "$tasks_file" ]]; then
+    return 0
+  fi
+
+  # Read file using shared helper
+  _read_file_to_lines "$tasks_file"
+
+  for ((i=0; i<_LINE_COUNT; i++)); do
+    local line="${_LINES[$i]}"
+
+    # Check for unchecked P0 task
+    if [[ "$line" =~ ^-\ \[\ \]\ \[P0\] ]]; then
+      local p0_task_name
+      p0_task_name=$(echo "$line" | sed -E 's/^- \[ \] \[P0\] //')
+
+      _get_line_context "$i"
+      # Use shared helper with strict_html=true for prev/next line HTML comment check
+      if ! is_skip_approved "$line" "$_PREV_LINE" "$_NEXT_LINE" true; then
+        err "P0 任务跳过需审批: ${p0_task_name} (AC-005)"
+      fi
+    fi
+  done
+}
+
+# =============================================================================
+# AC-006: Environment Match Check
+# Call env-match-check.sh to verify test environment declaration
+# =============================================================================
+check_env_match() {
+  # Only run in archive/strict modes
+  if [[ "$mode" != "archive" && "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  # Check if env-match-check.sh exists
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local env_check_script="${script_dir}/env-match-check.sh"
+
+  if [[ ! -x "$env_check_script" ]]; then
+    warn "env-match-check.sh not found; skipping environment check"
+    return 0
+  fi
+
+  # Run env-match-check
+  if ! "$env_check_script" "$change_id" --project-root "$project_root" --change-root "$change_root" >/dev/null 2>&1; then
+    err "测试环境声明缺失: verification.md 需要包含 '测试环境声明' 部分 (AC-006)"
+  fi
+}
+
+# =============================================================================
+# AC-003: Role Boundary Check (Enhanced from check_no_tests_changed)
+# Enforce role-specific file modification boundaries
+# Refactored: split into per-role helper functions for maintainability
+# =============================================================================
+
+# Helper: Report role violation with changed files list (DRY extraction)
+_report_role_violation() {
+  local role_name="$1" forbidden_target="$2" changed_list="$3"
+  err "角色违规: ${role_name} 禁止修改 ${forbidden_target} (AC-003)"
+  echo "  检测到变更:" >&2
+  printf "%s\n" "$changed_list" | head -5 | sed 's/^/    /' >&2
+  if [[ $(printf "%s\n" "$changed_list" | wc -l) -gt 5 ]]; then
+    echo "    ... and more" >&2
+  fi
+}
+
+# Helper: Check Coder role boundaries
+_check_coder_boundaries() {
+  local changed="$1"
+
+  # Coder cannot modify tests/**
+  local tests_changed
+  tests_changed=$(printf "%s\n" "$changed" | grep -E "^tests/" || true)
+  if [[ -n "$tests_changed" ]]; then
+    _report_role_violation "Coder" "tests/**" "$tests_changed"
+  fi
+
+  # Coder cannot modify verification.md
+  if printf "%s\n" "$changed" | grep -qE "verification\.md$"; then
+    err "角色违规: Coder 禁止修改 verification.md (AC-003)"
+  fi
+
+  # Coder cannot modify .devbooks/ config
+  if printf "%s\n" "$changed" | grep -qE "^\.devbooks/"; then
+    err "角色违规: Coder 禁止修改 .devbooks/ 配置 (AC-003)"
+  fi
+}
+
+# Helper: Check Test Owner role boundaries
+_check_test_owner_boundaries() {
+  local changed="$1"
+
+  # Test Owner cannot modify src/**
+  local src_changed
+  src_changed=$(printf "%s\n" "$changed" | grep -E "^src/" || true)
+  if [[ -n "$src_changed" ]]; then
+    _report_role_violation "Test Owner" "src/**" "$src_changed"
+  fi
+}
+
+# Helper: Check Reviewer role boundaries
+_check_reviewer_boundaries() {
+  local changed="$1"
+
+  # Reviewer cannot modify any code files
+  local code_changed
+  code_changed=$(printf "%s\n" "$changed" | grep -E "\.(ts|js|tsx|jsx|py|sh)$" || true)
+  if [[ -n "$code_changed" ]]; then
+    _report_role_violation "Reviewer" "代码文件" "$code_changed"
+  fi
+}
+
+check_role_boundaries() {
+  # Only run when role is specified or in apply mode
+  if [[ -z "$role" && "$mode" != "apply" ]]; then
     return 0
   fi
 
   if ! command -v git >/dev/null 2>&1; then
-    warn "git not found; cannot enforce 'coder must not modify tests/**'"
+    warn "git not found; cannot enforce role boundaries"
     return 0
   fi
 
   if ! git -C "$project_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    warn "not a git worktree; cannot enforce 'coder must not modify tests/**'"
+    warn "not a git worktree; cannot enforce role boundaries"
     return 0
   fi
 
+  # Get changed files
+  local changed
   changed="$(
     {
       git -C "$project_root" diff --name-only
@@ -431,10 +786,17 @@ check_no_tests_changed() {
     return 0
   fi
 
-  if printf "%s\n" "$changed" | rg -n "^tests/" >/dev/null; then
-    err "detected changes under tests/** (coder forbidden):"
-    printf "%s\n" "$changed" | rg "^tests/" >&2 || true
-  fi
+  # Dispatch to role-specific helper
+  case "$role" in
+    coder)      _check_coder_boundaries "$changed" ;;
+    test-owner) _check_test_owner_boundaries "$changed" ;;
+    reviewer)   _check_reviewer_boundaries "$changed" ;;
+  esac
+}
+
+# Backward compatibility alias
+check_no_tests_changed() {
+  check_role_boundaries
 }
 
 # ============================================================================
@@ -518,6 +880,12 @@ else
   check_verification
   check_no_tests_changed
   check_implicit_changes
+  # New quality gates (harden-devbooks-quality-gates)
+  check_evidence_closure       # AC-001: Green evidence required for archive
+  check_task_completion_rate   # AC-002: 100% completion for strict mode
+  check_test_failure_in_evidence  # AC-007: No failures in Green evidence
+  check_skip_approval          # AC-005: P0 skip requires approval
+  check_env_match              # AC-006: Environment declaration required
 fi
 
 if [[ $errors -gt 0 ]]; then

@@ -212,6 +212,45 @@ else
   warn "hint: characterization tests help preserve behavior knowledge"
 fi
 
+# Check 7: Basic test coverage (P1 - harden-devbooks-quality-gates)
+echo "checking: prototype has basic test coverage"
+proto_src="${prototype_dir}/src"
+if [[ -d "$proto_src" ]]; then
+  src_count=$(find "$proto_src" -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.sh" \) 2>/dev/null | wc -l | tr -d ' ')
+  test_count=$(find "$prototype_dir" -type f \( -name "*.test.*" -o -name "*_test.*" -o -name "*.spec.*" \) 2>/dev/null | wc -l | tr -d ' ')
+
+  if [[ "$src_count" -gt 0 ]]; then
+    if [[ "$test_count" -eq 0 ]]; then
+      warn "no test files found for ${src_count} source files in prototype"
+      warn "hint: consider adding characterization tests before promotion"
+    else
+      ratio=$((test_count * 100 / src_count))
+      if [[ "$ratio" -lt 50 ]]; then
+        warn "low test coverage: ${test_count} test files for ${src_count} source files (${ratio}%)"
+      else
+        ok "test coverage: ${test_count} test files for ${src_count} source files (${ratio}%)"
+      fi
+    fi
+  fi
+fi
+
+# Check 8: Complexity threshold warning (P1 - harden-devbooks-quality-gates)
+echo "checking: prototype complexity"
+if [[ -d "$proto_src" ]]; then
+  # Count total lines of code
+  total_loc=$(find "$proto_src" -type f \( -name "*.ts" -o -name "*.js" -o -name "*.py" -o -name "*.sh" \) -exec cat {} \; 2>/dev/null | wc -l | tr -d ' ')
+
+  # Complexity threshold: warn if > 1000 lines (configurable via env)
+  complexity_threshold="${PROTOTYPE_COMPLEXITY_THRESHOLD:-1000}"
+
+  if [[ "$total_loc" -gt "$complexity_threshold" ]]; then
+    warn "prototype exceeds complexity threshold: ${total_loc} lines (threshold: ${complexity_threshold})"
+    warn "hint: consider breaking into smaller modules before promotion"
+  else
+    ok "complexity: ${total_loc} lines (threshold: ${complexity_threshold})"
+  fi
+fi
+
 echo ""
 
 # ============================================================================
