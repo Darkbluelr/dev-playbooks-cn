@@ -4,16 +4,16 @@ skill: devbooks-spec-gardener
 
 # /devbooks:gardener
 
-触发 Skill：`devbooks-spec-gardener`
+Triggers Skill: `devbooks-spec-gardener`
 
-## 用途
+## Purpose
 
-归档前修剪与维护 truth-root（去重合并、删除过时、目录整理、一致性修复），避免 specs 堆叠失控。
+Pre-archive pruning and maintenance of truth-root (deduplication/merging, removing obsolete content, directory organization, consistency fixes) to prevent specs from accumulating out of control.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 变更包归档前的收尾清理
-- specs 目录需要去重和整理
-- 清理过时的规范文档
+- Cleanup before change package archival
+- Specs directory needs deduplication and organization
+- Clean up obsolete specification documents
 
-请点名使用 `devbooks-spec-gardener` 执行相应任务。
+Please invoke `devbooks-spec-gardener` to execute the corresponding task.

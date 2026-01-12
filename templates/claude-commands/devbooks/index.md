@@ -4,16 +4,16 @@ skill: devbooks-index-bootstrap
 
 # /devbooks:index
 
-触发 Skill：`devbooks-index-bootstrap`
+Triggers Skill: `devbooks-index-bootstrap`
 
-## 用途
+## Purpose
 
-自动检测项目语言栈并生成 SCIP 索引，激活图基代码理解能力。
+Automatically detect project language stack and generate SCIP index, activating graph-based code understanding capabilities.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 首次进入大型项目需要索引
-- CKB 报告索引缺失时
-- 更新代码后重建索引
+- First time entering a large project that needs indexing
+- When CKB reports missing index
+- Rebuild index after code updates
 
-请点名使用 `devbooks-index-bootstrap` 执行相应任务。
+Please invoke `devbooks-index-bootstrap` to execute the corresponding task.

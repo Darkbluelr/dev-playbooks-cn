@@ -4,16 +4,16 @@ skill: devbooks-test-owner
 
 # /devbooks:test
 
-触发 Skill：`devbooks-test-owner`
+Triggers Skill: `devbooks-test-owner`
 
-## 用途
+## Purpose
 
-以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现独立对话、先跑出 Red 基线。
+As Test Owner role, convert design/specs into executable verification tests and traceability documentation (verification.md), emphasizing independent dialog from implementation and running Red baseline first.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 需要从规格生成测试用例
-- 建立追溯矩阵（AC 到测试）
-- 生成 Red-Green 基线测试
+- Need to generate test cases from specifications
+- Build traceability matrix (AC to tests)
+- Generate Red-Green baseline tests
 
-请点名使用 `devbooks-test-owner` 执行相应任务。
+Please invoke `devbooks-test-owner` to execute the corresponding task.

@@ -12,7 +12,7 @@ set -euo pipefail
 # 3. Production verification.md exists (Test Owner has produced acceptance tests)
 # 4. All quality gates pass before promotion
 #
-# Reference: 《人月神话》第11章 "未雨绸缪" — "为舍弃而计划"
+# Reference: "The Mythical Man-Month" Chapter 11 "Plan to Throw One Away"
 # ============================================================================
 
 usage() {
@@ -157,14 +157,14 @@ else
   # Check 3: Promotion checklist is complete (no unchecked items in promotion section)
   echo "checking: promotion checklist is complete"
 
-  # Extract lines between "提升检查清单" and next "## " or "丢弃检查清单"
+  # Extract lines between "Promotion Checklist" and next "## " or "Discard Checklist"
   # and check for unchecked items "- [ ]"
-  if grep -A 20 "提升检查清单" "$prototype_md" 2>/dev/null | \
-     grep -B 20 -E "(^## |丢弃检查清单)" 2>/dev/null | \
+  if grep -A 20 "Promotion Checklist" "$prototype_md" 2>/dev/null | \
+     grep -B 20 -E "(^## |Discard Checklist)" 2>/dev/null | \
      grep -q "^\- \[ \]"; then
     err "unchecked items in promotion checklist"
-    err "hint: complete all items in '提升检查清单' section of PROTOTYPE.md"
-    grep -A 20 "提升检查清单" "$prototype_md" | grep "^\- \[ \]" | head -5 >&2
+    err "hint: complete all items in 'Promotion Checklist' section of PROTOTYPE.md"
+    grep -A 20 "Promotion Checklist" "$prototype_md" | grep "^\- \[ \]" | head -5 >&2
     ((errors++))
   else
     ok "promotion checklist complete"
@@ -262,7 +262,7 @@ if [[ $errors -gt 0 ]]; then
   err "${errors} error(s) found"
   echo ""
   echo "Required before promotion:"
-  echo "  1. Complete all items in PROTOTYPE.md '提升检查清单'"
+  echo "  1. Complete all items in PROTOTYPE.md 'Promotion Checklist'"
   echo "  2. Create production design.md with AC-xxx items"
   echo "  3. Have Test Owner create verification.md with acceptance tests"
   exit 1
@@ -323,7 +323,7 @@ cat > "${change_dir}/evidence/prototype-promotion.md" <<EOF
 - Production track: active
 
 ---
-Reference: 《人月神话》第11章 — "第一个开发的系统并不合用...为舍弃而计划"
+Reference: "The Mythical Man-Month" Chapter 11 - "The first system built is not suitable...plan to throw one away"
 EOF
 ok "created: ${change_dir}/evidence/prototype-promotion.md"
 

@@ -5,29 +5,29 @@ backward-compat: true
 
 # /devbooks:archive
 
-**向后兼容命令**：执行归档阶段。
+**Backward Compatible Command**: Execute archive phase.
 
-## 用途
+## Purpose
 
-此命令是向后兼容命令，保持与原有 `/devbooks:archive` 调用方式一致。
+This command is a backward compatible command, maintaining consistency with the original `/devbooks:archive` invocation.
 
-内部调用 `devbooks-spec-gardener` Skill。
+Internally calls `devbooks-spec-gardener` Skill.
 
-## 新版本替代方案
+## New Version Alternative
 
-建议使用直达命令：
+Recommended direct command:
 
 ```
 /devbooks:gardener
 ```
 
-## 功能
+## Function
 
-归档前修剪与维护 <truth-root>（去重合并/删除过时/目录整理/一致性修复），避免 specs 堆叠失控。
+Pre-archive pruning and maintenance of <truth-root> (deduplication/merging, removing obsolete content, directory organization, consistency fixes) to prevent specs from accumulating out of control.
 
-## 迁移说明
+## Migration Guide
 
 ```
-旧命令             新命令
+Old Command             New Command
 /devbooks:archive  →  /devbooks:gardener
 ```

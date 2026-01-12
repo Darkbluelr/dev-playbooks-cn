@@ -1,17 +1,17 @@
 #!/bin/bash
 # skills/devbooks-delivery-workflow/scripts/spec-promote.sh
-# 规格提升脚本
+# Spec Promotion Script
 #
-# 将暂存层的 spec delta 提升到真理层。
+# Promotes the spec delta from the staging layer to the truth layer.
 #
-# 用法：
-#   ./spec-promote.sh <change-id> [选项]
+# Usage:
+#   ./spec-promote.sh <change-id> [options]
 #   ./spec-promote.sh --help
 #
-# 退出码：
-#   0 - 提升成功
-#   1 - 提升失败
-#   2 - 用法错误
+# Exit codes:
+#   0 - Promotion successful
+#   1 - Promotion failed
+#   2 - Usage error
 
 set -euo pipefail
 
@@ -29,21 +29,21 @@ NC='\033[0m'
 
 show_help() {
     cat << 'EOF'
-规格提升脚本 (spec-promote.sh)
+Spec Promotion Script (spec-promote.sh)
 
-用法：
-  ./spec-promote.sh <change-id> [选项]
+Usage:
+  ./spec-promote.sh <change-id> [options]
 
-选项：
-  --project-root DIR  项目根目录
-  --truth-root DIR    真理源目录
-  --dry-run           模拟运行
-  --help, -h          显示帮助
+Options:
+  --project-root DIR  Project root directory
+  --truth-root DIR    Truth source directory
+  --dry-run           Simulate run
+  --help, -h          Show help
 
-流程：
-  1. 检查前置条件（已 stage）
-  2. 移动 _staged/<change-id>/ 内容到 specs/
-  3. 清理 _staged/<change-id>/ 目录
+Process:
+  1. Check prerequisites (already staged)
+  2. Move _staged/<change-id>/ contents to specs/
+  3. Clean up _staged/<change-id>/ directory
 
 EOF
 }
@@ -63,29 +63,29 @@ main() {
             --project-root) project_root="${2:-.}"; shift 2 ;;
             --truth-root) truth_root="${2:-specs}"; shift 2 ;;
             --dry-run) dry_run=true; shift ;;
-            -*) log_error "未知选项: $1"; exit 2 ;;
+            -*) log_error "Unknown option: $1"; exit 2 ;;
             *) change_id="$1"; shift ;;
         esac
     done
 
     if [[ -z "$change_id" ]]; then
-        log_error "缺少 change-id"
+        log_error "Missing change-id"
         exit 2
     fi
 
     local staged_dir="${project_root}/${truth_root}/_staged/${change_id}"
     local specs_dir="${project_root}/${truth_root}"
 
-    log_info "提升变更包: ${change_id}"
+    log_info "Promoting change package: ${change_id}"
 
-    # 检查前置条件
+    # Check prerequisites
     if [[ ! -d "$staged_dir" ]]; then
-        log_error "未找到暂存内容: ${staged_dir}"
-        log_error "请先运行 spec-stage.sh"
+        log_error "Staged content not found: ${staged_dir}"
+        log_error "Please run spec-stage.sh first"
         exit 1
     fi
 
-    # 提升文件
+    # Promote files
     local promoted=0
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
@@ -104,14 +104,14 @@ main() {
         promoted=$((promoted + 1))
     done < <(find "$staged_dir" -type f 2>/dev/null)
 
-    # 清理暂存目录
+    # Clean up staging directory
     if [[ "$dry_run" == true ]]; then
-        log_info "[DRY-RUN] 将删除: ${staged_dir}"
+        log_info "[DRY-RUN] Would delete: ${staged_dir}"
     else
         rm -rf "$staged_dir"
     fi
 
-    log_pass "已提升 ${promoted} 个文件到真理层"
+    log_pass "Promoted ${promoted} file(s) to truth layer"
     exit 0
 }
 

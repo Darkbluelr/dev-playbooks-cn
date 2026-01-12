@@ -11,6 +11,9 @@ CLAUDE.md
 .devbooks/backup/
 .devbooks/*.log
 
+# DevBooks internal playbooks for this repo (do not publish)
+dev-playbooks/
+
 # Project self-test artifacts (not part of the library)
 AGENTS.md
 openspec/
@@ -24,6 +27,7 @@ venv/
 
 # Node
 node_modules/
+.npm-cache/
 
 # Logs
 *.log

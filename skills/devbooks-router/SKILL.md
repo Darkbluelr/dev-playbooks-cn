@@ -1,6 +1,6 @@
 ---
 name: devbooks-router
-description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 DevBooks proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说"下一步怎么做/路由到合适 skill/按 devbooks 跑闭环"等时使用。
+description: "devbooks-router: DevBooks workflow routing and next-step recommendations. Based on user requests (proposal/design/spec/plan/test/implementation/review/archive, or DevBooks proposal/apply/archive) selects the appropriate devbooks-* Skills and provides artifact locations and shortest closed-loop. Use when user says 'what's next/route to appropriate skill/run devbooks closed-loop' etc."
 tools:
   - Glob
   - Grep
@@ -9,41 +9,41 @@ tools:
   - mcp__ckb__getStatus
 ---
 
-# DevBooks：工作流路由（Router）
+# DevBooks: Workflow Router
 
-## 前置：配置发现（协议无关）
+## Prerequisite: Configuration Discovery (Protocol Agnostic)
 
-- `<truth-root>`：当前真理目录根
-- `<change-root>`：变更包目录根
+- `<truth-root>`: Current truth directory root
+- `<change-root>`: Change package directory root
 
-执行前**必须**按以下顺序查找配置（找到后停止）：
-1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
-4. `project.md`（如存在）→ template 协议，使用默认映射
-5. 若仍无法确定 → **停止并询问用户**
+Before execution, **must** search for configuration in the following order (stop when found):
+1. `.devbooks/config.yaml` (if exists) -> Parse and use its mappings
+2. `dev-playbooks/project.md` (if exists) -> DevBooks 2.0 protocol, use default mappings
+4. `project.md` (if exists) -> template protocol, use default mappings
+5. If still cannot determine -> **Stop and ask user**
 
-**关键约束**：
-- 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
-- 禁止猜测目录根
-- 禁止跳过规则文档阅读
+**Key Constraints**:
+- If configuration specifies `agents_doc` (rules document), **must read that document first** before executing any operation
+- Guessing directory roots is prohibited
+- Skipping rules document reading is prohibited
 
-## 前置：图索引健康检查（自动）
+## Prerequisite: Graph Index Health Check (Automatic)
 
-**在路由前自动执行**，检查 CKB 图索引状态：
+**Execute automatically before routing**, check CKB graph index status:
 
-1. 调用 `mcp__ckb__getStatus` 检查 SCIP 后端
-2. 如果 `backends.scip.healthy = false`：
-   - 提示用户：「检测到代码图索引未激活，影响分析/调用图等图基能力不可用」
-   - 询问是否现在生成索引（约 1-5 分钟）
-   - 若用户同意，执行 `devbooks-index-bootstrap` 流程
-   - 若用户拒绝，继续路由但标注「图基能力降级」
+1. Call `mcp__ckb__getStatus` to check SCIP backend
+2. If `backends.scip.healthy = false`:
+   - Prompt user: "Detected code graph index not activated, impact analysis/call graph and other graph-based capabilities unavailable"
+   - Ask whether to generate index now (approximately 1-5 minutes)
+   - If user agrees, execute `devbooks-index-bootstrap` flow
+   - If user declines, continue routing but mark "graph-based capabilities degraded"
 
-3. 如果 `backends.scip.healthy = true`：
-   - 静默通过，继续路由
+3. If `backends.scip.healthy = true`:
+   - Pass silently, continue routing
 
-**检查脚本**（供参考）：
+**Check script** (for reference):
 ```bash
-# 检测语言并生成索引
+# Detect language and generate index
 if [ -f "tsconfig.json" ]; then
   scip-typescript index --output index.scip
 elif [ -f "pyproject.toml" ]; then
@@ -53,295 +53,294 @@ elif [ -f "go.mod" ]; then
 fi
 ```
 
-**降级模式说明**：
-- 无索引时，`devbooks-impact-analysis` 退化为 Grep 文本搜索（准确度下降）
-- 无索引时，`devbooks-code-review` 无法获取调用图上下文
-- 建议在 Apply 阶段前完成索引生成
+**Degraded Mode Description**:
+- Without index, `devbooks-impact-analysis` degrades to Grep text search (reduced accuracy)
+- Without index, `devbooks-code-review` cannot get call graph context
+- Recommend completing index generation before Apply phase
 
-## 你要做的事
+## Your Task
 
-把用户的自然语言请求映射成：
-1) 现在处于哪个阶段（proposal / apply / review / archive）
-2) 本次变更的“必产物”（proposal/design/tasks/verification）与“按需产物”（spec deltas/contract/c4/evidence）
-3) 下一步该用哪个（或哪些）`devbooks-*` Skills
-4) 每个产物应落到哪个文件路径
+Map user's natural language request to:
+1) Which phase currently (proposal / apply / review / archive)
+2) Required artifacts for this change (proposal/design/tasks/verification) and on-demand artifacts (spec deltas/contract/c4/evidence)
+3) Which `devbooks-*` Skill(s) to use next
+4) Which file path each artifact should be placed in
 
-## 输出要求（强制）
+## Output Requirements (Mandatory)
 
-1) **先问清楚 2 个最小关键问题**（若上下文里已有答案则不问）：
-   - `<change-id>` 是什么？
-   - `<truth-root>` / `<change-root>` 在该项目最终取值是什么？
-2) 给出“下一步路由结果”（3–6 条即可）：
-   - 每条包含：要用的 Skill + 产物路径 + 为什么需要
-3) 如果用户明确要你"直接开始产出文件内容"，再进入对应 Skill 的输出模式。
+1) **First clarify 2 minimum key questions** (don't ask if answers already in context):
+   - What is `<change-id>`?
+   - What are `<truth-root>` / `<change-root>` final values for this project?
+2) Provide "next step routing result" (3-6 items):
+   - Each includes: Skill to use + artifact path + why needed
+3) Only enter corresponding Skill's output mode if user explicitly says "start producing file content directly".
 
 ---
 
-## Impact 画像解析（AC-003 / AC-012）
+## Impact Profile Parsing (AC-003 / AC-012)
 
-当 `proposal.md` 存在时，Router **应自动解析** Impact 章节以生成更精确的执行计划。
+When `proposal.md` exists, Router **should automatically parse** Impact section to generate more precise execution plan.
 
-### Impact Profile 结构
+### Impact Profile Structure
 
 ```yaml
 impact_profile:
-  external_api: true/false       # 对外 API 变更
-  architecture_boundary: true/false  # 架构边界变更
-  data_model: true/false         # 数据模型变更
-  cross_repo: true/false         # 跨仓库影响
-  risk_level: high/medium/low    # 风险等级
-  affected_modules:              # 受影响模块列表
+  external_api: true/false       # External API changes
+  architecture_boundary: true/false  # Architecture boundary changes
+  data_model: true/false         # Data model changes
+  cross_repo: true/false         # Cross-repository impact
+  risk_level: high/medium/low    # Risk level
+  affected_modules:              # Affected modules list
     - name: <module-path>
       type: add/modify/delete
       files: <count>
 ```
 
-### 解析流程
+### Parsing Flow
 
-1. 检测 `proposal.md` 是否存在
-2. 若存在，查找 `## Impact` 章节
-3. 提取 `impact_profile:` YAML 块
-4. 验证必填字段：`external_api`、`risk_level`、`affected_modules`
+1. Detect if `proposal.md` exists
+2. If exists, find `## Impact` section
+3. Extract `impact_profile:` YAML block
+4. Validate required fields: `external_api`, `risk_level`, `affected_modules`
 
-### 基于 Impact 画像的路由增强
+### Routing Enhancement Based on Impact Profile
 
-| Impact 字段 | 值 | 自动追加 Skill |
-|-------------|-----|---------------|
+| Impact Field | Value | Auto-append Skill |
+|--------------|-------|-------------------|
 | `external_api: true` | - | `devbooks-spec-contract` |
 | `architecture_boundary: true` | - | `devbooks-c4-map` |
 | `cross_repo: true` | - | `devbooks-federation` |
 | `risk_level: high` | - | `devbooks-proposal-debate-workflow` |
-| `affected_modules` 数量 > 5 | - | `devbooks-impact-analysis`（深度分析） |
+| `affected_modules` count > 5 | - | `devbooks-impact-analysis` (deep analysis) |
 
-### 执行计划输出格式
+### Execution Plan Output Format
 
 ```markdown
-## 执行计划（基于 Impact 画像）
+## Execution Plan (Based on Impact Profile)
 
-### 必须执行
-1. `/devbooks:proposal` → proposal.md（提案已存在，跳过）
-2. `/devbooks:design` → design.md（必须）
-3. `/devbooks:plan` → tasks.md（必须）
+### Must Execute
+1. `/devbooks:proposal` -> proposal.md (proposal exists, skip)
+2. `/devbooks:design` -> design.md (required)
+3. `/devbooks:plan` -> tasks.md (required)
 
-### 建议执行（基于 Impact 分析）
-4. `/devbooks:spec` → specs/**（检测到 external_api: true）
-5. `/devbooks:c4` → architecture/c4.md（检测到 architecture_boundary: true）
+### Recommended (Based on Impact Analysis)
+4. `/devbooks:spec` -> specs/** (detected external_api: true)
+5. `/devbooks:c4` -> architecture/c4.md (detected architecture_boundary: true)
 
-### 可选执行
-6. `/devbooks:impact` → 深度影响分析（affected_modules > 5）
+### Optional
+6. `/devbooks:impact` -> Deep impact analysis (affected_modules > 5)
 ```
 
-### 解析失败处理（AC-012）
+### Parsing Failure Handling (AC-012)
 
-**无 Impact 画像时**：
-
-```
-⚠️ proposal.md 中未找到 Impact 画像。
-
-缺失项：
-- Impact 章节不存在
-- 或 impact_profile YAML 块缺失
-
-建议动作：
-1. 运行 `/devbooks:impact` 生成影响分析
-2. 或直接使用直达命令 `/devbooks:<skill>`
-
-直达命令列表：
-- /devbooks:design → 设计文档
-- /devbooks:plan → 编码计划
-- /devbooks:spec → 规格定义
-```
-
-**YAML 解析失败时**：
+**When no Impact Profile**:
 
 ```
-⚠️ Impact 画像解析失败。
+Warning: Impact profile not found in proposal.md.
 
-错误：<具体错误信息>
+Missing items:
+- Impact section doesn't exist
+- Or impact_profile YAML block is missing
 
-建议动作：
-1. 检查 proposal.md 中 impact_profile YAML 格式
-2. 或使用直达命令 `/devbooks:<skill>` 绕过 Router
+Recommended actions:
+1. Run `/devbooks:impact` to generate impact analysis
+2. Or use direct command `/devbooks:<skill>` directly
+
+Direct command list:
+- /devbooks:design -> Design document
+- /devbooks:plan -> Implementation plan
+- /devbooks:spec -> Spec definition
+```
+
+**When YAML parsing fails**:
+
+```
+Warning: Impact profile parsing failed.
+
+Error: <specific error message>
+
+Recommended actions:
+1. Check impact_profile YAML format in proposal.md
+2. Or use direct command `/devbooks:<skill>` to bypass Router
 ```
 
 ---
 
-## 路由规则（质量优先默认）
+## Routing Rules (Quality-First Default)
 
-### A) Proposal（提案阶段）
+### A) Proposal (Proposal Phase)
 
-触发信号：用户说“提案/为什么要改/范围/风险/坏味道重构/要不要做/先别写代码”等。
+Trigger signals: User says "proposal/why change/scope/risk/code smell refactoring/should we do it/don't write code yet" etc.
 
-默认路由：
-- `devbooks-proposal-author` → `(<change-root>/<change-id>/proposal.md)`（必须）
-- `devbooks-design-doc` → `(<change-root>/<change-id>/design.md)`（非小改动必须；只写 What/Constraints + AC-xxx）
-- `devbooks-implementation-plan` → `(<change-root>/<change-id>/tasks.md)`（必须；只从设计推导）
+Default routing:
+- `devbooks-proposal-author` -> `(<change-root>/<change-id>/proposal.md)` (required)
+- `devbooks-design-doc` -> `(<change-root>/<change-id>/design.md)` (required for non-trivial changes; only write What/Constraints + AC-xxx)
+- `devbooks-implementation-plan` -> `(<change-root>/<change-id>/tasks.md)` (required; derive from design only)
 
-按需追加（满足条件才加）：
-- **跨模块/影响不清晰**：`devbooks-impact-analysis`（建议写回 proposal Impact）
-- **风险/争议/取舍明显**：`devbooks-proposal-debate-workflow`（Author/Challenger/Judge，对辩后写回 Decision Log）
-- **对外行为/契约/数据不变量变化**：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + `design.md` Contract 章节
-  - 若需要"确定性创建 spec delta 文件/避免路径写错"：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
-- **模块边界/依赖方向/架构形态变化**：`devbooks-c4-map` → `(<truth-root>/architecture/c4.md)`
+On-demand additions (add only when conditions met):
+- **Cross-module/unclear impact**: `devbooks-impact-analysis` (recommend writing back to proposal Impact)
+- **Obvious risks/disputes/trade-offs**: `devbooks-proposal-debate-workflow` (Author/Challenger/Judge, write back Decision Log after debate)
+- **External behavior/contract/data invariant changes**: `devbooks-spec-contract` -> `(<change-root>/<change-id>/specs/**)` + `design.md` Contract section
+  - If need "deterministic spec delta file creation/avoid wrong paths": `change-spec-delta-scaffold.sh <change-id> <capability> ...`
+- **Module boundary/dependency direction/architecture changes**: `devbooks-c4-map` -> `(<truth-root>/architecture/c4.md)`
 
-硬约束提醒：
-- proposal 阶段禁止写实现代码；实现发生在 apply 阶段并以测试/闸门为完成判据。
-- 若需要“确定性落盘骨架/避免漏文件”：优先运行 `devbooks-delivery-workflow` 的脚本
+Hard constraint reminders:
+- Implementation code is prohibited in proposal phase; implementation happens in apply phase with tests/gates as completion criteria.
+- If need "deterministic scaffold/avoid missing files": prefer running `devbooks-delivery-workflow` scripts
   - `change-scaffold.sh <change-id> ...`
   - `change-check.sh <change-id> --mode proposal ...`
 
-### B) Apply（实现阶段：Test Owner / Coder）
+### B) Apply (Implementation Phase: Test Owner / Coder)
 
-触发信号：用户说“开始实现/跑测试/修复失败/按 tasks 做/让闸门全绿”等。
+Trigger signals: User says "start implementing/run tests/fix failures/follow tasks/make gates all green" etc.
 
-默认路由（强制角色隔离）：
-- Test Owner（独立对话/独立实例）：`devbooks-test-owner`
-  - 产物：`(<change-root>/<change-id>/verification.md)` + `tests/**`
-  - 先跑出 **Red** 基线，并记录证据（如 `(<change-root>/<change-id>/evidence/**)`）
-- Coder（独立对话/独立实例）：`devbooks-coder`
-  - 输入：`tasks.md` + 测试报错 + 代码库
-  - 禁止修改 `tests/**`
+Default routing (mandatory role isolation):
+- Test Owner (independent conversation/independent instance): `devbooks-test-owner`
+  - Artifacts: `(<change-root>/<change-id>/verification.md)` + `tests/**`
+  - Run **Red** baseline first, record evidence (e.g., `(<change-root>/<change-id>/evidence/**)`)
+- Coder (independent conversation/independent instance): `devbooks-coder`
+  - Input: `tasks.md` + test errors + codebase
+  - Modifying `tests/**` is prohibited
 
-apply 阶段的确定性检查（推荐）：
-- Test Owner：`change-check.sh <change-id> --mode apply --role test-owner ...`
-- Test Owner（证据落盘）：`change-evidence.sh <change-id> --label red-baseline -- <test-command>`
-- Coder：`change-check.sh <change-id> --mode apply --role coder ...`（会额外检查 git diff 下 `tests/**` 未被修改）
+Apply phase deterministic checks (recommended):
+- Test Owner: `change-check.sh <change-id> --mode apply --role test-owner ...`
+- Test Owner (evidence recording): `change-evidence.sh <change-id> --label red-baseline -- <test-command>`
+- Coder: `change-check.sh <change-id> --mode apply --role coder ...` (additionally checks git diff that `tests/**` was not modified)
 
-LSC（大规模同质化修改）建议：
-- 先用 `change-codemod-scaffold.sh <change-id> --name <codemod-name> ...` 生成 codemod 脚本骨架，再用脚本批量变更并记录 evidence
+LSC (Large Scale Changes) recommendations:
+- First use `change-codemod-scaffold.sh <change-id> --name <codemod-name> ...` to generate codemod script skeleton, then batch changes with script and record evidence
 
-### C) Review（评审阶段）
+### C) Review (Review Phase)
 
-触发信号：用户说“review/坏味道/可维护性/依赖风险/一致性”等。
+Trigger signals: User says "review/code smell/maintainability/dependency risk/consistency" etc.
 
-默认路由：
-- `devbooks-code-review`（输出可执行建议；不改业务结论、不改 tests）
+Default routing:
+- `devbooks-code-review` (output actionable suggestions; don't change business conclusions, don't change tests)
 
-### D) Archive（归档阶段）
+### D) Archive (Archive Phase)
 
-触发信号：用户说"归档/合并 specs/关账/收尾"等。
+Trigger signals: User says "archive/merge specs/close out/wrap up" etc.
 
-默认路由：
-- 若本次产生了 spec delta：`devbooks-spec-gardener`（先修剪 `<truth-root>/**` 再归档合并）
-- 若需要回写设计决策：`devbooks-design-backport`（按需）
+Default routing:
+- If spec deltas produced: `devbooks-spec-gardener` (prune `<truth-root>/**` before archive merge)
+- If design decisions need backporting: `devbooks-design-backport` (on demand)
 
-归档前的确定性检查（推荐）：
-- `change-check.sh <change-id> --mode strict ...`（要求：proposal 已 Approved、tasks 全勾选、trace matrix 无 TODO、结构守门决策已填写）
+Pre-archive deterministic checks (recommended):
+- `change-check.sh <change-id> --mode strict ...` (requires: proposal Approved, tasks all checked, trace matrix no TODO, structural gate decisions filled)
 
-### E) Prototype（原型模式）
+### E) Prototype (Prototype Mode)
 
-> 来源：《人月神话》第11章"未雨绸缪" — "第一个开发的系统并不合用...为舍弃而计划"
+> Source: "The Mythical Man-Month" Chapter 11 "Plan to Throw One Away" - "The first system developed is never fit for use...plan to throw one away"
 
-触发信号：用户说"先做原型/快速验证/spike/--prototype/扔掉式原型/Plan to Throw One Away"等。
+Trigger signals: User says "prototype first/quick validation/spike/--prototype/throwaway prototype/Plan to Throw One Away" etc.
 
-**原型模式适用场景**：
-- 技术方案不确定，需要快速验证可行性
-- 第一次做某类功能，预期会重写
-- 需要探索 API/库/框架的实际行为
+**Prototype mode applicable scenarios**:
+- Technical solution uncertain, need quick feasibility validation
+- First time building certain feature, expected to rewrite
+- Need to explore actual behavior of API/library/framework
 
-**默认路由（原型轨道约束）**：
+**Default routing (prototype track constraints)**:
 
-1. 创建原型骨架：
+1. Create prototype skeleton:
    - `change-scaffold.sh <change-id> --prototype ...`
-   - 产物：`(<change-root>/<change-id>/prototype/)`
+   - Artifact: `(<change-root>/<change-id>/prototype/)`
 
-2. Test Owner（独立对话）使用 `devbooks-test-owner --prototype`：
-   - 产物：`(<change-root>/<change-id>/prototype/characterization/)`
-   - 生成**表征测试**（记录实际行为）而非验收测试
-   - **不需要 Red 基线**——表征测试断言的是"现状"
+2. Test Owner (independent conversation) uses `devbooks-test-owner --prototype`:
+   - Artifact: `(<change-root>/<change-id>/prototype/characterization/)`
+   - Generate **characterization tests** (record actual behavior) not acceptance tests
+   - **No Red baseline needed** - characterization tests assert "current state"
 
-3. Coder（独立对话）使用 `devbooks-coder --prototype`：
-   - 输出路径：`(<change-root>/<change-id>/prototype/src/)`
-   - 允许绕过 lint/复杂度阈值
-   - **禁止直接落到仓库 `src/`**
+3. Coder (independent conversation) uses `devbooks-coder --prototype`:
+   - Output path: `(<change-root>/<change-id>/prototype/src/)`
+   - May bypass lint/complexity thresholds
+   - **Directly landing in repository `src/` is prohibited**
 
-**硬约束（必须遵守）**：
-- 原型代码与生产代码**物理隔离**（不同目录）
-- Test Owner 与 Coder 仍必须**独立对话/独立实例**（角色隔离不变）
-- 原型提升到生产需要**显式触发** `prototype-promote.sh <change-id>`
+**Hard constraints (must follow)**:
+- Prototype code and production code **physically isolated** (different directories)
+- Test Owner and Coder still must be **independent conversations/independent instances** (role isolation unchanged)
+- Prototype promotion to production requires **explicit trigger** `prototype-promote.sh <change-id>`
 
-**原型提升到生产的前置条件**：
-1. 创建生产级 `design.md`（从原型学习中提炼 What/Constraints/AC-xxx）
-2. Test Owner 产出验收测试 `verification.md`（替代表征测试）
-3. 完成 `prototype/PROTOTYPE.md` 中的提升检查清单
-4. 运行 `prototype-promote.sh <change-id>` 并通过所有闸门
+**Prerequisites for prototype promotion to production**:
+1. Create production-grade `design.md` (extract What/Constraints/AC-xxx from prototype learnings)
+2. Test Owner produces acceptance tests `verification.md` (replacing characterization tests)
+3. Complete promotion checklist in `prototype/PROTOTYPE.md`
+4. Run `prototype-promote.sh <change-id>` and pass all gates
 
-**原型丢弃流程**：
-1. 记录学习到的关键洞察到 `proposal.md` 的 Decision Log
-2. 删除 `prototype/` 目录
+**Prototype discard flow**:
+1. Record key insights learned to proposal.md Decision Log
+2. Delete `prototype/` directory
 
-## DevBooks 命令适配
+## DevBooks Command Adaptation
 
-DevBooks 使用 `/devbooks:proposal`、`/devbooks:apply`、`/devbooks:archive` 作为入口。
-按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。
-
----
-
-## 上下文感知
-
-本 Skill 在执行前自动检测上下文，选择合适的路由策略。
-
-检测规则参考：`skills/_shared/context-detection-template.md`
-
-### 检测流程
-
-1. 检测变更包是否存在
-2. 检测已有产物（proposal/design/tasks/verification）
-3. 推断当前阶段（proposal/apply/archive）
-4. 根据阶段选择默认路由
-
-### 本 Skill 支持的模式
-
-| 模式 | 触发条件 | 行为 |
-|------|----------|------|
-| **新变更** | 变更包不存在或为空 | 路由到 proposal 阶段，建议创建 proposal.md |
-| **进行中** | 变更包存在，有部分产物 | 根据缺失产物推荐下一步 |
-| **待归档** | 闸门通过，`evidence/green-final/` 存在 | 路由到 archive 阶段 |
-
-### 检测输出示例
-
-```
-检测结果：
-- 变更包状态：存在
-- 已有产物：proposal.md ✓, design.md ✓, tasks.md ✓, verification.md ✗
-- 当前阶段：apply
-- 建议路由：devbooks-test-owner（先建立 Red 基线）
-```
+DevBooks uses `/devbooks:proposal`, `/devbooks:apply`, `/devbooks:archive` as entry points.
+Route according to A/B/C/D above, artifact paths based on `<truth-root>/<change-root>` mappings from project signpost.
 
 ---
 
-## MCP 增强
+## Context Awareness
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
+This Skill automatically detects context before execution and selects appropriate routing strategy.
 
-MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+Detection rules reference: `skills/_shared/context-detection-template.md`
 
-### 依赖的 MCP 服务
+### Detection Flow
 
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+1. Detect if change package exists
+2. Detect existing artifacts (proposal/design/tasks/verification)
+3. Infer current phase (proposal/apply/archive)
+4. Select default routing based on phase
 
-### 检测流程
+### Modes Supported by This Skill
 
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 在路由建议中标注"图基能力已激活"
-3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议运行 /devbooks:index
+| Mode | Trigger Condition | Behavior |
+|------|-------------------|----------|
+| **New change** | Change package doesn't exist or empty | Route to proposal phase, suggest creating proposal.md |
+| **In progress** | Change package exists, has partial artifacts | Recommend next step based on missing artifacts |
+| **Ready to archive** | Gates passed, `evidence/green-final/` exists | Route to archive phase |
 
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 影响分析推荐 | 使用 CKB 精确分析 | 使用 Grep 文本搜索 |
-| 代码导航 | 符号级跳转可用 | 文件级搜索 |
-| 热点检测 | CKB 实时分析 | 不可用 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
+### Detection Output Example
 
 ```
-⚠️ CKB 索引未激活，图基能力（影响分析、调用图等）将降级。
-建议运行 /devbooks:index 生成索引以启用完整功能。
+Detection Result:
+- Change package status: exists
+- Existing artifacts: proposal.md OK, design.md OK, tasks.md OK, verification.md missing
+- Current phase: apply
+- Recommended routing: devbooks-test-owner (establish Red baseline first)
 ```
 
+---
+
+## MCP Enhancement
+
+This Skill supports MCP runtime enhancement, automatically detecting and enabling advanced features.
+
+MCP enhancement rules reference: `skills/_shared/mcp-enhancement-template.md`
+
+### Dependent MCP Services
+
+| Service | Purpose | Timeout |
+|---------|---------|---------|
+| `mcp__ckb__getStatus` | Detect CKB index availability | 2s |
+
+### Detection Flow
+
+1. Call `mcp__ckb__getStatus` (2s timeout)
+2. If CKB available -> Mark "graph-based capabilities activated" in routing suggestions
+3. If timeout or failure -> Mark "graph-based capabilities degraded" in routing suggestions, suggest running /devbooks:index
+
+### Enhanced Mode vs Basic Mode
+
+| Feature | Enhanced Mode | Basic Mode |
+|---------|---------------|------------|
+| Impact analysis recommendation | Use CKB precise analysis | Use Grep text search |
+| Code navigation | Symbol-level jump available | File-level search |
+| Hotspot detection | CKB real-time analysis | Unavailable |
+
+### Degradation Notice
+
+When MCP unavailable, output the following notice:
+
+```
+Warning: CKB index not activated, graph-based capabilities (impact analysis, call graph, etc.) will be degraded.
+Recommend running /devbooks:index to generate index for full functionality.
+```

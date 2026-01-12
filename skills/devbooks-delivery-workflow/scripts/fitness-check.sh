@@ -1,87 +1,87 @@
 #!/bin/bash
 # skills/devbooks-delivery-workflow/scripts/fitness-check.sh
-# 架构适应度检查脚本
+# Architecture Fitness Check Script
 #
-# 执行架构适应度函数检查，验证代码是否符合架构规则。
+# Executes architecture fitness function checks to verify code conforms to architectural rules.
 #
-# 用法：
-#   ./fitness-check.sh [选项]
+# Usage:
+#   ./fitness-check.sh [options]
 #   ./fitness-check.sh --help
 #
-# 选项：
-#   --mode MODE         检查模式：warn（警告）| error（阻断）
-#   --rules FILE        规则文件路径
-#   --project-root DIR  项目根目录
-#   --file FILE         检查单个文件（用于测试）
+# Options:
+#   --mode MODE         Check mode: warn (warning) | error (blocking)
+#   --rules FILE        Rules file path
+#   --project-root DIR  Project root directory
+#   --file FILE         Check a single file (for testing)
 #
-# 退出码：
-#   0 - 检查通过（或 warn 模式下有警告）
-#   1 - 检查失败（error 模式下有违规）
-#   2 - 用法错误
+# Exit codes:
+#   0 - Check passed (or warnings in warn mode)
+#   1 - Check failed (violations in error mode)
+#   2 - Usage error
 
 set -euo pipefail
 
-# 版本
+# Version
 VERSION="1.0.0"
 
-# 默认值
+# Defaults
 mode="warn"
 rules_file=""
 project_root="."
 single_file=""
 
-# 颜色输出
+# Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# 计数器
+# Counters
 errors=0
 warnings=0
 
-# 显示帮助
+# Show help
 show_help() {
     cat << 'EOF'
-架构适应度检查脚本 (fitness-check.sh)
+Architecture Fitness Check Script (fitness-check.sh)
 
-用法：
-  ./fitness-check.sh [选项]
+Usage:
+  ./fitness-check.sh [options]
 
-选项：
-  --mode MODE         检查模式：warn（仅警告）| error（阻断）
-  --rules FILE        规则文件路径（默认: specs/architecture/fitness-rules.md）
-  --project-root DIR  项目根目录，默认为当前目录
-  --file FILE         检查单个文件（用于测试）
-  --help, -h          显示此帮助信息
-  --version, -v       显示版本信息
+Options:
+  --mode MODE         Check mode: warn (warning only) | error (blocking)
+  --rules FILE        Rules file path (default: specs/architecture/fitness-rules.md)
+  --project-root DIR  Project root directory, default is current directory
+  --file FILE         Check a single file (for testing)
+  --help, -h          Show this help message
+  --version, -v       Show version information
 
-支持的规则类型：
-  FR-001: 分层架构检查（Controller → Service → Repository）
-  FR-002: 循环依赖检查（基础版）
-  FR-003: 敏感文件守护
+Supported rule types:
+  FR-001: Layered architecture check (Controller -> Service -> Repository)
+  FR-002: Circular dependency check (basic version)
+  FR-003: Sensitive file protection
 
-退出码：
-  0 - 检查通过（或 warn 模式下有警告）
-  1 - 检查失败（error 模式下有违规）
-  2 - 用法错误
+Exit codes:
+  0 - Check passed (or warnings in warn mode)
+  1 - Check failed (violations in error mode)
+  2 - Usage error
 
-示例：
-  ./fitness-check.sh                          # 默认检查
-  ./fitness-check.sh --mode error             # 严格模式
-  ./fitness-check.sh --rules custom-rules.md  # 自定义规则文件
-  ./fitness-check.sh --file src/test.js       # 检查单个文件
+Examples:
+  ./fitness-check.sh                          # Default check
+  ./fitness-check.sh --mode error             # Strict mode
+  ./fitness-check.sh --rules custom-rules.md  # Custom rules file
+  ./fitness-check.sh --file src/test.js       # Check a single file
 
 EOF
 }
 
-# 显示版本
+# Show version
 show_version() {
     echo "fitness-check.sh v${VERSION}"
 }
 
-# 日志函数
+# Log functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $*" >&2
 }
@@ -105,32 +105,32 @@ log_warn() {
 }
 
 # ============================================================================
-# FR-001: 分层架构检查
-# Controller 不应直接调用 Repository
+# FR-001: Layered Architecture Check
+# Controller should not call Repository directly
 # ============================================================================
 check_layered_architecture() {
-    log_info "FR-001: 检查分层架构..."
+    log_info "FR-001: Checking layered architecture..."
 
     local src_dir="${project_root}/src"
     local controllers_dir="${src_dir}/controllers"
 
     if [[ ! -d "$controllers_dir" ]]; then
-        # 尝试其他常见路径
+        # Try other common paths
         controllers_dir="${src_dir}/controller"
         if [[ ! -d "$controllers_dir" ]]; then
-            log_info "  未找到 controllers 目录，跳过"
+            log_info "  No controllers directory found, skipping"
             return 0
         fi
     fi
 
     local violations=""
 
-    # 查找 Controller 中直接调用 Repository 的代码
-    # 模式: Repository.xxx 或 import ... from '...repository'
+    # Find Controller code that directly calls Repository
+    # Pattern: Repository.xxx or import ... from '...repository'
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
 
-        # 检查直接调用 Repository 方法
+        # Check direct Repository method calls
         local matches
         matches=$(grep -nE "Repository\.(find|save|delete|update|create|get)|new [A-Z][a-zA-Z]*Repository" "$file" 2>/dev/null || true)
 
@@ -140,36 +140,36 @@ check_layered_architecture() {
     done < <(find "$controllers_dir" -type f \( -name "*.ts" -o -name "*.js" \) 2>/dev/null)
 
     if [[ -n "$violations" ]]; then
-        log_fail "FR-001: 分层架构违规 - Controller 直接访问 Repository"
-        echo -e "  违规详情:\n$violations" >&2
+        log_fail "FR-001: Layered architecture violation - Controller directly accesses Repository"
+        echo -e "  Violation details:\n$violations" >&2
         return 1
     fi
 
-    log_pass "FR-001: 分层架构检查通过"
+    log_pass "FR-001: Layered architecture check passed"
     return 0
 }
 
 # ============================================================================
-# FR-002: 循环依赖检查（基础版）
-# 检测明显的循环 import
+# FR-002: Circular Dependency Check (basic version)
+# Detect obvious circular imports
 # ============================================================================
 check_circular_dependencies() {
-    log_info "FR-002: 检查循环依赖..."
+    log_info "FR-002: Checking circular dependencies..."
 
     local src_dir="${project_root}/src"
 
     if [[ ! -d "$src_dir" ]]; then
-        log_info "  未找到 src 目录，跳过"
+        log_info "  No src directory found, skipping"
         return 0
     fi
 
-    # 基础检查：同一目录下的互相引用
-    # 这是一个简化版本，完整检测需要更复杂的图分析
+    # Basic check: mutual references within the same directory
+    # This is a simplified version, full detection requires more complex graph analysis
 
     local circular_count=0
 
-    # 查找可能的循环引用模式
-    # 例如: a.ts import from './b' 且 b.ts import from './a'
+    # Find potential circular reference patterns
+    # Example: a.ts import from './b' and b.ts import from './a'
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
 
@@ -178,7 +178,7 @@ check_circular_dependencies() {
         local base
         base=$(basename "$file" | sed 's/\.\(ts\|js\|tsx\|jsx\)$//')
 
-        # 获取该文件的相对导入
+        # Get relative imports from this file
         local imports
         imports=$(grep -oE "from ['\"]\.\/[a-zA-Z0-9_-]+['\"]" "$file" 2>/dev/null | sed "s/from ['\"]\.\\///g; s/['\"]//g" || true)
 
@@ -187,31 +187,31 @@ check_circular_dependencies() {
             [[ ! -f "$imported_file" ]] && imported_file="${dir}/${imported}.js"
             [[ ! -f "$imported_file" ]] && continue
 
-            # 检查被导入的文件是否反向导入
+            # Check if imported file imports back
             if grep -qE "from ['\"]\./${base}['\"]" "$imported_file" 2>/dev/null; then
-                log_warn "FR-002: 可能的循环依赖: ${file} <-> ${imported_file}"
+                log_warn "FR-002: Possible circular dependency: ${file} <-> ${imported_file}"
                 circular_count=$((circular_count + 1))
             fi
         done
     done < <(find "$src_dir" -type f \( -name "*.ts" -o -name "*.js" \) 2>/dev/null | head -100)
 
     if [[ $circular_count -gt 0 ]]; then
-        log_warn "FR-002: 检测到 ${circular_count} 处可能的循环依赖"
-        return 0  # 只警告，不阻断
+        log_warn "FR-002: Detected ${circular_count} possible circular dependencies"
+        return 0  # Only warn, do not block
     fi
 
-    log_pass "FR-002: 循环依赖检查通过"
+    log_pass "FR-002: Circular dependency check passed"
     return 0
 }
 
 # ============================================================================
-# FR-003: 敏感文件守护
-# 防止敏感文件被意外修改或提交
+# FR-003: Sensitive File Protection
+# Prevent sensitive files from being accidentally modified or committed
 # ============================================================================
 check_sensitive_files() {
-    log_info "FR-003: 检查敏感文件..."
+    log_info "FR-003: Checking sensitive files..."
 
-    # 敏感文件模式
+    # Sensitive file patterns
     local sensitive_patterns=(
         ".env"
         ".env.local"
@@ -227,18 +227,18 @@ check_sensitive_files() {
     local violations=0
 
     for pattern in "${sensitive_patterns[@]}"; do
-        # 检查是否有敏感文件被跟踪
+        # Check if sensitive files are being tracked
         if command -v git >/dev/null 2>&1 && git -C "$project_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
             local tracked
             tracked=$(git -C "$project_root" ls-files "$pattern" 2>/dev/null || true)
             if [[ -n "$tracked" ]]; then
-                log_fail "FR-003: 敏感文件被 Git 跟踪: ${tracked}"
+                log_fail "FR-003: Sensitive file tracked by Git: ${tracked}"
                 violations=$((violations + 1))
             fi
         fi
     done
 
-    # 检查 .gitignore 是否包含敏感模式
+    # Check if .gitignore contains sensitive patterns
     local gitignore="${project_root}/.gitignore"
     if [[ -f "$gitignore" ]]; then
         local missing_patterns=()
@@ -249,12 +249,12 @@ check_sensitive_files() {
         done
 
         if [[ ${#missing_patterns[@]} -gt 0 ]]; then
-            log_warn "FR-003: .gitignore 建议添加敏感文件模式: ${missing_patterns[*]}"
+            log_warn "FR-003: .gitignore should add sensitive file patterns: ${missing_patterns[*]}"
         fi
     fi
 
     if [[ $violations -eq 0 ]]; then
-        log_pass "FR-003: 敏感文件检查通过"
+        log_pass "FR-003: Sensitive file check passed"
         return 0
     fi
 
@@ -262,38 +262,38 @@ check_sensitive_files() {
 }
 
 # ============================================================================
-# 检查单个文件（用于测试）
+# Check a single file (for testing)
 # ============================================================================
 check_single_file() {
     local file="$1"
 
-    log_info "检查文件: $file"
+    log_info "Checking file: $file"
 
     if [[ ! -f "$file" ]]; then
-        log_fail "文件不存在: $file"
+        log_fail "File does not exist: $file"
         return 1
     fi
 
-    # FR-001: 分层架构检查
+    # FR-001: Layered architecture check
     if [[ "$file" =~ controller ]]; then
         local matches
         matches=$(grep -nE "Repository\.(find|save|delete|update|create|get)" "$file" 2>/dev/null || true)
         if [[ -n "$matches" ]]; then
-            log_fail "FR-001: Controller 直接访问 Repository"
+            log_fail "FR-001: Controller directly accesses Repository"
             echo "  $matches" >&2
             return 1
         fi
     fi
 
-    log_pass "文件检查通过: $file"
+    log_pass "File check passed: $file"
     return 0
 }
 
 # ============================================================================
-# 主函数
+# Main function
 # ============================================================================
 main() {
-    # 解析参数
+    # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --help|-h)
@@ -331,7 +331,7 @@ main() {
         esac
     done
 
-    # 验证模式
+    # Validate mode
     case "$mode" in
         warn|error) ;;
         *)
@@ -341,47 +341,47 @@ main() {
     esac
 
     echo "=========================================="
-    echo "架构适应度检查 (fitness-check.sh)"
-    echo "模式: $mode"
-    echo "项目: $project_root"
+    echo "Architecture Fitness Check (fitness-check.sh)"
+    echo "Mode: $mode"
+    echo "Project: $project_root"
     echo "=========================================="
     echo ""
 
-    # 单文件检查模式
+    # Single file check mode
     if [[ -n "$single_file" ]]; then
         check_single_file "$single_file"
         exit $?
     fi
 
-    # 运行所有检查
+    # Run all checks
     check_layered_architecture || true
     check_circular_dependencies || true
     check_sensitive_files || true
 
-    # 输出总结
+    # Output summary
     echo ""
     echo "=========================================="
-    echo "检查完成"
-    echo "  错误: $errors"
-    echo "  警告: $warnings"
+    echo "Check Complete"
+    echo "  Errors: $errors"
+    echo "  Warnings: $warnings"
     echo "=========================================="
 
     if [[ $errors -gt 0 ]]; then
         echo ""
-        log_fail "检查失败: ${errors} 个错误"
+        log_fail "Check failed: ${errors} error(s)"
         exit 1
     fi
 
     if [[ $warnings -gt 0 ]]; then
         echo ""
-        log_warn "检查通过: ${warnings} 个警告"
+        log_warn "Check passed: ${warnings} warning(s)"
         exit 0
     fi
 
     echo ""
-    log_pass "检查通过: 无违规"
+    log_pass "Check passed: no violations"
     exit 0
 }
 
-# 运行主函数
+# Run main function
 main "$@"

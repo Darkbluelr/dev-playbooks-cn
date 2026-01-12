@@ -4,16 +4,16 @@ skill: devbooks-proposal-author
 
 # /devbooks:proposal
 
-触发 Skill：`devbooks-proposal-author`
+Triggers Skill: `devbooks-proposal-author`
 
-## 用途
+## Purpose
 
-撰写变更提案（proposal.md），作为后续 Design/Spec/Plan 的入口。对设计性决策会呈现选项给用户选择。
+Write change proposal (proposal.md), serving as the entry point for subsequent Design/Spec/Plan. Presents options to user for design decisions.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 启动新的变更/功能开发
-- 需要分析为什么要改、改动范围、影响面
-- 坏味道重构需要立项时
+- Starting new change/feature development
+- Need to analyze why to change, scope of change, impact area
+- When code smell refactoring needs to be initiated
 
-请点名使用 `devbooks-proposal-author` 执行相应任务。
+Please invoke `devbooks-proposal-author` to execute the corresponding task.

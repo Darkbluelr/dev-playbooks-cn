@@ -1,59 +1,59 @@
 #!/bin/bash
 # skills/devbooks-delivery-workflow/scripts/spec-preview.sh
-# 规格冲突预检脚本
+# Spec Conflict Pre-check Script
 #
-# 读取变更包的 spec delta，检查暂存层中的冲突。
+# Reads the spec delta from a change package and checks for conflicts in the staging layer.
 #
-# 用法：
-#   ./spec-preview.sh <change-id> [选项]
+# Usage:
+#   ./spec-preview.sh <change-id> [options]
 #   ./spec-preview.sh --help
 #
-# 退出码：
-#   0 - 无冲突
-#   1 - 检测到冲突
-#   2 - 用法错误
+# Exit codes:
+#   0 - No conflicts
+#   1 - Conflicts detected
+#   2 - Usage error
 
 set -euo pipefail
 
 VERSION="1.0.0"
 
-# 默认值
+# Defaults
 project_root="."
 change_root="changes"
 truth_root="specs"
 
-# 颜色输出
+# Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# 显示帮助
+# Show help
 show_help() {
     cat << 'EOF'
-规格冲突预检脚本 (spec-preview.sh)
+Spec Conflict Pre-check Script (spec-preview.sh)
 
-用法：
-  ./spec-preview.sh <change-id> [选项]
+Usage:
+  ./spec-preview.sh <change-id> [options]
 
-选项：
-  --project-root DIR  项目根目录，默认为当前目录
-  --change-root DIR   变更包目录，默认为 changes
-  --truth-root DIR    真理源目录，默认为 specs
-  --help, -h          显示此帮助信息
-  --version, -v       显示版本信息
+Options:
+  --project-root DIR  Project root directory, default is current directory
+  --change-root DIR   Change package directory, default is changes
+  --truth-root DIR    Truth source directory, default is specs
+  --help, -h          Show this help message
+  --version, -v       Show version information
 
-冲突检测：
-  1. 文件级冲突：同一目标文件被多个变更包修改
-  2. 内容级冲突：同一 REQ-xxx 被修改
+Conflict detection:
+  1. File-level conflicts: Same target file modified by multiple change packages
+  2. Content-level conflicts: Same REQ-xxx being modified
 
-退出码：
-  0 - 无冲突
-  1 - 检测到冲突
-  2 - 用法错误
+Exit codes:
+  0 - No conflicts
+  1 - Conflicts detected
+  2 - Usage error
 
-示例：
+Examples:
   ./spec-preview.sh my-feature
   ./spec-preview.sh my-feature --change-root dev-playbooks/changes
 
@@ -80,11 +80,11 @@ log_pass() {
     echo -e "${GREEN}[PASS]${NC} $*"
 }
 
-# 主函数
+# Main function
 main() {
     local change_id=""
 
-    # 解析参数
+    # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --help|-h)
@@ -108,7 +108,7 @@ main() {
                 shift 2
                 ;;
             -*)
-                log_error "未知选项: $1"
+                log_error "Unknown option: $1"
                 exit 2
                 ;;
             *)
@@ -119,28 +119,28 @@ main() {
     done
 
     if [[ -z "$change_id" ]]; then
-        log_error "缺少 change-id"
+        log_error "Missing change-id"
         exit 2
     fi
 
-    # 构建路径
+    # Build paths
     local change_dir="${project_root}/${change_root}/${change_id}"
     local staged_dir="${project_root}/${truth_root}/_staged"
     local specs_delta_dir="${change_dir}/specs"
 
-    log_info "预检变更包: ${change_id}"
-    log_info "  变更目录: ${change_dir}"
-    log_info "  暂存目录: ${staged_dir}"
+    log_info "Pre-checking change package: ${change_id}"
+    log_info "  Change directory: ${change_dir}"
+    log_info "  Staging directory: ${staged_dir}"
 
-    # 检查变更包存在
+    # Check change package exists
     if [[ ! -d "$change_dir" ]]; then
-        log_error "变更包不存在: ${change_dir}"
+        log_error "Change package does not exist: ${change_dir}"
         exit 2
     fi
 
-    # 检查是否有 spec delta
+    # Check if there is spec delta
     if [[ ! -d "$specs_delta_dir" ]]; then
-        log_info "无 spec delta，跳过预检"
+        log_info "No spec delta, skipping pre-check"
         exit 0
     fi
 
@@ -148,8 +148,8 @@ main() {
     local file_conflicts=""
     local req_conflicts=""
 
-    # 文件级冲突检测
-    log_info "检查文件级冲突..."
+    # File-level conflict detection
+    log_info "Checking file-level conflicts..."
     while IFS= read -r delta_file; do
         [[ -z "$delta_file" ]] && continue
 
@@ -162,8 +162,8 @@ main() {
         fi
     done < <(find "$specs_delta_dir" -type f -name "*.md" 2>/dev/null)
 
-    # 内容级冲突检测（REQ-xxx）
-    log_info "检查内容级冲突..."
+    # Content-level conflict detection (REQ-xxx)
+    log_info "Checking content-level conflicts..."
     local current_reqs
     current_reqs=$(grep -rhoE "REQ-[A-Z0-9]+-[0-9]+" "$specs_delta_dir" 2>/dev/null | sort -u || true)
 
@@ -178,25 +178,25 @@ main() {
         done <<< "$current_reqs"
     fi
 
-    # 输出结果
+    # Output results
     echo ""
     if [[ $conflicts -gt 0 ]]; then
-        log_error "检测到 ${conflicts} 个冲突"
+        log_error "Detected ${conflicts} conflict(s)"
 
         if [[ -n "$file_conflicts" ]]; then
-            echo -e "\n文件级冲突:"
+            echo -e "\nFile-level conflicts:"
             echo -e "$file_conflicts"
         fi
 
         if [[ -n "$req_conflicts" ]]; then
-            echo -e "\n内容级冲突 (REQ-xxx):"
+            echo -e "\nContent-level conflicts (REQ-xxx):"
             echo -e "$req_conflicts"
         fi
 
         exit 1
     fi
 
-    log_pass "无冲突，可以暂存"
+    log_pass "No conflicts, ready to stage"
     exit 0
 }
 

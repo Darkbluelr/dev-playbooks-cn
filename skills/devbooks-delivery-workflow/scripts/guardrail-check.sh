@@ -120,18 +120,18 @@ if [[ ! -f "$file" ]]; then
 fi
 
 # Check if guardrail section exists - if not, skip (guardrail review not applicable)
-if ! rg -n "^F\\) 结构质量守门记录|^## F\\) 结构质量守门" "$file" >/dev/null 2>&1; then
+if ! rg -n "^F\\) Structural Quality Gate Record|^## F\\) Structural Quality Gate" "$file" >/dev/null 2>&1; then
   echo "ok: guardrail section not present (not applicable for ${change_id})"
   exit 0
 fi
 
-decision_line=$(rg -n "^- 决策与授权：" "$file" || true)
+decision_line=$(rg -n "^- Decision and Authorization:" "$file" || true)
 if [[ -z "$decision_line" ]]; then
-  echo "error: guardrail section exists but missing '- 决策与授权：' line in ${file}" >&2
+  echo "error: guardrail section exists but missing '- Decision and Authorization:' line in ${file}" >&2
   exit 1
 fi
 
-value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- 决策与授权： *//')"
+value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- Decision and Authorization: *//')"
 
 if [[ -z "$value" || "$value" == "<"* || "$value" == "TBD"* ]]; then
   echo "error: unresolved guardrail decision in ${file}" >&2
@@ -141,16 +141,16 @@ fi
 echo "ok: guardrail decision present for ${change_id}"
 
 # =============================================================================
-# Role Permission Checks (借鉴 VS Code 的角色权限分离机制)
+# Role Permission Checks (inspired by VS Code role permission separation)
 # =============================================================================
 
-# 定义角色禁止修改的文件模式
+# Define file patterns forbidden for each role
 declare -A ROLE_FORBIDDEN_PATTERNS
 ROLE_FORBIDDEN_PATTERNS[coder]="tests/|test/|\.test\.|\.spec\.|__tests__|verification\.md"
-ROLE_FORBIDDEN_PATTERNS[test-owner]=""  # test-owner 可以修改测试文件
-ROLE_FORBIDDEN_PATTERNS[reviewer]=".*"  # reviewer 不应修改任何文件
+ROLE_FORBIDDEN_PATTERNS[test-owner]=""  # test-owner can modify test files
+ROLE_FORBIDDEN_PATTERNS[reviewer]=".*"  # reviewer should not modify any files
 
-# 定义所有角色都禁止修改的敏感文件（类似 VS Code 的 engineering system 保护）
+# Define sensitive files forbidden for all roles (similar to VS Code engineering system protection)
 SENSITIVE_PATTERNS="\.devbooks/|\.github/workflows/|build/|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock"
 
 check_role_permissions() {
@@ -163,13 +163,13 @@ check_role_permissions() {
 
   echo "info: checking role permissions for '${role}'..."
 
-  # 获取变更的文件列表（从 git diff 或变更包记录）
+  # Get list of changed files (from git diff or change package record)
   local changed_files=""
   if [[ -d "${project_root}/.git" ]]; then
     changed_files=$(cd "$project_root" && git diff --name-only HEAD~1 2>/dev/null || true)
   fi
 
-  # 如果没有 git，尝试从 proposal.md 的 Impact 部分读取
+  # If no git, try reading from proposal.md Impact section
   if [[ -z "$changed_files" && -f "${change_path}/proposal.md" ]]; then
     changed_files=$(grep -A 100 "^## Impact" "${change_path}/proposal.md" | grep -E "^\s*-\s+\`" | sed 's/.*`\([^`]*\)`.*/\1/' || true)
   fi
@@ -185,14 +185,14 @@ check_role_permissions() {
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
 
-    # 检查角色特定的禁止模式
+    # Check role-specific forbidden patterns
     if [[ -n "$forbidden" ]] && echo "$file" | grep -qE "$forbidden"; then
       violations="${violations}\n  - ${file} (forbidden for role '${role}')"
     fi
 
-    # 检查敏感文件（所有角色都禁止，除非明确声明）
+    # Check sensitive files (forbidden for all roles unless explicitly declared)
     if echo "$file" | grep -qE "$SENSITIVE_PATTERNS"; then
-      # 检查 proposal.md 是否有 engineering-system-change 标签
+      # Check if proposal.md has engineering-system-change tag
       if ! grep -q "engineering-system-change" "${change_path}/proposal.md" 2>/dev/null; then
         violations="${violations}\n  - ${file} (sensitive file requires 'engineering-system-change' tag in proposal.md)"
       fi
@@ -209,7 +209,7 @@ check_role_permissions() {
 }
 
 # =============================================================================
-# Lockfile Idempotency Check (借鉴 VS Code 的 no-package-lock-changes.yml)
+# Lockfile Idempotency Check (inspired by VS Code no-package-lock-changes.yml)
 # =============================================================================
 
 check_lockfile_changes() {
@@ -229,8 +229,8 @@ check_lockfile_changes() {
   fi
 
   if [[ -n "$changed_lockfiles" ]]; then
-    # 检查 proposal.md 是否明确声明了依赖变更
-    if ! grep -qE "(dependency|依赖|deps|升级|upgrade|update.*package)" "${change_path}/proposal.md" 2>/dev/null; then
+    # Check if proposal.md explicitly declares dependency changes
+    if ! grep -qE "(dependency|deps|upgrade|update.*package)" "${change_path}/proposal.md" 2>/dev/null; then
       echo "error: lockfile changes detected (${changed_lockfiles}) but proposal.md does not declare dependency changes" >&2
       echo "hint: add dependency change description to proposal.md or use '--check-lockfile=false'" >&2
       return 1
@@ -258,7 +258,7 @@ check_engineering_changes() {
   fi
 
   if [[ -n "$eng_changes" ]]; then
-    # 检查 proposal.md 是否有 engineering-system-change 标签
+    # Check if proposal.md has engineering-system-change tag
     if ! grep -q "engineering-system-change" "${change_path}/proposal.md" 2>/dev/null; then
       echo "error: engineering system changes detected but proposal.md missing 'engineering-system-change' tag:" >&2
       echo "$eng_changes" | sed 's/^/  - /' >&2
@@ -271,8 +271,8 @@ check_engineering_changes() {
 }
 
 # =============================================================================
-# Layering Constraints Check (依赖卫士 - Dependency Guard)
-# 防止依赖方向违规（上层不可直接依赖下层实现细节）
+# Layering Constraints Check (Dependency Guard)
+# Prevent dependency direction violations (upper layer cannot directly depend on lower layer implementation details)
 # =============================================================================
 
 check_layering_constraints() {
@@ -281,7 +281,7 @@ check_layering_constraints() {
 
   echo "info: checking layering constraints (dependency guard)..."
 
-  # 如果没有 truth_root 或约束文件不存在，跳过
+  # Skip if no truth_root or constraints file doesn't exist
   if [[ -z "$truth_root" ]]; then
     echo "warn: --truth-root not specified, skipping layering check"
     return 0
@@ -292,7 +292,7 @@ check_layering_constraints() {
     return 0
   fi
 
-  # 获取变更的文件
+  # Get changed files
   local changed_files=""
   if [[ -d "${project_root}/.git" ]]; then
     changed_files=$(cd "$project_root" && git diff --name-only HEAD~1 2>/dev/null || true)
@@ -305,10 +305,10 @@ check_layering_constraints() {
 
   local violations=""
 
-  # 解析约束文件中的分层规则
-  # 格式：| base | src/base/ | ... | （无） | platform, domain, ... |
+  # Parse layering rules from constraints file
+  # Format: | base | src/base/ | ... | (none) | platform, domain, ... |
 
-  # 常见的分层违规检查
+  # Common layering violation checks
   while IFS= read -r file; do
     [[ -z "$file" ]] && continue
     [[ ! "$file" =~ \.(ts|tsx|js|jsx|py|go|java|rs)$ ]] && continue
@@ -316,25 +316,25 @@ check_layering_constraints() {
     local file_path="${project_root}/${file}"
     [[ ! -f "$file_path" ]] && continue
 
-    # 检查 base 层是否引用了 platform/domain/application/ui
+    # Check if base layer imports platform/domain/application/ui
     if [[ "$file" =~ ^src/base/ ]] || [[ "$file" =~ /base/ ]]; then
       if rg -q "from ['\"].*(platform|domain|application|app|ui)/" "$file_path" 2>/dev/null; then
         violations="${violations}\n  - ${file}: base layer imports upper layer"
       fi
     fi
 
-    # 检查 common 层是否引用了 browser/node 特定代码
+    # Check if common layer imports browser/node specific code
     if [[ "$file" =~ /common/ ]]; then
       if rg -q "from ['\"].*(browser|node)/" "$file_path" 2>/dev/null; then
         violations="${violations}\n  - ${file}: common layer imports platform-specific code"
       fi
-      # 检查是否使用了 DOM API
+      # Check if using DOM API
       if rg -q "(document\.|window\.|navigator\.)" "$file_path" 2>/dev/null; then
         violations="${violations}\n  - ${file}: common layer uses DOM API"
       fi
     fi
 
-    # 检查 core 是否引用了 contrib
+    # Check if core imports contrib
     if [[ "$file" =~ /core/ ]] || [[ "$file" =~ /services/ ]]; then
       if rg -q "from ['\"].*contrib/" "$file_path" 2>/dev/null; then
         violations="${violations}\n  - ${file}: core imports contrib (violates extension point design)"
@@ -354,13 +354,13 @@ check_layering_constraints() {
 }
 
 # =============================================================================
-# Circular Dependency Check (循环依赖检测)
+# Circular Dependency Check
 # =============================================================================
 
 check_circular_dependencies() {
   echo "info: checking for circular dependencies..."
 
-  # 检查是否有 madge 工具可用
+  # Check if madge tool is available
   if command -v madge >/dev/null 2>&1; then
     local circular=""
     circular=$(cd "$project_root" && madge --circular --warning src/ 2>/dev/null | grep -E "^\s+[a-zA-Z]" || true)
@@ -371,10 +371,10 @@ check_circular_dependencies() {
       return 1
     fi
   else
-    # 降级：使用简单的 grep 检测常见的循环模式
+    # Fallback: use simple grep to detect common circular patterns
     echo "info: madge not available, using basic circular detection"
 
-    # 检查是否有文件同时被导入又导入同一个模块（简单启发式）
+    # Check if files both import each other (simple heuristic)
     if [[ -d "${project_root}/.git" ]]; then
       local changed_files
       changed_files=$(cd "$project_root" && git diff --name-only HEAD~1 2>/dev/null | grep -E '\.(ts|js|tsx|jsx)$' || true)
@@ -384,11 +384,11 @@ check_circular_dependencies() {
         local file_path="${project_root}/${file}"
         [[ ! -f "$file_path" ]] && continue
 
-        # 获取文件的 imports
+        # Get file's imports
         local imports
         imports=$(rg "^import .* from ['\"]\./" "$file_path" 2>/dev/null | sed "s/.*from ['\"]\\([^'\"]*\\)['\"].*/\\1/" || true)
 
-        # 检查这些被导入的文件是否又导入了当前文件
+        # Check if imported files import current file back
         local file_base
         file_base=$(basename "$file" | sed 's/\.[^.]*$//')
 
@@ -410,8 +410,8 @@ check_circular_dependencies() {
 }
 
 # =============================================================================
-# Hotspot Warning Check (热点警告)
-# 热点 = 高变更频率 × 高复杂度
+# Hotspot Warning Check
+# Hotspot = High change frequency x High complexity
 # =============================================================================
 
 check_hotspot_changes() {
@@ -420,13 +420,13 @@ check_hotspot_changes() {
 
   echo "info: checking if changes touch hotspots..."
 
-  # 如果有热点文件，从中读取热点列表
+  # If hotspots file exists, read hotspot list from it
   local hotspot_files=""
   if [[ -n "$truth_root" && -f "$hotspots_file" ]]; then
-    hotspot_files=$(grep -E "^\| " "$hotspots_file" | grep -v "文件\|File\|---" | awk -F'|' '{print $2}' | tr -d ' ' || true)
+    hotspot_files=$(grep -E "^\| " "$hotspots_file" | grep -v "File\|---" | awk -F'|' '{print $2}' | tr -d ' ' || true)
   fi
 
-  # 如果没有热点文件，尝试使用 git 历史计算
+  # If no hotspots file, try computing from git history
   if [[ -z "$hotspot_files" && -d "${project_root}/.git" ]]; then
     echo "info: no hotspots.md found, computing from git history (top 10 churn files)..."
     hotspot_files=$(cd "$project_root" && git log --oneline --name-only --since="30 days ago" 2>/dev/null | \
@@ -439,13 +439,13 @@ check_hotspot_changes() {
     return 0
   fi
 
-  # 获取变更的文件
+  # Get changed files
   local changed_files=""
   if [[ -d "${project_root}/.git" ]]; then
     changed_files=$(cd "$project_root" && git diff --name-only HEAD~1 2>/dev/null || true)
   fi
 
-  # 检查变更文件是否触及热点
+  # Check if changed files touch hotspots
   local hotspot_hits=""
   while IFS= read -r changed; do
     [[ -z "$changed" ]] && continue
@@ -455,9 +455,9 @@ check_hotspot_changes() {
   done <<< "$changed_files"
 
   if [[ -n "$hotspot_hits" ]]; then
-    echo -e "warn: changes touch high-risk hotspots (high churn × complexity):${hotspot_hits}" >&2
+    echo -e "warn: changes touch high-risk hotspots (high churn x complexity):${hotspot_hits}" >&2
     echo "hint: consider extra review and testing for these files" >&2
-    # 这是警告，不是错误，不阻止合并
+    # This is a warning, not an error, does not block merge
   fi
 
   echo "ok: hotspot check completed"
@@ -470,7 +470,7 @@ check_hotspot_changes() {
 
 exit_code=0
 
-# 角色权限检查
+# Role permission check
 if [[ -n "$role" ]]; then
   change_path=$(dirname "$file")
   if ! check_role_permissions "$role" "$change_path"; then
@@ -478,7 +478,7 @@ if [[ -n "$role" ]]; then
   fi
 fi
 
-# Lockfile 检查
+# Lockfile check
 if [[ "$check_lockfile" == "true" ]]; then
   change_path=$(dirname "$file")
   if ! check_lockfile_changes "$change_path"; then
@@ -486,7 +486,7 @@ if [[ "$check_lockfile" == "true" ]]; then
   fi
 fi
 
-# 工程系统变更检查
+# Engineering system change check
 if [[ "$check_engineering" == "true" ]]; then
   change_path=$(dirname "$file")
   if ! check_engineering_changes "$change_path"; then
@@ -494,7 +494,7 @@ if [[ "$check_engineering" == "true" ]]; then
   fi
 fi
 
-# 分层约束检查（依赖卫士）
+# Layering constraint check (Dependency Guard)
 if [[ "$check_layers" == "true" ]]; then
   change_path=$(dirname "$file")
   if ! check_layering_constraints "$change_path"; then
@@ -502,18 +502,18 @@ if [[ "$check_layers" == "true" ]]; then
   fi
 fi
 
-# 循环依赖检查
+# Circular dependency check
 if [[ "$check_cycles" == "true" ]]; then
   if ! check_circular_dependencies; then
     exit_code=1
   fi
 fi
 
-# 热点警告检查（警告不阻止，但记录）
+# Hotspot warning check (warning only, does not affect exit code)
 if [[ "$check_hotspots" == "true" ]]; then
   change_path=$(dirname "$file")
   check_hotspot_changes "$change_path"
-  # 热点只是警告，不影响 exit_code
+  # Hotspots are just warnings, do not affect exit_code
 fi
 
 exit $exit_code

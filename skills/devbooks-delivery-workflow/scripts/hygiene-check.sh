@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# hygiene-check.sh - 代码卫生检查脚本（借鉴 VS Code gulpfile.hygiene.ts）
+# hygiene-check.sh - Code hygiene check script (inspired by VS Code gulpfile.hygiene.ts)
 set -euo pipefail
 
 usage() {
@@ -79,12 +79,12 @@ done
 
 cd "$project_root"
 
-# 默认检查所有源文件
+# Default: check all source files
 if [[ ${#paths[@]} -eq 0 ]]; then
   paths=("src" "tests" "lib")
 fi
 
-# 结果收集
+# Result collection
 declare -a violations=()
 exit_code=0
 
@@ -209,7 +209,7 @@ check_test_only() {
 check_todo_issues() {
   echo "info: checking TODOs for issue references..."
 
-  # 查找没有 issue 引用的 TODO
+  # Find TODOs without issue reference
   local matches
   matches=$(rg -l 'TODO(?!\s*[:#]\s*\d+|.*#\d+|.*issue|.*ISSUE)' "${paths[@]}" --type ts --type js 2>/dev/null || true)
 
@@ -252,16 +252,16 @@ check_trailing_whitespace() {
 check_copyright() {
   echo "info: checking copyright headers..."
 
-  # 检查是否有 copyright 配置
+  # Check if copyright configuration exists
   local copyright_pattern=""
   if [[ -f ".copyrightrc" ]]; then
     copyright_pattern=$(cat .copyrightrc)
   elif [[ -f "LICENSE" ]]; then
-    # 尝试从 LICENSE 文件提取 copyright holder
+    # Try to extract copyright holder from LICENSE file
     local holder
     holder=$(grep -i "copyright" LICENSE 2>/dev/null | head -1 || true)
     if [[ -n "$holder" ]]; then
-      # 简化检查：只检查是否有 copyright 声明
+      # Simplified check: only check if copyright declaration exists
       copyright_pattern="Copyright"
     fi
   fi

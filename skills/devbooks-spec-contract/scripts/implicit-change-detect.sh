@@ -14,7 +14,7 @@ set -euo pipefail
 # - Configuration changes (*.env*, *.config.*, *.json, *.yaml)
 # - Build changes (Makefile, tsconfig.json, webpack.config.*, Dockerfile, etc.)
 #
-# Reference: 《人月神话》第7章"巴比伦塔" — 隐式变更危险
+# Reference: "The Mythical Man-Month" Chapter 7 "Why Did the Tower of Babel Fail?" - Implicit changes are dangerous
 # ============================================================================
 
 usage() {

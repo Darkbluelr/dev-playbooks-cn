@@ -4,16 +4,16 @@ skill: devbooks-design-backport
 
 # /devbooks:backport
 
-触发 Skill：`devbooks-design-backport`
+Triggers Skill: `devbooks-design-backport`
 
-## 用途
+## Purpose
 
-把实现过程中发现的新约束、冲突、缺口回写到 design.md，保持设计为黄金真理，并标注决策与影响。
+Write back newly discovered constraints, conflicts, gaps found during implementation to design.md, keeping design as the golden truth, with annotated decisions and impacts.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 实现中发现设计遗漏或冲突
-- 需要更新设计文档以反映实际
-- 保持设计与实现的一致性
+- Found design omissions or conflicts during implementation
+- Need to update design document to reflect reality
+- Maintain consistency between design and implementation
 
-请点名使用 `devbooks-design-backport` 执行相应任务。
+Please invoke `devbooks-design-backport` to execute the corresponding task.

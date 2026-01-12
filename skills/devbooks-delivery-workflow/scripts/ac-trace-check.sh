@@ -1,85 +1,85 @@
 #!/bin/bash
 # skills/devbooks-delivery-workflow/scripts/ac-trace-check.sh
-# AC-ID 追溯覆盖率检查脚本
+# AC-ID Traceability Coverage Check Script
 #
-# 检查 AC-ID 从设计到测试的追溯覆盖率。
+# Checks the traceability coverage of AC-IDs from design to tests.
 #
-# 用法：
-#   ./ac-trace-check.sh <change-id> [选项]
+# Usage:
+#   ./ac-trace-check.sh <change-id> [options]
 #   ./ac-trace-check.sh --help
 #
-# 选项：
-#   --threshold N       覆盖率阈值（默认 80）
-#   --output FORMAT     输出格式（text|json，默认 text）
-#   --project-root DIR  项目根目录
-#   --change-root DIR   变更包目录
+# Options:
+#   --threshold N       Coverage threshold (default 80)
+#   --output FORMAT     Output format (text|json, default text)
+#   --project-root DIR  Project root directory
+#   --change-root DIR   Change package directory
 #
-# 退出码：
-#   0 - 覆盖率达标
-#   1 - 覆盖率未达标
-#   2 - 用法错误
+# Exit codes:
+#   0 - Coverage meets threshold
+#   1 - Coverage below threshold
+#   2 - Usage error
 
 set -euo pipefail
 
-# 版本
+# Version
 VERSION="1.0.0"
 
-# 默认值
+# Defaults
 threshold=80
 output_format="text"
 project_root="."
 change_root="changes"
 
-# 颜色输出
+# Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# 显示帮助
+# Show help
 show_help() {
     cat << 'EOF'
-AC-ID 追溯覆盖率检查脚本 (ac-trace-check.sh)
+AC-ID Traceability Coverage Check Script (ac-trace-check.sh)
 
-用法：
-  ./ac-trace-check.sh <change-id> [选项]
+Usage:
+  ./ac-trace-check.sh <change-id> [options]
 
-选项：
-  --threshold N       覆盖率阈值，默认 80（百分比）
-  --output FORMAT     输出格式：text | json，默认 text
-  --project-root DIR  项目根目录，默认为当前目录
-  --change-root DIR   变更包目录，默认为 changes
-  --help, -h          显示此帮助信息
-  --version, -v       显示版本信息
+Options:
+  --threshold N       Coverage threshold, default 80 (percentage)
+  --output FORMAT     Output format: text | json, default text
+  --project-root DIR  Project root directory, default is current directory
+  --change-root DIR   Change package directory, default is changes
+  --help, -h          Show this help message
+  --version, -v       Show version information
 
-算法：
-  1. 从 design.md 提取所有 AC-xxx
-  2. 从 tasks.md 提取任务中引用的 AC-xxx
-  3. 从 tests/ 提取测试标记的 AC-xxx
-  4. 计算：覆盖率 = (已追溯 AC 数) / (总 AC 数) × 100%
-  5. 对比阈值，返回退出码
+Algorithm:
+  1. Extract all AC-xxx from design.md
+  2. Extract AC-xxx referenced in tasks.md
+  3. Extract AC-xxx marked in tests/
+  4. Calculate: Coverage = (traced AC count) / (total AC count) x 100%
+  5. Compare against threshold, return exit code
 
-退出码：
-  0 - 覆盖率达标
-  1 - 覆盖率未达标
-  2 - 用法错误
+Exit codes:
+  0 - Coverage meets threshold
+  1 - Coverage below threshold
+  2 - Usage error
 
-示例：
-  ./ac-trace-check.sh my-feature                     # 默认检查
-  ./ac-trace-check.sh my-feature --threshold 90     # 90% 阈值
-  ./ac-trace-check.sh my-feature --output json      # JSON 输出
+Examples:
+  ./ac-trace-check.sh my-feature                     # Default check
+  ./ac-trace-check.sh my-feature --threshold 90     # 90% threshold
+  ./ac-trace-check.sh my-feature --output json      # JSON output
   ./ac-trace-check.sh my-feature --change-root dev-playbooks/changes
 
 EOF
 }
 
-# 显示版本
+# Show version
 show_version() {
     echo "ac-trace-check.sh v${VERSION}"
 }
 
-# 日志函数
+# Log functions
 log_info() {
     [[ "$output_format" == "text" ]] && echo -e "${BLUE}[INFO]${NC} $*" >&2
 }
@@ -96,13 +96,13 @@ log_warn() {
     [[ "$output_format" == "text" ]] && echo -e "${YELLOW}[WARN]${NC} $*"
 }
 
-# 提取 AC-ID
+# Extract AC-IDs
 extract_ac_ids() {
     local file="$1"
     grep -oE "AC-[A-Z0-9]+" "$file" 2>/dev/null | sort -u || true
 }
 
-# 从目录提取 AC-ID
+# Extract AC-IDs from directory
 extract_ac_ids_from_dir() {
     local dir="$1"
     local pattern="${2:-*.test.*}"
@@ -111,13 +111,13 @@ extract_ac_ids_from_dir() {
     done | sort -u
 }
 
-# 计算覆盖率
+# Calculate coverage
 calculate_coverage() {
     local design_acs="$1"
     local tasks_acs="$2"
     local test_acs="$3"
 
-    # 获取 AC 列表
+    # Get AC lists
     local design_list=()
     local tasks_list=()
     local test_list=()
@@ -139,12 +139,12 @@ calculate_coverage() {
     local total=${#design_list[@]}
 
     if [[ $total -eq 0 ]]; then
-        # 没有 AC，算作 100% 覆盖
+        # No ACs, count as 100% coverage
         echo "100 0 0"
         return
     fi
 
-    # 计算覆盖的 AC
+    # Calculate covered ACs
     local covered=0
     for ac in "${design_list[@]}"; do
         local in_test=false
@@ -169,17 +169,17 @@ calculate_coverage() {
 
     echo "$rate $covered $total"
 
-    # 输出未覆盖列表到 stderr
+    # Output uncovered list to stderr
     if [[ ${#uncovered_list[@]} -gt 0 && "$output_format" == "text" ]]; then
         echo "uncovered: ${uncovered_list[*]}" >&2
     fi
 }
 
-# 主函数
+# Main function
 main() {
     local change_id=""
 
-    # 解析参数
+    # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --help|-h)
@@ -218,14 +218,14 @@ main() {
         esac
     done
 
-    # 验证参数
+    # Validate arguments
     if [[ -z "$change_id" ]]; then
         echo "error: missing change-id" >&2
         echo "Use --help for usage" >&2
         exit 2
     fi
 
-    # 构建路径
+    # Build paths
     local change_dir
     if [[ "$change_root" = /* ]]; then
         change_dir="${change_root}/${change_id}"
@@ -237,22 +237,22 @@ main() {
     local tasks_file="${change_dir}/tasks.md"
     local tests_dir="${project_root}/tests"
 
-    log_info "检查变更包: ${change_id}"
-    log_info "设计文件: ${design_file}"
-    log_info "任务文件: ${tasks_file}"
-    log_info "测试目录: ${tests_dir}"
+    log_info "Checking change package: ${change_id}"
+    log_info "Design file: ${design_file}"
+    log_info "Tasks file: ${tasks_file}"
+    log_info "Tests directory: ${tests_dir}"
 
-    # 检查文件存在
+    # Check file exists
     if [[ ! -f "$design_file" ]]; then
         if [[ "$output_format" == "json" ]]; then
             echo '{"error": "design.md not found", "coverage": 0}'
         else
-            log_fail "design.md 不存在: ${design_file}"
+            log_fail "design.md does not exist: ${design_file}"
         fi
         exit 1
     fi
 
-    # 提取 AC-ID
+    # Extract AC-IDs
     local design_acs tasks_acs test_acs
 
     design_acs=$(extract_ac_ids "$design_file")
@@ -266,15 +266,15 @@ main() {
         test_acs=$(extract_ac_ids_from_dir "$tests_dir")
     fi
 
-    # 计算覆盖率
+    # Calculate coverage
     local result
     result=$(calculate_coverage "$design_acs" "$tasks_acs" "$test_acs")
     read -r rate covered total <<< "$result"
 
-    # 输出结果
+    # Output results
     if [[ "$output_format" == "json" ]]; then
         local uncovered_json="[]"
-        # 重新计算未覆盖列表
+        # Recalculate uncovered list
         local uncovered_acs=""
         while IFS= read -r ac; do
             [[ -z "$ac" ]] && continue
@@ -300,25 +300,25 @@ main() {
 EOF
     else
         echo ""
-        echo "AC 追溯覆盖率报告"
-        echo "================"
-        echo "变更包: ${change_id}"
-        echo "总 AC 数: ${total}"
-        echo "已覆盖: ${covered}"
-        echo "覆盖率: ${rate}%"
-        echo "阈值: ${threshold}%"
+        echo "AC Traceability Coverage Report"
+        echo "================================"
+        echo "Change package: ${change_id}"
+        echo "Total ACs: ${total}"
+        echo "Covered: ${covered}"
+        echo "Coverage: ${rate}%"
+        echo "Threshold: ${threshold}%"
         echo ""
 
         if [[ $rate -ge $threshold ]]; then
-            log_pass "覆盖率 ${rate}% >= ${threshold}%，检查通过"
+            log_pass "Coverage ${rate}% >= ${threshold}%, check passed"
             exit 0
         else
-            log_fail "覆盖率 ${rate}% < ${threshold}%，检查失败"
+            log_fail "Coverage ${rate}% < ${threshold}%, check failed"
             exit 1
         fi
     fi
 
-    # JSON 模式下的退出码
+    # Exit code for JSON mode
     if [[ $rate -ge $threshold ]]; then
         exit 0
     else
@@ -326,5 +326,5 @@ EOF
     fi
 }
 
-# 运行主函数
+# Run main function
 main "$@"

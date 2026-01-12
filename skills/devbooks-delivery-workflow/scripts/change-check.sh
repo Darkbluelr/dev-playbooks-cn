@@ -144,7 +144,7 @@ contains_placeholder() {
   local file="$1"
   # Pattern includes intentional Chinese quotes for detecting placeholders
   # shellcheck disable=SC2140
-  if rg -n '<change-id>|<truth-root>|<change-root>|<一句话目标>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<填"无"|TODO\b' "$file" >/dev/null; then
+  if rg -n '<change-id>|<truth-root>|<change-root>|<one-line-goal>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<fill "none"|TODO\b' "$file" >/dev/null; then
     return 0
   fi
   return 1
@@ -242,31 +242,31 @@ check_proposal() {
     fi
   done
 
-  if ! rg -n "^- 价值信号与观测口径：" "$proposal_file" >/dev/null; then
+  if ! rg -n "^- Value Signal and Observation:" "$proposal_file" >/dev/null; then
     if [[ "$mode" == "strict" ]]; then
-      err "proposal missing '- 价值信号与观测口径：' (strict): ${proposal_file}"
+      err "proposal missing '- Value Signal and Observation:' (strict): ${proposal_file}"
     else
-      warn "proposal missing '- 价值信号与观测口径：' (recommended): ${proposal_file}"
+      warn "proposal missing '- Value Signal and Observation:' (recommended): ${proposal_file}"
     fi
   fi
 
-  if ! rg -n "^- 价值流瓶颈假设" "$proposal_file" >/dev/null; then
+  if ! rg -n "^- Value Stream Bottleneck Hypothesis" "$proposal_file" >/dev/null; then
     if [[ "$mode" == "strict" ]]; then
-      err "proposal missing '- 价值流瓶颈假设...' (strict): ${proposal_file}"
+      err "proposal missing '- Value Stream Bottleneck Hypothesis...' (strict): ${proposal_file}"
     else
-      warn "proposal missing '- 价值流瓶颈假设...' (recommended): ${proposal_file}"
+      warn "proposal missing '- Value Stream Bottleneck Hypothesis...' (recommended): ${proposal_file}"
     fi
   fi
 
   local decision_line
-  decision_line=$(rg -n "^- 决策状态：" "$proposal_file" -m 1 || true)
+  decision_line=$(rg -n "^- Decision Status:" "$proposal_file" -m 1 || true)
   if [[ -z "$decision_line" ]]; then
-    err "proposal missing '- 决策状态：' line: ${proposal_file}"
+    err "proposal missing '- Decision Status:' line: ${proposal_file}"
     return 0
   fi
 
   local value
-  value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- 决策状态： *//')"
+  value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- Decision Status: *//')"
 
   case "$value" in
     Pending|Approved|Revise|Rejected) ;;
@@ -298,8 +298,8 @@ check_design() {
     return 0
   fi
 
-  # Support headings with Chinese annotations: ## Acceptance Criteria（验收标准）
-  if ! rg -n "^## Acceptance Criteria|^## 验收标准" "$design_file" >/dev/null; then
+  # Support headings with annotations: ## Acceptance Criteria
+  if ! rg -n "^## Acceptance Criteria" "$design_file" >/dev/null; then
     err "design missing '## Acceptance Criteria' heading: ${design_file}"
   fi
 
@@ -308,10 +308,10 @@ check_design() {
   fi
 
   # ============================================================================
-  # 设计模式借鉴：Problem Context / Rationale / Trade-offs 必填检查
+  # Design pattern reference: Problem Context / Rationale / Trade-offs required
   # ============================================================================
   if [[ "$mode" == "apply" || "$mode" == "archive" || "$mode" == "strict" ]]; then
-    if ! rg -n "^## Problem Context|^## 问题背景" "$design_file" >/dev/null; then
+    if ! rg -n "^## Problem Context" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Problem Context' section (strict): ${design_file}"
       else
@@ -319,7 +319,7 @@ check_design() {
       fi
     fi
 
-    if ! rg -n "^## Design Rationale|^## 设计决策理由" "$design_file" >/dev/null; then
+    if ! rg -n "^## Design Rationale" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Design Rationale' section (strict): ${design_file}"
       else
@@ -327,7 +327,7 @@ check_design() {
       fi
     fi
 
-    if ! rg -n "^## Trade-offs|^## 权衡取舍" "$design_file" >/dev/null; then
+    if ! rg -n "^## Trade-offs" "$design_file" >/dev/null; then
       if [[ "$mode" == "strict" ]]; then
         err "design missing '## Trade-offs' section (strict): ${design_file}"
       else
@@ -337,10 +337,10 @@ check_design() {
   fi
 
   # ============================================================================
-  # 设计模式借鉴：封装变化点检查（在设计原则章节）
+  # Design pattern reference: Encapsulate variation points check (in design principles)
   # ============================================================================
   if [[ "$mode" == "strict" ]]; then
-    if ! rg -n "变化点|Variation Point|封装变化|Encapsulate.*Vari" "$design_file" >/dev/null; then
+    if ! rg -n "Variation Point|Encapsulate.*Vari" "$design_file" >/dev/null; then
       warn "design may not have identified variation points (strict): ${design_file}"
     fi
   fi
@@ -355,12 +355,12 @@ check_design() {
 check_tasks() {
   require_file "$tasks_file" || return 0
 
-  if ! rg -n "主线计划区|Main Plan Area" "$tasks_file" >/dev/null; then
-    err "tasks missing '主线计划区/Main Plan Area': ${tasks_file}"
+  if ! rg -n "Main Plan Area" "$tasks_file" >/dev/null; then
+    err "tasks missing 'Main Plan Area': ${tasks_file}"
   fi
 
-  if ! rg -n "断点区|Context Switch Breakpoint Area" "$tasks_file" >/dev/null; then
-    err "tasks missing '断点区/Context Switch Breakpoint Area': ${tasks_file}"
+  if ! rg -n "Context Switch Breakpoint Area" "$tasks_file" >/dev/null; then
+    err "tasks missing 'Context Switch Breakpoint Area': ${tasks_file}"
   fi
 
   if ! rg -n "^- \\[[ xX]\\]" "$tasks_file" >/dev/null; then
@@ -411,7 +411,7 @@ check_verification() {
     return 0
   fi
 
-  for h in "A\\) 测试计划指令表" "B\\) 追溯矩阵" "C\\) 执行锚点" "D\\) MANUAL-\\* 清单"; do
+  for h in "A\\) Test Plan Directive Table" "B\\) Traceability Matrix" "C\\) Execution Anchors" "D\\) MANUAL-\\* Checklist"; do
     if ! rg -n "${h}" "$verification_file" >/dev/null; then
       err "verification missing section '${h}': ${verification_file}"
     fi
@@ -423,12 +423,12 @@ check_verification() {
 
   if [[ "$mode" == "strict" ]]; then
     # G) section is recommended but not blocking
-    if ! rg -n "^## G\\) 价值流与度量|^G\\) 价值流与度量" "$verification_file" >/dev/null; then
-      warn "verification missing 'G) 价值流与度量' section (recommended for strict): ${verification_file}"
+    if ! rg -n "^## G\\) Value Stream and Metrics|^G\\) Value Stream and Metrics" "$verification_file" >/dev/null; then
+      warn "verification missing 'G) Value Stream and Metrics' section (recommended for strict): ${verification_file}"
     else
-      # Only check 目标价值信号 if G) section exists
-      if ! rg -n "^- 目标价值信号：" "$verification_file" >/dev/null; then
-        warn "verification missing '- 目标价值信号：' line (recommended): ${verification_file}"
+      # Only check Target Value Signal if G) section exists
+      if ! rg -n "^- Target Value Signal:" "$verification_file" >/dev/null; then
+        warn "verification missing '- Target Value Signal:' line (recommended): ${verification_file}"
       fi
     fi
 
@@ -532,7 +532,7 @@ check_constitution() {
   # Run constitution check
   echo "  constitution check..."
   if ! "$constitution_script" "$project_root" --quiet 2>/dev/null; then
-    err "constitution check failed (strict): 项目宪法缺失或无效"
+    err "constitution check failed (strict): project constitution missing or invalid"
     return 0
   fi
 }
@@ -567,7 +567,7 @@ check_fitness() {
   echo "  fitness check (mode=${fitness_mode})..."
   if ! "$fitness_script" --project-root "$project_root" --mode "$fitness_mode" 2>/dev/null; then
     if [[ "$fitness_mode" == "error" ]]; then
-      err "fitness check failed (strict): 架构适应度检查失败"
+      err "fitness check failed (strict): architecture fitness check failed"
     else
       warn "fitness check warnings detected"
     fi
@@ -575,7 +575,7 @@ check_fitness() {
 }
 
 # =============================================================================
-# AC-001: Green Evidence Closure Check (《人月神话》第6章 "沟通")
+# AC-001: Green Evidence Closure Check (Mythical Man-Month Ch.6 "Communication")
 # Block archive when Green evidence is missing
 # =============================================================================
 check_evidence_closure() {
@@ -587,7 +587,7 @@ check_evidence_closure() {
   local evidence_dir="${change_dir}/evidence/green-final"
 
   if [[ ! -d "$evidence_dir" ]]; then
-    err "缺少 Green 证据: evidence/green-final/ 不存在 (AC-001)"
+    err "Missing Green evidence: evidence/green-final/ does not exist (AC-001)"
     return 0
   fi
 
@@ -595,7 +595,7 @@ check_evidence_closure() {
   local file_count
   file_count=$(find "$evidence_dir" -type f 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$file_count" -eq 0 ]]; then
-    err "缺少 Green 证据: evidence/green-final/ 为空 (AC-001)"
+    err "Missing Green evidence: evidence/green-final/ is empty (AC-001)"
     return 0
   fi
 }
@@ -649,7 +649,7 @@ check_task_completion_rate() {
   local incomplete_tasks=$((total_tasks - completed_tasks))
   if [[ "$incomplete_tasks" -gt 0 ]]; then
     local rate=$((completed_tasks * 100 / total_tasks))
-    err "任务完成率 ${rate}% (${completed_tasks}/${total_tasks})，需要 100% (AC-002)"
+    err "Task completion rate ${rate}% (${completed_tasks}/${total_tasks}), need 100% (AC-002)"
   fi
 }
 
@@ -690,8 +690,8 @@ check_test_failure_in_evidence() {
     for file in $fail_files; do
       # Check if the match is a real failure (not "0 tests failed" pattern)
       if rg --no-ignore "$fail_pattern" "$file" 2>/dev/null | grep -qvE "^[[:space:]]*#|0 (tests?|failures?|failed)"; then
-        err "测试失败: Green 证据中包含失败模式，不能归档 (AC-007)"
-        echo "  文件: $file" >&2
+        err "Test failure: Green evidence contains failure pattern, cannot archive (AC-007)"
+        echo "  File: $file" >&2
         return 0
       fi
     done
@@ -727,7 +727,7 @@ check_skip_approval() {
       _get_line_context "$i"
       # Use shared helper with strict_html=true for prev/next line HTML comment check
       if ! is_skip_approved "$line" "$_PREV_LINE" "$_NEXT_LINE" true; then
-        err "P0 任务跳过需审批: ${p0_task_name} (AC-005)"
+        err "P0 task skip requires approval: ${p0_task_name} (AC-005)"
       fi
     fi
   done
@@ -755,7 +755,7 @@ check_env_match() {
 
   # Run env-match-check
   if ! "$env_check_script" "$change_id" --project-root "$project_root" --change-root "$change_root" >/dev/null 2>&1; then
-    err "测试环境声明缺失: verification.md 需要包含 '测试环境声明' 部分 (AC-006)"
+    err "Test environment declaration missing: verification.md needs 'Test Environment Declaration' section (AC-006)"
   fi
 }
 
@@ -774,17 +774,17 @@ check_docs_impact() {
   fi
 
   # Check if Documentation Impact section exists
-  if ! rg -n "^## Documentation Impact|^## 文档影响" "$design_file" >/dev/null; then
+  if ! rg -n "^## Documentation Impact" "$design_file" >/dev/null; then
     if [[ "$mode" == "strict" ]]; then
-      err "design.md 缺少 '## Documentation Impact/文档影响' 章节 (AC-008)"
+      err "design.md missing '## Documentation Impact' section (AC-008)"
     else
-      warn "design.md 缺少 '## Documentation Impact/文档影响' 章节（建议添加）"
+      warn "design.md missing '## Documentation Impact' section (recommended)"
     fi
     return 0
   fi
 
-  # Check for "无需更新" declaration - if checked, skip further checks
-  if rg -n "^\- \[x\] 本次变更为内部重构|^\- \[x\] 本次变更仅修复" "$design_file" >/dev/null; then
+  # Check for "no update needed" declaration - if checked, skip further checks
+  if rg -n "^\- \[x\] This change is internal refactoring|^\- \[x\] This change only fixes" "$design_file" >/dev/null; then
     # Declared as no doc update needed, skip
     return 0
   fi
@@ -799,11 +799,11 @@ check_docs_impact() {
   if [[ "$has_p0_docs" == true ]]; then
     # Check if documentation update checklist items are completed
     local unchecked_items
-    unchecked_items=$(rg -n "^\- \[ \] 新增脚本|^\- \[ \] 新增配置|^\- \[ \] 新增工作流|^\- \[ \] API" "$design_file" || true)
+    unchecked_items=$(rg -n "^\- \[ \] New script|^\- \[ \] New config|^\- \[ \] New workflow|^\- \[ \] API" "$design_file" || true)
 
     if [[ -n "$unchecked_items" && "$mode" == "strict" ]]; then
-      err "文档更新检查清单有未完成项 (AC-008)"
-      echo "  未完成项:" >&2
+      err "Documentation update checklist has incomplete items (AC-008)"
+      echo "  Incomplete items:" >&2
       printf "%s\n" "$unchecked_items" | head -3 | sed 's/^/    /' >&2
     fi
   fi
@@ -813,7 +813,7 @@ check_docs_impact() {
     if git -C "$project_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       # Extract declared P0 docs from design.md
       local declared_docs
-      declared_docs=$(rg -o "\| (README\.md|docs/[^|]+\.md|使用说明[^|]*\.md|CHANGELOG\.md) \|" "$design_file" 2>/dev/null | sed 's/| //g; s/ |//g' | sort -u || true)
+      declared_docs=$(rg -o "\| (README\.md|docs/[^|]+\.md|CHANGELOG\.md) \|" "$design_file" 2>/dev/null | sed 's/| //g; s/ |//g' | sort -u || true)
 
       if [[ -n "$declared_docs" ]]; then
         # Get changed files
@@ -824,7 +824,7 @@ check_docs_impact() {
           [[ -n "$doc" ]] || continue
           # Check if the declared doc is in the changed files
           if ! printf "%s\n" "$changed_files" | grep -qF "$doc"; then
-            warn "声明需更新但未修改: $doc (建议检查)"
+            warn "Declared to update but not modified: $doc (recommend checking)"
           fi
         done <<< "$declared_docs"
       fi
@@ -841,8 +841,8 @@ check_docs_impact() {
 # Helper: Report role violation with changed files list (DRY extraction)
 _report_role_violation() {
   local role_name="$1" forbidden_target="$2" changed_list="$3"
-  err "角色违规: ${role_name} 禁止修改 ${forbidden_target} (AC-003)"
-  echo "  检测到变更:" >&2
+  err "Role violation: ${role_name} cannot modify ${forbidden_target} (AC-003)"
+  echo "  Detected changes:" >&2
   printf "%s\n" "$changed_list" | head -5 | sed 's/^/    /' >&2
   if [[ $(printf "%s\n" "$changed_list" | wc -l) -gt 5 ]]; then
     echo "    ... and more" >&2
@@ -862,12 +862,12 @@ _check_coder_boundaries() {
 
   # Coder cannot modify verification.md
   if printf "%s\n" "$changed" | grep -qE "verification\.md$"; then
-    err "角色违规: Coder 禁止修改 verification.md (AC-003)"
+    err "Role violation: Coder cannot modify verification.md (AC-003)"
   fi
 
   # Coder cannot modify .devbooks/ config
   if printf "%s\n" "$changed" | grep -qE "^\.devbooks/"; then
-    err "角色违规: Coder 禁止修改 .devbooks/ 配置 (AC-003)"
+    err "Role violation: Coder cannot modify .devbooks/ config (AC-003)"
   fi
 }
 
@@ -891,7 +891,7 @@ _check_reviewer_boundaries() {
   local code_changed
   code_changed=$(printf "%s\n" "$changed" | grep -E "\.(ts|js|tsx|jsx|py|sh)$" || true)
   if [[ -n "$code_changed" ]]; then
-    _report_role_violation "Reviewer" "代码文件" "$code_changed"
+    _report_role_violation "Reviewer" "code files" "$code_changed"
   fi
 }
 
@@ -938,7 +938,7 @@ check_no_tests_changed() {
 }
 
 # ============================================================================
-# Implicit Change Detection (《人月神话》第7章 "巴比伦塔")
+# Implicit Change Detection (Mythical Man-Month Ch.7 "Tower of Babel")
 # ============================================================================
 check_implicit_changes() {
   # Only run in apply/archive/strict modes

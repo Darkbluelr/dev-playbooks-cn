@@ -10,7 +10,7 @@ set -euo pipefail
 # - Test entropy (flaky tests, coverage, test/code ratio)
 # - Dependency entropy (outdated deps, vulnerabilities)
 #
-# Reference: 《人月神话》第16章"没有银弹" — 控制复杂性是软件开发的关键
+# Reference: "The Mythical Man-Month" Chapter 16 "No Silver Bullet" - Controlling complexity is key to software development
 # ============================================================================
 
 usage() {

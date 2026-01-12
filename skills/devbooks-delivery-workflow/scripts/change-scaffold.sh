@@ -131,179 +131,179 @@ render_template() {
 cat <<'EOF' | render_template | write_file "${change_dir}/proposal.md"
 # Proposal: __CHANGE_ID__
 
-> 产物落点：`__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
+> Output location: `__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
 >
-> 注意：proposal 阶段禁止写实现代码；只定义 Why/What/Impact/Risks/Validation + 争议点。
+> Note: Proposal phase prohibits implementation code; only define Why/What/Impact/Risks/Validation + debate points.
 
 ## Why
 
-- 问题：
-- 目标：
+- Problem:
+- Goal:
 
 ## What Changes
 
-- In scope：
-- Out of scope（Non-goals）：
-- 影响范围（模块/能力/对外契约/数据不变量）：
+- In scope:
+- Out of scope (Non-goals):
+- Impact scope (modules/capabilities/external contracts/data invariants):
 
 ## Impact
 
-- 对外契约（API/Schema/Event）：
-- 数据与迁移：
-- 受影响模块与依赖：
-- 测试与质量闸门：
-- 价值信号与观测口径：<填“无”或写明指标/看板/日志/业务事件>
-- 价值流瓶颈假设（哪里会堵：PR review / tests / 发布 / 手工验收）：<填“无”或写明假设与缓解策略>
+- External contracts (API/Schema/Event):
+- Data and migration:
+- Affected modules and dependencies:
+- Testing and quality gates:
+- Value Signal and Observation: <fill "none" or specify metrics/dashboard/logs/business events>
+- Value Stream Bottleneck Hypothesis (where will it block: PR review / tests / release / manual acceptance): <fill "none" or specify hypothesis and mitigation strategy>
 
 ## Risks & Rollback
 
-- 风险：
-- 降级策略：
-- 回滚策略：
+- Risks:
+- Degradation strategy:
+- Rollback strategy:
 
 ## Validation
 
-- 候选验收锚点（tests/静态检查/build/手工证据）：
-- 证据落点：`__CHANGE_ROOT__/__CHANGE_ID__/evidence/`（推荐用 `change-evidence.sh <change-id> -- <command>` 采集）
+- Candidate acceptance anchors (tests/static checks/build/manual evidence):
+- Evidence location: `__CHANGE_ROOT__/__CHANGE_ID__/evidence/` (recommend using `change-evidence.sh <change-id> -- <command>` to collect)
 
 ## Debate Packet
 
-- 争议点/需要裁决的问题（<=7 条）：
+- Debate points/questions requiring decision (<=7 items):
 
 ## Decision Log
 
-- 决策状态：Pending
-- 裁决摘要：
-- 需要裁决的问题清单：
+- Decision Status: Pending
+- Decision summary:
+- Questions requiring decision:
 EOF
 
 cat <<'EOF' | render_template | write_file "${change_dir}/design.md"
 # Design: __CHANGE_ID__
 
-> 产物落点：`__CHANGE_ROOT__/__CHANGE_ID__/design.md`
+> Output location: `__CHANGE_ROOT__/__CHANGE_ID__/design.md`
 >
-> 只写 What/Constraints + AC-xxx；禁止写实现步骤与函数体代码。
+> Only write What/Constraints + AC-xxx; prohibit implementation steps and function body code.
 
-## 背景与现状
+## Background and Current State
 
-- 当前行为（可观察事实）：
-- 主要约束（性能/安全/兼容/依赖方向）：
+- Current behavior (observable facts):
+- Main constraints (performance/security/compatibility/dependency direction):
 
 ## Goals / Non-goals
 
-- Goals：
-- Non-goals：
+- Goals:
+- Non-goals:
 
-## 设计原则与红线
+## Design Principles and Red Lines
 
-- 原则：
-- Red Lines（不可破）：
+- Principles:
+- Red Lines (unbreakable):
 
-## 目标架构（可选）
+## Target Architecture (optional)
 
-- 边界与依赖方向：
-- 扩展点：
+- Boundaries and dependency direction:
+- Extension points:
 
-## 数据与契约（按需）
+## Data and Contracts (as needed)
 
-- Artifacts / Events / Schema：
-- 兼容策略（版本化/迁移/回放）：
+- Artifacts / Events / Schema:
+- Compatibility strategy (versioning/migration/replay):
 
-## 可观测性与验收（按需）
+## Observability and Acceptance (as needed)
 
-- 指标/KPI/SLO：
+- Metrics/KPI/SLO:
 
 ## Acceptance Criteria
 
-- AC-001（A/B/C）：<可观察的 Pass/Fail 判据>（候选锚点：tests/命令/证据）
+- AC-001 (A/B/C): <observable Pass/Fail criteria> (candidate anchors: tests/commands/evidence)
 EOF
 
 cat <<'EOF' | render_template | write_file "${change_dir}/tasks.md"
 # Tasks: __CHANGE_ID__
 
-> 产物落点：`__CHANGE_ROOT__/__CHANGE_ID__/tasks.md`
+> Output location: `__CHANGE_ROOT__/__CHANGE_ID__/tasks.md`
 >
-> 只从 `__CHANGE_ROOT__/__CHANGE_ID__/design.md` 推导任务；不要从 tests/ 反推计划。
+> Only derive tasks from `__CHANGE_ROOT__/__CHANGE_ID__/design.md`; do not reverse-engineer plan from tests/.
 
 ========================
-主线计划区 (Main Plan Area)
+Main Plan Area
 ========================
 
-- [ ] MP1.1 <一句话目标>
-  - Why：
-  - Acceptance Criteria（引用 AC-xxx）：
-  - Candidate Anchors（tests/命令/证据）：
-  - Dependencies：
-  - Risks：
+- [ ] MP1.1 <one-line goal>
+  - Why:
+  - Acceptance Criteria (reference AC-xxx):
+  - Candidate Anchors (tests/commands/evidence):
+  - Dependencies:
+  - Risks:
 
 ========================
-临时计划区 (Temporary Plan Area)
+Temporary Plan Area
 ========================
 
-- （留空/按需）
+- (leave empty/as needed)
 
 ========================
-断点区 (Context Switch Breakpoint Area)
+Context Switch Breakpoint Area
 ========================
 
-- 上次进度：
-- 当前阻塞：
-- 下一步最短路径：
+- Last progress:
+- Current blocker:
+- Next shortest path:
 EOF
 
 cat <<'EOF' | render_template | write_file "${change_dir}/verification.md"
-# verification.md（__CHANGE_ID__）
+# verification.md (__CHANGE_ID__)
 
-> 推荐路径：`__CHANGE_ROOT__/__CHANGE_ID__/verification.md`
+> Recommended path: `__CHANGE_ROOT__/__CHANGE_ID__/verification.md`
 >
-> 目标：把“完成定义”落到可执行锚点与证据上，并提供 `AC-xxx -> Requirement/Scenario -> Test IDs -> Evidence` 的追溯。
+> Goal: Anchor "Definition of Done" to executable anchors and evidence, and provide `AC-xxx -> Requirement/Scenario -> Test IDs -> Evidence` traceability.
 
 ---
 
-## 元信息
+## Metadata
 
-- Change ID：`__CHANGE_ID__`
-- 状态：Draft | Ready | Done | Archived
-- 关联：
-  - Proposal：`__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
-  - Design：`__CHANGE_ROOT__/__CHANGE_ID__/design.md`
-  - Tasks：`__CHANGE_ROOT__/__CHANGE_ID__/tasks.md`
-  - Spec deltas：`__CHANGE_ROOT__/__CHANGE_ID__/specs/**`
-- 维护者：<you>
-- 更新时间：YYYY-MM-DD
-- Test Owner（独立对话）：<session/agent>
-- Coder（独立对话）：<session/agent>
-- Red 基线证据：`__CHANGE_ROOT__/__CHANGE_ID__/evidence/`
-
----
-
-========================
-A) 测试计划指令表
-========================
-
-### 主线计划区 (Main Plan Area)
-
-- [ ] TP1.1 <一句话目标>
-  - Why：
-  - Acceptance Criteria（引用 AC-xxx / Requirement）：
-  - Test Type：unit | contract | integration | e2e | fitness | static
-  - Non-goals：
-  - Candidate Anchors（Test IDs / commands / evidence）：
-
-### 临时计划区 (Temporary Plan Area)
-
-- （留空/按需）
-
-### 断点区 (Context Switch Breakpoint Area)
-
-- 上次进度：
-- 当前阻塞：
-- 下一步最短路径：
+- Change ID: `__CHANGE_ID__`
+- Status: Draft | Ready | Done | Archived
+- References:
+  - Proposal: `__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
+  - Design: `__CHANGE_ROOT__/__CHANGE_ID__/design.md`
+  - Tasks: `__CHANGE_ROOT__/__CHANGE_ID__/tasks.md`
+  - Spec deltas: `__CHANGE_ROOT__/__CHANGE_ID__/specs/**`
+- Maintainer: <you>
+- Last Updated: YYYY-MM-DD
+- Test Owner (independent session): <session/agent>
+- Coder (independent session): <session/agent>
+- Red baseline evidence: `__CHANGE_ROOT__/__CHANGE_ID__/evidence/`
 
 ---
 
 ========================
-B) 追溯矩阵（Traceability Matrix）
+A) Test Plan Directive Table
+========================
+
+### Main Plan Area
+
+- [ ] TP1.1 <one-line goal>
+  - Why:
+  - Acceptance Criteria (reference AC-xxx / Requirement):
+  - Test Type: unit | contract | integration | e2e | fitness | static
+  - Non-goals:
+  - Candidate Anchors (Test IDs / commands / evidence):
+
+### Temporary Plan Area
+
+- (leave empty/as needed)
+
+### Context Switch Breakpoint Area
+
+- Last progress:
+- Current blocker:
+- Next shortest path:
+
+---
+
+========================
+B) Traceability Matrix
 ========================
 
 | AC | Requirement/Scenario | Test IDs / Commands | Evidence / MANUAL-* | Status |
@@ -313,73 +313,73 @@ B) 追溯矩阵（Traceability Matrix）
 ---
 
 ========================
-C) 执行锚点（Deterministic Anchors）
+C) Execution Anchors (Deterministic Anchors)
 ========================
 
-### 1) 行为（Behavior）
+### 1) Behavior
 
-- unit：
-- integration：
-- e2e：
+- unit:
+- integration:
+- e2e:
 
-### 2) 契约（Contract）
+### 2) Contract
 
-- OpenAPI/Proto/Schema：
-- contract tests：
+- OpenAPI/Proto/Schema:
+- contract tests:
 
-### 3) 结构（Structure / Fitness Functions）
+### 3) Structure (Fitness Functions)
 
-- 分层/依赖方向/禁止循环：
+- Layering/dependency direction/no cycles:
 
-### 4) 静态与安全（Static/Security）
+### 4) Static and Security
 
-- lint/typecheck/build：
-- SAST/secret scan：
-- 报告格式：json|xml（优先机器可读）
+- lint/typecheck/build:
+- SAST/secret scan:
+- Report format: json|xml (prefer machine-readable)
 
 ---
 
 ========================
-D) MANUAL-* 清单（人工/混合验收）
+D) MANUAL-* Checklist (Manual/Hybrid Acceptance)
 ========================
 
-- [ ] MANUAL-001 <验收项>
-  - Pass/Fail 判据：
-  - Evidence（截图/录像/链接/日志）：
-  - 责任人/签字：
+- [ ] MANUAL-001 <acceptance item>
+  - Pass/Fail criteria:
+  - Evidence (screenshot/video/link/log):
+  - Responsible/Sign-off:
 
 ---
 
 ========================
-E) 风险与降级（可选）
+E) Risks and Degradation (optional)
 ========================
 
-- 风险：
-- 降级策略：
-- 回滚策略：
+- Risks:
+- Degradation strategy:
+- Rollback strategy:
 
 ========================
-F) 结构质量守门记录
+F) Structural Quality Gate Record
 ========================
 
-- 冲突点：
-- 评估影响（内聚/耦合/可测试性）：
-- 替代闸门（复杂度/耦合/依赖方向/测试质量）：
-- 决策与授权：<填“无”或写明授权人/结论>
+- Conflict points:
+- Impact assessment (cohesion/coupling/testability):
+- Alternative gates (complexity/coupling/dependency direction/test quality):
+- Decision and authorization: <fill "none" or specify authorizer/conclusion>
 
 ========================
-G) 价值流与度量（可选，但必须显式填“无”）
+G) Value Stream and Metrics (optional, but must explicitly fill "none")
 ========================
 
-- 目标价值信号：<填“无”或写明指标/看板/日志/业务事件>
-- 交付与稳定性指标（可选 DORA）：<填“无”或写明 Lead Time / Deploy Frequency / Change Failure Rate / MTTR 的观测口径>
-- 观测窗口与触发点：<填“无”或写明上线后多久、观察哪些告警/报表>
-- Evidence：<填“无”或写明链接/截图/报表路径（建议落到 evidence/）>
+- Target Value Signal: <fill "none" or specify metrics/dashboard/logs/business events>
+- Delivery and stability metrics (optional DORA): <fill "none" or specify Lead Time / Deploy Frequency / Change Failure Rate / MTTR observation approach>
+- Observation window and trigger points: <fill "none" or specify post-launch duration, what alerts/reports to observe>
+- Evidence: <fill "none" or specify link/screenshot/report path (recommend storing in evidence/)>
 EOF
 
 specs_readme_path="${change_dir}/specs/README.md"
 if [[ ! -f "$specs_readme_path" || "$force" == true ]]; then
-  printf '%s\n' "# specs/" "" "在本目录下为每个 capability 创建子目录，并在其中写 \`spec.md\`：" "" "- \`${change_root}/${change_id}/specs/<capability>/spec.md\`" "" | write_file "$specs_readme_path"
+  printf '%s\n' "# specs/" "" "Create a subdirectory for each capability in this directory, and write \`spec.md\` inside:" "" "- \`${change_root}/${change_id}/specs/<capability>/spec.md\`" "" | write_file "$specs_readme_path"
 fi
 
 # Prototype mode: create prototype track skeleton
@@ -389,51 +389,51 @@ if [[ "$prototype" == true ]]; then
   cat <<'EOF' | render_template | write_file "${change_dir}/prototype/PROTOTYPE.md"
 # Prototype Declaration: __CHANGE_ID__
 
-> 此目录包含原型代码，**禁止直接合并到生产代码库**。
+> This directory contains prototype code, **DO NOT merge directly into production codebase**.
 >
-> 来源：《人月神话》第11章"未雨绸缪" — "第一个开发的系统并不合用...为舍弃而计划"
+> Source: "The Mythical Man-Month" Chapter 11 "Plan to Throw One Away" - "The first system built is not usable...plan to throw it away"
 
-## 目录结构
+## Directory Structure
 
 ```
 prototype/
-├── PROTOTYPE.md          # 本文件：原型声明与状态
-├── src/                  # 原型实现代码（允许技术债）
-└── characterization/     # 表征测试（记录实际行为，非验收测试）
+├── PROTOTYPE.md          # This file: prototype declaration and status
+├── src/                  # Prototype implementation code (technical debt allowed)
+└── characterization/     # Characterization tests (record actual behavior, not acceptance tests)
 ```
 
-## 状态
+## Status
 
-- [ ] 原型完成
-- [ ] 表征测试就绪（行为快照已记录）
-- [ ] 已决定：提升 / 丢弃 / 迭代
+- [ ] Prototype complete
+- [ ] Characterization tests ready (behavior snapshot recorded)
+- [ ] Decided: promote / discard / iterate
 
-## 约束（必须遵守）
+## Constraints (must follow)
 
-1. **物理隔离**：原型代码只能在 `prototype/src/` 下，禁止直接落到仓库 `src/`
-2. **角色隔离不变**：Test Owner 与 Coder 仍必须独立对话/独立实例
-3. **表征测试优先**：Test Owner 产出的是"表征测试"（记录实际行为），不是验收测试
-4. **提升需显式触发**：运行 `prototype-promote.sh __CHANGE_ID__` 并完成检查清单
+1. **Physical isolation**: Prototype code can only be in `prototype/src/`, cannot directly land in repo `src/`
+2. **Role isolation unchanged**: Test Owner and Coder must still use independent sessions/instances
+3. **Characterization tests first**: Test Owner produces "characterization tests" (record actual behavior), not acceptance tests
+4. **Promotion requires explicit trigger**: Run `prototype-promote.sh __CHANGE_ID__` and complete checklist
 
-## 提升检查清单（提升前必须完成）
+## Promotion Checklist (must complete before promotion)
 
-- [ ] 创建生产级 `design.md`（从原型学习中提炼 What/Constraints/AC-xxx）
-- [ ] Test Owner 产出验收测试 `verification.md`（替代表征测试）
-- [ ] 运行 `prototype-promote.sh __CHANGE_ID__` 并通过所有闸门
-- [ ] 原型代码归档到 `tests/archived-characterization/__CHANGE_ID__/`
+- [ ] Create production-level `design.md` (extract What/Constraints/AC-xxx from prototype learnings)
+- [ ] Test Owner produces acceptance tests `verification.md` (replace characterization tests)
+- [ ] Run `prototype-promote.sh __CHANGE_ID__` and pass all gates
+- [ ] Archive prototype code to `tests/archived-characterization/__CHANGE_ID__/`
 
-## 丢弃检查清单（丢弃时）
+## Discard Checklist (when discarding)
 
-- [ ] 记录学习到的关键洞察到 `proposal.md` 的 Decision Log
-- [ ] 删除 `prototype/` 目录
+- [ ] Record key insights learned to `proposal.md` Decision Log
+- [ ] Delete `prototype/` directory
 
-## 学习记录
+## Learning Record
 
-> 在原型过程中学到了什么？这些洞察将帮助生产级实现。
+> What was learned during prototyping? These insights will help production-level implementation.
 
-- 技术发现：
-- 风险澄清：
-- 设计约束更新：
+- Technical discoveries:
+- Risk clarifications:
+- Design constraint updates:
 EOF
 
   echo "ok: created prototype track at ${change_dir}/prototype/"

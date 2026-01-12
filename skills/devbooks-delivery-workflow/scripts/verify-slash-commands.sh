@@ -1,7 +1,7 @@
 #!/bin/bash
-# verify-slash-commands.sh - 验证 Slash 命令定义
+# verify-slash-commands.sh - Verify Slash command definitions
 #
-# 验证 AC-001（24 个命令）和 AC-002（命令与 Skill 1:1 对应）
+# Verify AC-001 (24 commands) and AC-002 (command to Skill 1:1 mapping)
 
 set -uo pipefail
 
@@ -33,29 +33,29 @@ check_skill_mapping() {
         if grep -q "skill: $expected_skill" "$file"; then
             check "AC-002: $cmd.md → $expected_skill" "0"
         else
-            check "AC-002: $cmd.md → $expected_skill（skill 元数据不匹配）" "1"
+            check "AC-002: $cmd.md → $expected_skill (skill metadata mismatch)" "1"
         fi
     fi
 }
 
-echo "=== Slash 命令验证（21 核心 + 3 向后兼容 = 24 个命令） ==="
+echo "=== Slash Command Verification (21 core + 3 backward compatible = 24 commands) ==="
 echo ""
 
 COMMANDS_DIR="templates/claude-commands/devbooks"
 
-# AC-001: 检查命令数量（24 = 21 核心 + 3 向后兼容）
-echo "AC-001: 检查命令数量..."
+# AC-001: Check command count (24 = 21 core + 3 backward compatible)
+echo "AC-001: Checking command count..."
 cmd_count=$(ls "$COMMANDS_DIR"/*.md 2>/dev/null | wc -l | tr -d ' ')
 if [[ "$cmd_count" -eq 24 ]]; then
-    check "AC-001: 命令数量为 24（21 核心 + 3 向后兼容）" "0"
+    check "AC-001: Command count is 24 (21 core + 3 backward compatible)" "0"
 else
-    check "AC-001: 命令数量为 24（实际: $cmd_count）" "1"
+    check "AC-001: Command count is 24 (actual: $cmd_count)" "1"
 fi
 
 echo ""
-echo "=== 检查 21 个命令文件存在性 ==="
+echo "=== Checking 21 command file existence ==="
 
-# 21 个命令文件列表
+# 21 command files list
 COMMANDS=(
     "router"
     "proposal"
@@ -82,16 +82,16 @@ COMMANDS=(
 
 for cmd in "${COMMANDS[@]}"; do
     if [[ -f "$COMMANDS_DIR/$cmd.md" ]]; then
-        check "AC-011~AC-031: $cmd.md 存在" "0"
+        check "AC-011~AC-031: $cmd.md exists" "0"
     else
-        check "AC-011~AC-031: $cmd.md 存在" "1"
+        check "AC-011~AC-031: $cmd.md exists" "1"
     fi
 done
 
 echo ""
-echo "=== AC-002: 检查命令与 Skill 对应关系 ==="
+echo "=== AC-002: Checking command to Skill mapping ==="
 
-# 命令 -> Skill 映射检查
+# Command -> Skill mapping check
 check_skill_mapping "router" "devbooks-router"
 check_skill_mapping "proposal" "devbooks-proposal-author"
 check_skill_mapping "challenger" "devbooks-proposal-challenger"
@@ -115,32 +115,32 @@ check_skill_mapping "bootstrap" "devbooks-brownfield-bootstrap"
 check_skill_mapping "index" "devbooks-index-bootstrap"
 
 echo ""
-echo "=== AC-008: 检查向后兼容命令 ==="
+echo "=== AC-008: Checking backward compatible commands ==="
 
-# 向后兼容命令列表
+# Backward compatible commands list
 COMPAT_COMMANDS=("apply" "archive" "quick")
 
 for cmd in "${COMPAT_COMMANDS[@]}"; do
     if [[ -f "$COMMANDS_DIR/$cmd.md" ]]; then
         if grep -q "backward-compat: true" "$COMMANDS_DIR/$cmd.md"; then
-            check "AC-008: $cmd.md 存在且标记为向后兼容" "0"
+            check "AC-008: $cmd.md exists and marked as backward compatible" "0"
         else
-            check "AC-008: $cmd.md 存在但缺少 backward-compat 标记" "1"
+            check "AC-008: $cmd.md exists but missing backward-compat marker" "1"
         fi
     else
-        check "AC-008: $cmd.md 存在" "1"
+        check "AC-008: $cmd.md exists" "1"
     fi
 done
 
 echo ""
-echo "=== 结果 ==="
-echo "通过: $PASSED"
-echo "失败: $FAILED"
+echo "=== Results ==="
+echo "Passed: $PASSED"
+echo "Failed: $FAILED"
 
 if [[ $FAILED -eq 0 ]]; then
-    echo -e "${GREEN}全部通过！${NC}"
+    echo -e "${GREEN}All passed!${NC}"
     exit 0
 else
-    echo -e "${RED}存在失败项${NC}"
+    echo -e "${RED}Some checks failed${NC}"
     exit 1
 fi

@@ -1,5 +1,8 @@
 # 不包含在 npm 包中的文件
 
+# 仓库内部 DevBooks playbooks（不要发布）
+dev-playbooks/
+
 # 变更包目录
 dev-playbooks/changes/
 

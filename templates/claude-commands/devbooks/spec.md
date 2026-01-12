@@ -4,16 +4,16 @@ skill: devbooks-spec-contract
 
 # /devbooks:spec
 
-触发 Skill：`devbooks-spec-contract`
+Triggers Skill: `devbooks-spec-contract`
 
-## 用途
+## Purpose
 
-定义对外行为规格与契约（Requirements/Scenarios/API/Schema/兼容策略/迁移），并建议或生成 contract tests。
+Define external behavior specifications and contracts (Requirements/Scenarios/API/Schema/Compatibility Strategy/Migration), and suggest or generate contract tests.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 需要定义 API 或接口规格
-- 需要撰写行为场景（Given/When/Then）
-- 需要兼容性策略和迁移方案
+- Need to define API or interface specifications
+- Need to write behavior scenarios (Given/When/Then)
+- Need compatibility strategy and migration plan
 
-请点名使用 `devbooks-spec-contract` 执行相应任务。
+Please invoke `devbooks-spec-contract` to execute the corresponding task.

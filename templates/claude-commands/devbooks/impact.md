@@ -4,16 +4,16 @@ skill: devbooks-impact-analysis
 
 # /devbooks:impact
 
-触发 Skill：`devbooks-impact-analysis`
+Triggers Skill: `devbooks-impact-analysis`
 
-## 用途
+## Purpose
 
-跨模块/跨文件/对外契约变更前做影响分析，产出可直接写入 proposal.md 的 Impact 部分。
+Perform impact analysis before cross-module/cross-file/external contract changes, output Impact section that can be directly written to proposal.md.
 
-## 典型使用场景
+## Typical Use Cases
 
-- 变更前评估影响范围
-- 识别受影响的模块和 API
-- 分析兼容性风险
+- Assess impact scope before changes
+- Identify affected modules and APIs
+- Analyze compatibility risks
 
-请点名使用 `devbooks-impact-analysis` 执行相应任务。
+Please invoke `devbooks-impact-analysis` to execute the corresponding task.
