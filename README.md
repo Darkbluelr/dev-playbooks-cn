@@ -9,32 +9,32 @@ DevBooks 是面向 **Claude Code / Codex CLI** 的“代理式 AI 开发工作�
 全局安装：
 
 ```bash
-npm install -g devbooks
+npm install -g dev-playbooks
 ```
 
 一次性使用（无需全局安装）：
 
 ```bash
-npx devbooks@latest init
+npx dev-playbooks@latest init
 ```
 
 ### 2) 在你的项目中初始化
 
-如果你用了上面的 `npx devbooks@latest init`，可以跳过这一步。
+如果你用了上面的 `npx dev-playbooks@latest init`，可以跳过这一步。
 
 在项目根目录执行：
 
 ```bash
-devbooks init
+dev-playbooks init
 ```
 
 后续需要更新现有配置时：
 
 ```bash
-devbooks update
+dev-playbooks update
 ```
 
-安装落点（`devbooks init` 或安装脚本之后）：
+安装落点（`dev-playbooks init` 或安装脚本之后）：
 - Claude Code：`~/.claude/skills/devbooks-*`
 - Codex CLI：`$CODEX_HOME/skills/devbooks-*`（默认 `~/.codex/skills/devbooks-*`）
 - Codex Prompts：`$CODEX_HOME/prompts/devbooks-*.md`（可选）

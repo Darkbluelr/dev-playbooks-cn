@@ -1,5 +1,5 @@
 {
-  "name": "devbooks",
+  "name": "dev-playbooks",
   "version": "1.0.0",
   "description": "AI-driven spec-based development workflow",
   "keywords": [
@@ -16,14 +16,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anthropics/devbooks"
+    "url": "https://github.com/Darkbluelr/dev-playbooks-cn.git"
   },
-  "homepage": "https://github.com/anthropics/devbooks#readme",
+  "homepage": "https://github.com/Darkbluelr/dev-playbooks-cn#readme",
   "bugs": {
-    "url": "https://github.com/anthropics/devbooks/issues"
+    "url": "https://github.com/Darkbluelr/dev-playbooks-cn/issues"
   },
   "bin": {
-    "devbooks": "./bin/devbooks.js"
+    "dev-playbooks": "./bin/devbooks.js"
   },
   "files": [
     "bin/",
