@@ -118,27 +118,4 @@ See `skills/devbooks-federation/SKILL.md` for details
 | "Refactor", "optimize code", "eliminate duplication" | `devbooks-code-review` → `devbooks-coder` |
 | "New feature", "add XX", "implement XX" | `devbooks-router` → complete closed loop |
 | "Write tests", "add tests" | `devbooks-test-owner` |
-| "Continue", "next step" | Check `tasks.md` → `devbooks-coder` |
-| "Review" | `devbooks-code-review` |
 
-### Auto-Enable Graph-Based Analysis
-
-**Pre-check**: Call `mcp__ckb__getStatus` to check index status
-- Available: Auto-use `analyzeImpact`/`findReferences`/`getCallGraph`/`getHotspots`
-- Unavailable: Fall back to `Grep`/`Glob` text search
-
-### Auto Hotspot File Warning
-
-Before executing `devbooks-coder` or `devbooks-code-review`, **must** call `mcp__ckb__getHotspots`:
-- 🔴 Critical (Top 5): Output warning + suggest adding tests
-- 🟡 High (Top 10): Output notice + focus review
-- 🟢 Normal: Normal execution
-
-### Auto Change Package Status Recognition
-
-| Status | Auto Suggestion |
-|--------|-----------------|
-| Only `proposal.md` | → `devbooks-design-doc` |
-| Has `design.md` but no `tasks.md` | → `devbooks-implementation-plan` |
-| Has incomplete `tasks.md` | → `devbooks-coder` |
-| All tasks complete | → `devbooks-code-review` or archive |

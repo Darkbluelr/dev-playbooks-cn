@@ -28,9 +28,7 @@
   "files": [
     "bin/",
     "templates/",
-    "skills/",
-    "scripts/",
-    "setup/"
+    "skills/"
   ],
   "engines": {
     "node": ">=18"

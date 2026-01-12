@@ -2,7 +2,7 @@
 # DevBooks 系统依赖安装脚本
 # 支持 macOS (Homebrew) 和 Linux (apt/yum)
 #
-# 用法: ./setup/install-dependencies.sh [--all | --minimal | --dev]
+# 用法: ./scripts/install-dependencies.sh [--all | --minimal | --dev]
 #   --minimal  只安装必需依赖 (jq, ripgrep)
 #   --all      安装所有依赖（默认）
 #   --dev      额外安装开发依赖 (shellcheck)
@@ -212,7 +212,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 DevBooks 系统依赖安装脚本
 
 用法:
-  ./setup/install-dependencies.sh [选项]
+  ./scripts/install-dependencies.sh [选项]
 
 选项:
   --minimal   只安装必需依赖 (jq, ripgrep)
@@ -234,9 +234,9 @@ DevBooks 系统依赖安装脚本
     - shellcheck  Shell 脚本静态分析
 
 示例:
-  ./setup/install-dependencies.sh           # 安装全部推荐依赖
-  ./setup/install-dependencies.sh --minimal # 只安装必需依赖
-  ./setup/install-dependencies.sh --dev     # 安装全部 + 开发依赖
+  ./scripts/install-dependencies.sh           # 安装全部推荐依赖
+  ./scripts/install-dependencies.sh --minimal # 只安装必需依赖
+  ./scripts/install-dependencies.sh --dev     # 安装全部 + 开发依赖
 EOF
   exit 0
 fi

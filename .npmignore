@@ -30,9 +30,6 @@ mcp/
 # 文档（仅保留 README）
 docs/
 
-# 设置文件（模板在 templates/ 中）
-setup/
-
 # 工具脚本（非必要）
 tools/
 

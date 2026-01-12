@@ -60,8 +60,8 @@ DevBooks Skills 依赖两个目录根定义：
 - `<change-root>`：变更包目录根（默认 `dev-playbooks/changes/`）
 
 **快速集成**：
-- 模板入口：`setup/generic/devbooks-integration-template.md`
-- 让 AI 自动接线：`setup/generic/installation-prompt.md`
+- 模板入口：`docs/devbooks-integration-template.md`
+- 让 AI 自动接线：`docs/installation-prompt.md`
 
 ## 核心原则
 
@@ -175,8 +175,7 @@ Router 会分析需求并输出执行计划，告诉你下一步应该用哪个�
 
 ```
 skills/          # devbooks-* Skills 源码
-setup/           # 上下文协议适配与集成模板
-└── generic/     # 协议无关模板
+templates/       # 项目初始化模板（含 Slash Commands 模板）
 scripts/         # 安装与工具脚本
 docs/            # 文档
 tools/           # 工具脚本（复杂度、熵度量等）
