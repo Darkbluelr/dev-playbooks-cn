@@ -35,29 +35,64 @@ DevBooks 是一套面向 **Claude Code / Codex CLI** 的「代理式 AI 编程�
 
 ### 2. 接入你的项目
 
-DevBooks Skills 本身不依赖 OpenSpec；它们只依赖两个目录根的定义：
-- `<truth-root>`：当前真理目录根（默认建议 `specs/`）
-- `<change-root>`：变更包目录根（默认建议 `changes/`）
+DevBooks Skills 依赖两个目录根的定义：
+- `<truth-root>`：当前真理目录根（默认 `dev-playbooks/specs/`）
+- `<change-root>`：变更包目录根（默认 `dev-playbooks/changes/`）
 
-**OpenSpec 项目**：
-- 入口：`setup/openspec/README.md`
-- 让 AI 自动接线：`setup/openspec/安装提示词.md`
-- OpenSpec 映射：`<truth-root>` → `openspec/specs/`，`<change-root>` → `openspec/changes/`
-
-**其他项目**：
-- 入口：`setup/template/DevBooks集成模板（协议无关）.md`
-- 让 AI 自动接线：`setup/template/安装提示词.md`
+**快速接入**：
+- 入口：`setup/generic/DevBooks集成模板（协议无关）.md`
+- 让 AI 自动接线：`setup/generic/安装提示词.md`
 
 ---
 
 ## 日常变更闭环
 
-### 质量优先闭环（兼容 OpenSpec）
+### 双入口架构（v2）
+
+DevBooks 提供两种命令入口：
+
+1. **Router 入口**（推荐）：输入需求，获取完整执行计划
+2. **直达命令**：熟悉流程后直接调用对应 Skill
+
+### 使用 Router（推荐新手）
+
+```
+/devbooks:router <你的需求>
+```
+
+Router 会分析需求并输出执行计划，告诉你下一步用哪个命令。
+
+### 直达命令（21 个命令与 21 个 Skills 1:1 对应）
+
+| 阶段 | 命令 | 说明 |
+|------|------|------|
+| **Proposal** | `/devbooks:proposal` | 创建变更提案 |
+| | `/devbooks:impact` | 影响分析 |
+| | `/devbooks:challenger` | 提案质疑 |
+| | `/devbooks:judge` | 提案裁决 |
+| | `/devbooks:debate` | 三角对辩流程 |
+| | `/devbooks:design` | 设计文档 |
+| | `/devbooks:spec` | 规格与契约 |
+| | `/devbooks:c4` | C4 架构地图 |
+| | `/devbooks:plan` | 实现计划 |
+| **Apply** | `/devbooks:test` | Test Owner（独立对话） |
+| | `/devbooks:code` | Coder（独立对话） |
+| | `/devbooks:backport` | 设计回写 |
+| **Review** | `/devbooks:review` | 代码评审 |
+| | `/devbooks:test-review` | 测试评审 |
+| **Archive** | `/devbooks:gardener` | 规格园丁 |
+| | `/devbooks:delivery` | 交付工作流 |
+| **独立** | `/devbooks:entropy` | 熵度量 |
+| | `/devbooks:federation` | 跨仓库联邦分析 |
+| | `/devbooks:bootstrap` | 存量项目初始化 |
+| | `/devbooks:index` | 索引引导 |
+
+### 典型流程示例
 
 **1. Proposal（提案阶段，禁止写代码）**
 
 ```
-/devbooks-openspec-proposal <你的需求>
+/devbooks:proposal <你的需求>
 ```
 
 产物：`proposal.md`（必须），`design.md`（非小改动必须），`tasks.md`（必须）
@@ -66,8 +101,8 @@ DevBooks Skills 本身不依赖 OpenSpec；它们只依赖两个目录根的定�
 
 必须开 2 个独立对话/独立实例：
 ```
-/devbooks-openspec-apply test-owner <change-id>  # Test Owner
-/devbooks-openspec-apply coder <change-id>       # Coder
+/devbooks:test <change-id>   # Test Owner
+/devbooks:code <change-id>   # Coder
 ```
 
 - Test Owner：写 `verification.md` + tests，先跑出 **Red**
@@ -76,13 +111,13 @@ DevBooks Skills 本身不依赖 OpenSpec；它们只依赖两个目录根的定�
 **3. Review（评审阶段）**
 
 ```
-/devbooks-openspec-apply reviewer <change-id>
+/devbooks:review <change-id>
 ```
 
 **4. Archive（归档阶段）**
 
 ```
-/devbooks-openspec-archive <change-id>
+/devbooks:gardener <change-id>
 ```
 
 ---
@@ -112,11 +147,9 @@ DevBooks Skills 本身不依赖 OpenSpec；它们只依赖两个目录根的定�
 ```
 skills/          # devbooks-* Skills 源码
 setup/           # 上下文协议适配器与集成模板
-├── openspec/    # OpenSpec 协议集成
-│   └── prompts/ # Codex CLI 命令入口（OpenSpec 专用）
 └── generic/     # 协议无关模板
 scripts/         # 安装与辅助脚本
-docs/            # 提示词文档
+docs/            # 辅助文档
 tools/           # 辅助脚本（复杂度计算、熵度量等）
 ```
 
@@ -124,20 +157,35 @@ tools/           # 辅助脚本（复杂度计算、熵度量等）
 
 ## 文档索引
 
-### 提示词文档
+### MCP 自动检测与降级
 
-| 文档 | 说明 |
-|------|------|
-| `角色推荐提示词.md` | 提示词索引（按 MCP 安装情况选择） |
-| `docs/基础提示词.md` | 基础版提示词（无 MCP） |
-| `docs/MCP增强提示词.md` | MCP 增强提示词片段 |
-| `docs/完全体提示词.md` | 完全体提示词（所有 MCP） |
+DevBooks Skills 支持 MCP（Model Context Protocol）自动检测与降级：
 
-### 其他文档
+| MCP 状态 | 行为 |
+|----------|------|
+| CKB 可用 | 增强模式：使用 `analyzeImpact`、`getCallGraph`、`getHotspots` 等图基工具 |
+| CKB 不可用或超时（2s） | 基础模式：使用 Grep + Glob 文本搜索（功能完整，仅损失部分增强能力） |
 
-- Skills 速查表：`Skills使用说明.md`
-- 质量闸门指南：`docs/quality-gates-guide.md`
-- MCP 配置：`mcp/mcp-servers.md`、`mcp/mcp_claude.md`、`mcp/mcp_codex.md`
+**检测机制**：
+- 每个 Skill 执行时自动调用 `mcp__ckb__getStatus()`
+- 2 秒超时后输出 `[MCP 检测超时，已降级为基础模式]`
+- 无需手动选择"基础提示词"或"增强提示词"
+
+**更新 Slash 命令**：
+
+当你更新了 MCP 配置（如新增/移除 CKB Server）后，MCP 检测是运行时自动进行的，无需手动更新 Slash 命令。
+
+如果需要重新安装 Skills（如更新 DevBooks 版本）：
+
+```bash
+./scripts/install-skills.sh
+```
+
+### 辅助文档
+
+- Slash 命令使用指南：`docs/slash-commands-guide.md`
+- Skills 速查表：`skills/Skills使用说明.md`
+- MCP 配置：`docs/推荐MCP.md`
 
 ---
 

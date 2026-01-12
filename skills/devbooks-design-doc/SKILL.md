@@ -18,9 +18,9 @@ tools:
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
@@ -76,5 +76,46 @@ tools:
 
 ## 执行方式
 
-1) 先阅读并遵守：`references/项目开发实用提示词.md`（可验证性 + 结构质量守门）。
-2) 严格按完整提示词输出：`references/1 设计文档提示词.md`。
+1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+2) 严格按完整提示词输出：`references/设计文档提示词.md`。
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的运行模式。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `proposal.md` 是否存在（设计文档的输入）
+2. 检测 `design.md` 是否已存在
+3. 若存在，检测完整性（是否有 AC-xxx、是否有 `[TODO]`）
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **新建设计** | `design.md` 不存在 | 创建完整设计文档 |
+| **补充设计** | `design.md` 存在但有 `[TODO]` | 补充缺失章节 |
+| **添加 AC** | 设计存在但 AC 不完整 | 补充验收标准 |
+
+### 检测输出示例
+
+```
+检测结果：
+- proposal.md：存在
+- design.md：存在，有 5 个 [TODO]
+- AC 数量：8 个
+- 运行模式：补充设计
+```
+
+---
+
+## MCP 增强
+
+本 Skill 不依赖 MCP 服务，无需运行时检测。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+

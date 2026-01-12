@@ -1,6 +1,6 @@
 ---
 name: devbooks-test-owner
-description: devbooks-test-owner：以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现（Coder）独立对话、先跑出 Red 基线。用户说"写测试/验收测试/追溯矩阵/verification.md/Red-Green/contract tests/fitness tests"，或在 OpenSpec apply 阶段以 test owner 执行时使用。
+description: devbooks-test-owner：以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现（Coder）独立对话、先跑出 Red 基线。用户说"写测试/验收测试/追溯矩阵/verification.md/Red-Green/contract tests/fitness tests"，或在 DevBooks apply 阶段以 test owner 执行时使用。
 tools:
   - Glob
   - Grep
@@ -19,9 +19,9 @@ tools:
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
@@ -118,8 +118,56 @@ tools:
 
 ## 执行方式
 
-1) 先阅读并遵守：`references/项目开发实用提示词.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
 2) 阅读方法论参考：`references/测试驱动.md`（需要时再读）。
 3) 阅读测试分层指南：`references/测试分层策略.md`。
-4) 严格按完整提示词执行：`references/4 测试代码提示词.md`。
+4) 严格按完整提示词执行：`references/测试代码提示词.md`。
 5) 模板（按需）：`references/9 变更验证与追溯模板.md`。
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，确保角色隔离和前置条件满足。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `design.md` 是否存在
+2. 检测当前会话是否已执行过 Coder 角色
+3. 检测 `verification.md` 是否已存在
+4. 检测 `tests/` 目录状态
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **首次编写** | `verification.md` 不存在 | 创建完整验收测试套件 |
+| **补充测试** | `verification.md` 存在但有 `[TODO]` | 补充缺失的测试用例 |
+| **Red 基线验证** | 测试存在，需要确认 Red 状态 | 运行测试并记录失败日志 |
+
+### 前置检查
+
+- [ ] `design.md` 存在
+- [ ] 当前会话未执行过 Coder
+- [ ] 有 AC-xxx 可供追溯
+
+### 检测输出示例
+
+```
+检测结果：
+- 产物存在性：design.md ✓, verification.md ✗
+- 角色隔离：✓（当前会话未执行 Coder）
+- AC 数量：14 个
+- 运行模式：首次编写
+```
+
+---
+
+## MCP 增强
+
+本 Skill 不依赖 MCP 服务，无需运行时检测。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+

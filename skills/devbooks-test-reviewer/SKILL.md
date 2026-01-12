@@ -4,15 +4,15 @@
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 ---
 
 ## 角色定义
 
-**test-reviewer** 是 OpenSpec Apply 阶段的专门测试评审角色，与 reviewer（代码评审）互补。
+**test-reviewer** 是 DevBooks Apply 阶段的专门测试评审角色，与 reviewer（代码评审）互补。
 
 ### 职责范围
 
@@ -143,6 +143,46 @@
 | 阶段 | Apply |
 | 产物 | 评审报告（不写入变更包） |
 | 约束 | CON-ROLE-001~003 |
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的评审范围。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `verification.md` 是否存在
+2. 检测测试文件变更范围
+3. 检测 AC 覆盖状态
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **完整评审** | 新变更包首次评审 | 评审所有测试文件 |
+| **增量评审** | 已有评审报告 | 只评审新增/修改的测试 |
+| **覆盖率检查** | 带 --coverage 参数 | 只检查 AC 覆盖情况 |
+
+### 检测输出示例
+
+```
+检测结果：
+- verification.md：存在
+- 测试文件变更：5 个
+- AC 覆盖状态：8/10
+- 运行模式：增量评审
+```
+
+---
+
+## MCP 增强
+
+本 Skill 不依赖 MCP 服务，无需运行时检测。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ---
 

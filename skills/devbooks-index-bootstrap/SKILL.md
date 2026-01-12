@@ -172,3 +172,69 @@ A: 使用 CKB 状态检查工具：
 mcp__ckb__getStatus
 ```
 应返回 `scip: { healthy: true }`。
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的索引策略。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `index.scip` 是否存在
+2. 调用 `mcp__ckb__getStatus` 检查 SCIP 后端状态
+3. 检测项目语言栈
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **首次索引** | index.scip 不存在 | 检测语言栈并生成索引 |
+| **更新索引** | index.scip 存在但过期 | 重新生成索引 |
+| **验证模式** | 带 --check 参数 | 只验证索引状态，不生成 |
+
+### 检测输出示例
+
+```
+检测结果：
+- index.scip：不存在
+- CKB SCIP 后端：不可用
+- 语言栈：TypeScript
+- 运行模式：首次索引
+```
+
+---
+
+## MCP 增强
+
+本 Skill 支持 MCP 运行时增强，用于检测索引状态。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+
+### 依赖的 MCP 服务
+
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__getStatus` | 检测 SCIP 后端状态 | 2s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 检查 SCIP 后端是否 healthy
+3. 若不可用 → 触发索引生成流程
+
+### 索引生成后激活的 MCP 能力
+
+| 功能 | MCP 工具 |
+|------|----------|
+| 符号搜索 | `mcp__ckb__searchSymbols` |
+| 引用查找 | `mcp__ckb__findReferences` |
+| 调用图分析 | `mcp__ckb__getCallGraph` |
+| 影响分析 | `mcp__ckb__analyzeImpact` |
+
+### 降级提示
+
+本 Skill 不需要降级，其目的就是生成索引以启用其他 Skill 的 MCP 增强能力。
+

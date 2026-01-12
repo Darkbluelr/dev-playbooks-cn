@@ -29,7 +29,7 @@ Exit Codes:
 
 Examples:
   env-match-check.sh my-change-001
-  env-match-check.sh my-change-001 --change-root openspec/changes
+  env-match-check.sh my-change-001 --change-root dev-playbooks/changes
 EOF
 }
 

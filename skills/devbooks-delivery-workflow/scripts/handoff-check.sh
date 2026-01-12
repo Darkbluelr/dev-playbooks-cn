@@ -30,7 +30,7 @@ Exit Codes:
 
 Examples:
   handoff-check.sh my-change-001
-  handoff-check.sh my-change-001 --change-root openspec/changes
+  handoff-check.sh my-change-001 --change-root dev-playbooks/changes
   handoff-check.sh my-change-001 --allow-partial
 EOF
 }

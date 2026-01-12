@@ -10,7 +10,7 @@ Installs DevBooks skills (skills/devbooks-*) to:
   - Claude Code: ~/.claude/skills/
   - Codex CLI:   $CODEX_HOME/skills (default: ~/.codex/skills/)
 
-Optionally installs Codex prompt entrypoints (setup/openspec/prompts/devbooks-*.md) to:
+Optionally installs Codex prompt entrypoints (setup/dev-playbooks/prompts/devbooks-*.md) to:
   - Codex CLI:   $CODEX_HOME/prompts (default: ~/.codex/prompts/)
 EOF
 }
@@ -112,7 +112,7 @@ install_into() {
 install_prompts_into() {
   local dest_root="$1"
 
-  local prompts_src="${repo_root}/setup/openspec/prompts"
+  local prompts_src="${repo_root}/setup/dev-playbooks/prompts"
   if [[ ! -d "$prompts_src" ]]; then
     echo "error: missing prompts dir: $prompts_src" >&2
     exit 1

@@ -47,8 +47,8 @@ cd "$PROJECT_ROOT"
 FEDERATION_CONFIG=""
 if [ -f ".devbooks/federation.yaml" ]; then
     FEDERATION_CONFIG=".devbooks/federation.yaml"
-elif [ -f "openspec/federation.yaml" ]; then
-    FEDERATION_CONFIG="openspec/federation.yaml"
+elif [ -f "dev-playbooks/federation.yaml" ]; then
+    FEDERATION_CONFIG="dev-playbooks/federation.yaml"
 fi
 
 if [ -z "$FEDERATION_CONFIG" ]; then

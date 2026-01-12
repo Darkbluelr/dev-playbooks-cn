@@ -1,6 +1,6 @@
 # DevBooks 集成模板（协议无关）
 
-> 目标：把 DevBooks 的角色隔离、DoD、目录落点与 `devbooks-*` Skills 索引写进项目上下文（不依赖 OpenSpec）。
+> 目标：把 DevBooks 的角色隔离、DoD、目录落点与 `devbooks-*` Skills 索引写进项目上下文（不依赖 DevBooks）。
 
 ---
 

@@ -4,7 +4,7 @@
 # 安装方式：
 #   cp this-file .devbooks/federation.yaml
 #   # 或
-#   cp this-file openspec/federation.yaml
+#   cp this-file dev-playbooks/federation.yaml
 #
 # 使用方式：
 #   - devbooks-impact-analysis 会自动检测此文件并分析跨仓边界

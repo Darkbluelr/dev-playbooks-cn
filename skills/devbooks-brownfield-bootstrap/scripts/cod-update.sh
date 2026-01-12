@@ -47,8 +47,8 @@ cd "$PROJECT_ROOT"
 
 # 自动检测 truth-root
 if [ -z "$TRUTH_ROOT" ]; then
-    if [ -f "openspec/project.md" ]; then
-        TRUTH_ROOT="openspec/specs"
+    if [ -f "dev-playbooks/project.md" ]; then
+        TRUTH_ROOT="dev-playbooks/specs"
     elif [ -f ".devbooks/config.yaml" ]; then
         TRUTH_ROOT=$(grep 'truth_root:' .devbooks/config.yaml | awk '{print $2}' | tr -d '"' || echo "specs")
     else

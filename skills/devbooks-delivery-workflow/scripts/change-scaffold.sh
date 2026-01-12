@@ -19,7 +19,7 @@ Options:
                 Prototype code is physically isolated from production code.
 
 Notes:
-- This script is protocol-agnostic. For OpenSpec, pass --change-root openspec/changes --truth-root openspec/specs.
+- Use --change-root and --truth-root to customize paths for your project layout.
 - It writes markdown templates for proposal/design/tasks/verification and creates specs/ + evidence/ directories.
 EOF
 }

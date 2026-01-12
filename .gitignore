@@ -8,6 +8,7 @@ CLAUDE.md
 
 # DevBooks local config (keep template, ignore user-specific)
 .devbooks/embeddings/
+.devbooks/backup/
 .devbooks/*.log
 
 # Project self-test artifacts (not part of the library)

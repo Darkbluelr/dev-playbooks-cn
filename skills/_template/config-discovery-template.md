@@ -11,7 +11,7 @@
 ### 查找顺序
 
 1. `.devbooks/config.yaml`（如存在）→ 解析其中的映射
-2. `openspec/project.md`（如存在）→ 使用 OpenSpec 默认映射
+2. `dev-playbooks/project.md`（如存在）→ 使用 DevBooks 默认映射
 3. `project.md`（如存在）→ 使用 template 默认映射
 4. 若仍无法确定 → **停止并询问用户**
 
@@ -19,7 +19,7 @@
 
 | 协议 | truth_root | change_root | agents_doc |
 |------|------------|-------------|------------|
-| openspec | `openspec/specs/` | `openspec/changes/` | `openspec/project.md` |
+| devbooks | `dev-playbooks/specs/` | `dev-playbooks/changes/` | `dev-playbooks/project.md` |
 | template | `specs/` | `changes/` | `project.md` |
 
 ### 从配置中获取
@@ -63,7 +63,7 @@ source <("$DEVBOOKS_SCRIPTS/../config-discovery.sh")
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）
-2. `openspec/project.md`（如存在）
+2. `dev-playbooks/project.md`（如存在）
 3. `project.md`（如存在）
 4. 若仍无法确定 → **停止并询问用户**
 
@@ -79,10 +79,10 @@ source <("$DEVBOOKS_SCRIPTS/../config-discovery.sh")
 ```markdown
 ## 前置：目录根（协议无关）
 
-- `<truth-root>`：当前真理目录根（默认建议 `specs/`；OpenSpec 项目为 `openspec/specs/`）
-- `<change-root>`：变更包目录根（默认建议 `changes/`；OpenSpec 项目为 `openspec/changes/`）
+- `<truth-root>`：当前真理目录根（默认建议 `specs/`；DevBooks 项目为 `dev-playbooks/specs/`）
+- `<change-root>`：变更包目录根（默认建议 `changes/`；DevBooks 项目为 `dev-playbooks/changes/`）
 
-执行前必须先尝试读取 `openspec/project.md`（如存在）以确定 `<truth-root>/<change-root>`；禁止猜测目录根。若仍无法确定，再询问用户确认。
+执行前必须先尝试读取 `dev-playbooks/project.md`（如存在）以确定 `<truth-root>/<change-root>`；禁止猜测目录根。若仍无法确定，再询问用户确认。
 ```
 
 ### 更新后（协议发现）
@@ -95,7 +95,7 @@ source <("$DEVBOOKS_SCRIPTS/../config-discovery.sh")
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 协议，使用默认映射
 3. `project.md`（如存在）→ template 协议，使用默认映射
 4. 若仍无法确定 → **停止并询问用户**
 
@@ -113,7 +113,7 @@ source <("$DEVBOOKS_SCRIPTS/../config-discovery.sh")
 #!/bin/bash
 # 批量更新所有 Skills 的 SKILL.md
 
-OLD_PATTERN='执行前必须先尝试读取 `openspec/project.md`'
+OLD_PATTERN='执行前必须先尝试读取 `dev-playbooks/project.md`'
 NEW_TEXT='执行前**必须**按以下顺序查找配置'
 
 for skill_dir in skills/devbooks-*/; do

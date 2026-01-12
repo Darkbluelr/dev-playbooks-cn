@@ -1,6 +1,6 @@
 ---
 name: devbooks-coder
-description: devbooks-coder：以 Coder 角色严格按 tasks.md 实现功能并跑闸门，禁止修改 tests/，以测试/静态检查为唯一完成判据。用户说"按计划实现/修复测试失败/让闸门全绿/实现任务项/不改测试"，或在 OpenSpec apply 阶段以 coder 执行时使用。
+description: devbooks-coder：以 Coder 角色严格按 tasks.md 实现功能并跑闸门，禁止修改 tests/，以测试/静态检查为唯一完成判据。用户说"按计划实现/修复测试失败/让闸门全绿/实现任务项/不改测试"，或在 DevBooks apply 阶段以 coder 执行时使用。
 tools:
   - Glob
   - Grep
@@ -19,9 +19,9 @@ tools:
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
@@ -135,6 +135,85 @@ fi
 
 ## 执行方式
 
-1) 先阅读并遵守：`references/项目开发实用提示词.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
 2) 阅读低风险改动技术：`references/低风险改动技术.md`（需要时再读）。
-3) 严格按完整提示词执行：`references/11 代码实现提示词.md`。
+3) 严格按完整提示词执行：`references/代码实现提示词.md`。
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，确保前置条件满足。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `tasks.md` 是否存在
+2. 检测 `verification.md` 是否存在（Test Owner 已完成）
+3. 检测当前会话是否已执行过 Test Owner 角色
+4. 识别 tasks.md 中的进度（已完成/待做）
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **首次实现** | tasks.md 全部为 `[ ]` | 从 MP1.1 开始 |
+| **断点续做** | tasks.md 有部分 `[x]` | 从最后 `[x]` 后的第一个 `[ ]` 继续 |
+| **闸门修复** | 测试失败需要修复 | 优先处理失败项 |
+
+### 前置检查
+
+- [ ] `tasks.md` 存在
+- [ ] `verification.md` 存在
+- [ ] 当前会话未执行过 Test Owner
+- [ ] `tests/**` 有测试文件
+
+### 检测输出示例
+
+```
+检测结果：
+- 产物存在性：tasks.md ✓, verification.md ✓
+- 角色隔离：✓（当前会话未执行 Test Owner）
+- 进度：6/10 已完成
+- 运行模式：断点续做，从 MP1.7 继续
+```
+
+---
+
+## MCP 增强
+
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+
+### 依赖的 MCP 服务
+
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__getHotspots` | 检测热点文件，输出预警 | 2s |
+| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 若 CKB 可用 → 调用 `mcp__ckb__getHotspots` 获取热点文件
+3. 若超时或失败 → 降级到基础模式（无热点预警）
+
+### 增强模式 vs 基础模式
+
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 热点文件预警 | CKB 实时分析 | 不可用 |
+| 风险文件识别 | 自动高亮高热点变更 | 手动识别 |
+| 代码导航 | 符号级跳转 | 文件级搜索 |
+
+### 降级提示
+
+当 MCP 不可用时，输出以下提示：
+
+```
+⚠️ CKB 不可用，跳过热点检测。
+如需启用热点预警，请运行 /devbooks:index 生成索引。
+```
+

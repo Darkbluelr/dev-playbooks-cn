@@ -19,9 +19,9 @@ tools:
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
@@ -124,7 +124,7 @@ Options:
 ```bash
 # 完整架构检查（合并前）
 guardrail-check.sh <change-id> \
-  --truth-root openspec \
+  --truth-root devbooks \
   --check-layers \
   --check-cycles \
   --check-hotspots \
@@ -142,7 +142,76 @@ guardrail-check.sh <change-id> --check-layers --check-cycles
 - name: Architecture Compliance Check
   run: |
     ./scripts/guardrail-check.sh ${{ github.event.pull_request.number }} \
-      --truth-root openspec \
+      --truth-root devbooks \
       --check-layers \
       --check-cycles
+```
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的工作流阶段。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测变更包是否存在
+2. 检测当前阶段（proposal/apply/archive）
+3. 检测闸门状态
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **初始化模式** | 变更包不存在 | 创建变更包骨架 |
+| **检查模式** | 带 --check 参数 | 只运行闸门检查 |
+| **完整闭环** | 无特殊参数 | 执行完整 Design→Archive 流程 |
+
+### 检测输出示例
+
+```
+检测结果：
+- 变更包：存在
+- 当前阶段：apply
+- 闸门状态：proposal ✓, design ✓, tasks ✓
+- 运行模式：检查模式（apply 阶段）
+```
+
+---
+
+## MCP 增强
+
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+
+### 依赖的 MCP 服务
+
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 在工作流状态报告中标注索引可用性
+3. 若不可用 → 建议在 apply 阶段前生成索引
+
+### 增强模式 vs 基础模式
+
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 架构检查 | 精确依赖分析 | 基于 import 语句 |
+| 热点预警 | CKB 实时分析 | 不可用 |
+| 影响评估 | 调用图分析 | 文件级估算 |
+
+### 降级提示
+
+当 MCP 不可用时，输出以下提示：
+
+```
+⚠️ CKB 索引不可用，架构检查将使用基础模式。
+建议运行 /devbooks:index 生成索引以启用精确检查。
 ```

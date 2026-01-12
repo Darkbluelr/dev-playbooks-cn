@@ -1,11 +1,11 @@
 # DevBooks Skills 速查表（作用 / 场景 / 话术）
 
-默认按 OpenSpec 项目示例写路径：
-- `<truth-root>` = `openspec/specs`
-- `<change-root>` = `openspec/changes`
+默认按 DevBooks 项目示例写路径：
+- `<truth-root>` = `dev-playbooks/specs`
+- `<change-root>` = `dev-playbooks/changes`
 - `<change-id>` = 本次变更包目录名（动词开头）
 
-如果你不是 OpenSpec：把 `openspec/specs` / `openspec/changes` 替换成你项目“指路牌文件”里定义的 `<truth-root>` / `<change-root>`。
+如果你不是 DevBooks：把 `dev-playbooks/specs` / `dev-playbooks/changes` 替换成你项目“指路牌文件”里定义的 `<truth-root>` / `<change-root>`。
 
 ---
 
@@ -21,7 +21,7 @@
 - 使用话术（可直接复制）：
   ```text
   你现在是 Router。请点名使用 `devbooks-router`。
-  先读：`openspec/project.md`
+  先读：`dev-playbooks/project.md`
   先问我 2 个问题：`<change-id>` 是什么？`<truth-root>/<change-root>` 在本项目的取值是什么？
   然后给出下一步要用的 Skills（按顺序）+ 每个产物应落到的文件路径。
 
@@ -31,7 +31,7 @@
 - Prototype 模式话术（技术方案不确定时）：
   ```text
   你现在是 Router。请点名使用 `devbooks-router`，并启用 **Prototype 模式**。
-  先读：`openspec/project.md`
+  先读：`dev-playbooks/project.md`
 
   我想做一个"扔掉式原型"来验证技术可行性（Plan to Throw One Away）。
   请按原型轨道路由：
@@ -54,10 +54,10 @@
   - 需要把范围、风险、回滚、验收口径说清楚再动手
 - 使用话术：
   ```text
-  你现在是 Proposal Author。请点名使用 `devbooks-proposal-author`，按 OpenSpec proposal 阶段执行（禁止写实现代码）。
-  先读：`openspec/project.md`
+  你现在是 Proposal Author。请点名使用 `devbooks-proposal-author`，按 DevBooks proposal 阶段执行（禁止写实现代码）。
+  先读：`dev-playbooks/project.md`
   请你先生成一个动词开头的 `<change-id>`，并在输出里重复 3 次让我确认。
-  然后写：`openspec/changes/<change-id>/proposal.md`（必须包含 Debate Packet）。
+  然后写：`dev-playbooks/changes/<change-id>/proposal.md`（必须包含 Debate Packet）。
   额外要求：proposal 的 Impact 里必须写清 `价值信号与观测口径`、`价值流瓶颈假设（排队点）`（不会写就填“无”）。
 
   我的需求是：
@@ -78,9 +78,9 @@
 - 使用话术：
   ```text
   你现在是 Impact Analyst。请点名使用 `devbooks-impact-analysis`（禁止写代码）。
-  先读：`openspec/project.md`、`openspec/changes/<change-id>/proposal.md`、`openspec/specs/**`
+  先读：`dev-playbooks/project.md`、`dev-playbooks/changes/<change-id>/proposal.md`、`dev-playbooks/specs/**`
   请输出影响分析（Scope/Impacts/Risks/Minimal Diff/Open Questions），并把结论回填到：
-  `openspec/changes/<change-id>/proposal.md` 的 Impact 部分。
+  `dev-playbooks/changes/<change-id>/proposal.md` 的 Impact 部分。
   ```
 
 ---
@@ -94,7 +94,7 @@
 - 使用话术：
   ```text
   你现在是 Proposal Challenger。请点名使用 `devbooks-proposal-challenger`。
-  只读取：`openspec/changes/<change-id>/proposal.md`（如有再读 `design.md` / `openspec/specs/**`）
+  只读取：`dev-playbooks/changes/<change-id>/proposal.md`（如有再读 `design.md` / `dev-playbooks/specs/**`）
   只输出“质疑报告”（结论必须 `Approve | Revise | Reject`），不要修改任何文件。
   ```
 
@@ -108,9 +108,9 @@
 - 使用话术：
   ```text
   你现在是 Proposal Judge。请点名使用 `devbooks-proposal-judge`。
-  输入：`openspec/changes/<change-id>/proposal.md` + 我粘贴的 Challenger 报告
+  输入：`dev-playbooks/changes/<change-id>/proposal.md` + 我粘贴的 Challenger 报告
   请给出裁决（`Approved | Revise | Rejected`），并把裁决与“必须修改项/验证要求”写回：
-  `openspec/changes/<change-id>/proposal.md` 的 Decision Log（禁止 Pending）。
+  `dev-playbooks/changes/<change-id>/proposal.md` 的 Decision Log（禁止 Pending）。
   ```
 
 ---
@@ -124,9 +124,9 @@
 - 使用话术：
   ```text
   你现在是 Proposal Debate Orchestrator。请点名使用 `devbooks-proposal-debate-workflow`。
-  先读：`openspec/project.md`
+  先读：`dev-playbooks/project.md`
   约束：Author/Challenger/Judge 必须独立对话/独立实例；如果我无法提供独立对话，你就停止并说明原因。
-  目标：最终 `openspec/changes/<change-id>/proposal.md` 的 Decision Log 状态必须为 Approved/Revise/Rejected（禁止 Pending）。
+  目标：最终 `dev-playbooks/changes/<change-id>/proposal.md` 的 Decision Log 状态必须为 Approved/Revise/Rejected（禁止 Pending）。
   请你按工作流逐步告诉我：每一个独立对话里我要复制粘贴的指令是什么，以及每一步需要我把什么结果贴回当前对话。
 
   我的需求是：
@@ -144,8 +144,8 @@
 - 使用话术：
   ```text
   你现在是 Design Owner。请点名使用 `devbooks-design-doc`（禁止写实现步骤）。
-  先读：`openspec/project.md`、`openspec/changes/<change-id>/proposal.md`
-  请写：`openspec/changes/<change-id>/design.md`（只写 What/Constraints + AC-xxx）。
+  先读：`dev-playbooks/project.md`、`dev-playbooks/changes/<change-id>/proposal.md`
+  请写：`dev-playbooks/changes/<change-id>/design.md`（只写 What/Constraints + AC-xxx）。
   ```
 
 ---
@@ -162,9 +162,9 @@
 - 使用话术：
   ```text
   你现在是 Spec & Contract Owner。请点名使用 `devbooks-spec-contract`。
-  先读：`openspec/changes/<change-id>/proposal.md`、`openspec/changes/<change-id>/design.md`（如有）
+  先读：`dev-playbooks/changes/<change-id>/proposal.md`、`dev-playbooks/changes/<change-id>/design.md`（如有）
   请一次性输出：
-  - 规格 delta：`openspec/changes/<change-id>/specs/<capability>/spec.md`（Requirements/Scenarios）
+  - 规格 delta：`dev-playbooks/changes/<change-id>/specs/<capability>/spec.md`（Requirements/Scenarios）
   - 契约计划：写入 `design.md` 的 Contract 章节（API 变更 + 兼容策略 + Contract Test IDs）
   如有隐式变更风险，运行：`implicit-change-detect.sh`
   ```
@@ -180,15 +180,15 @@
 - 使用话术：
   - Proposal（只写 C4 Delta，不改当前真理）：
     ```text
-    你现在是 C4 Map Maintainer。请点名使用 `devbooks-c4-map`，但在 proposal 阶段**不要修改** `openspec/specs/architecture/c4.md`（当前真理）。
-    先读：`openspec/specs/architecture/c4.md`（如存在）+ 本次 `openspec/changes/<change-id>/proposal.md` + `openspec/changes/<change-id>/design.md`
-    请输出：一段可直接粘贴进 `openspec/changes/<change-id>/design.md` 的 **C4 Delta** 小节（C1/C2/C3 新增/修改/移除 + 依赖方向变化 + 建议的 Architecture Guardrails/fitness tests 条目）。
+    你现在是 C4 Map Maintainer。请点名使用 `devbooks-c4-map`，但在 proposal 阶段**不要修改** `dev-playbooks/specs/architecture/c4.md`（当前真理）。
+    先读：`dev-playbooks/specs/architecture/c4.md`（如存在）+ 本次 `dev-playbooks/changes/<change-id>/proposal.md` + `dev-playbooks/changes/<change-id>/design.md`
+    请输出：一段可直接粘贴进 `dev-playbooks/changes/<change-id>/design.md` 的 **C4 Delta** 小节（C1/C2/C3 新增/修改/移除 + 依赖方向变化 + 建议的 Architecture Guardrails/fitness tests 条目）。
     ```
   - Review/Archive（更新当前真理的权威地图）：
   ```text
   你现在是 C4 Map Maintainer。请点名使用 `devbooks-c4-map`。
-  先读：`openspec/specs/architecture/c4.md`（如存在）+ 本次 `openspec/changes/<change-id>/design.md` + 相关代码改动（用于确认变更已真实落地）
-  请更新（或创建最小骨架并标 TODO）：`openspec/specs/architecture/c4.md`。
+  先读：`dev-playbooks/specs/architecture/c4.md`（如存在）+ 本次 `dev-playbooks/changes/<change-id>/design.md` + 相关代码改动（用于确认变更已真实落地）
+  请更新（或创建最小骨架并标 TODO）：`dev-playbooks/specs/architecture/c4.md`。
   ```
 
 ---
@@ -202,9 +202,9 @@
 - 使用话术：
   ```text
   你现在是 Planner。请点名使用 `devbooks-implementation-plan`（禁止写实现代码）。
-  先读：`openspec/changes/<change-id>/design.md`（以及本次 `specs/**` 如有）；不得参考 `tests/**`。
-  请写：`openspec/changes/<change-id>/tasks.md`（每个任务都必须有验收锚点）。
-  最后运行：`openspec validate <change-id> --strict` 并修复所有问题。
+  先读：`dev-playbooks/changes/<change-id>/design.md`（以及本次 `specs/**` 如有）；不得参考 `tests/**`。
+  请写：`dev-playbooks/changes/<change-id>/tasks.md`（每个任务都必须有验收锚点）。
+  最后运行：`devbooks validate <change-id> --strict` 并修复所有问题。
   ```
 
 ---
@@ -218,13 +218,13 @@
 - **输出管理**：测试输出超过 50 行时，只保留关键失败信息，完整日志落盘到 `evidence/`
 - 使用话术（必须新对话/独立实例）：
   ```text
-  你现在是 Test Owner（必须独立对话/独立实例）。请点名使用 `devbooks-test-owner`，按 OpenSpec apply 阶段执行。
-  只读输入：`openspec/changes/<change-id>/proposal.md`、`design.md`、本次 `specs/**`（如有）；不得参考 `tasks.md`。
+  你现在是 Test Owner（必须独立对话/独立实例）。请点名使用 `devbooks-test-owner`，按 DevBooks apply 阶段执行。
+  只读输入：`dev-playbooks/changes/<change-id>/proposal.md`、`design.md`、本次 `specs/**`（如有）；不得参考 `tasks.md`。
   产出：
-    - `openspec/changes/<change-id>/verification.md`（含追溯矩阵）
+    - `dev-playbooks/changes/<change-id>/verification.md`（含追溯矩阵）
     - `tests/**`（按仓库惯例）
-    - 失败证据落盘到 `openspec/changes/<change-id>/evidence/`
-  要求：必须先跑出 Red 基线；最后运行 `openspec validate <change-id> --strict`。
+    - 失败证据落盘到 `dev-playbooks/changes/<change-id>/evidence/`
+  要求：必须先跑出 Red 基线；最后运行 `devbooks validate <change-id> --strict`。
   ```
 
 ---
@@ -242,11 +242,11 @@
 - **输出管理**：命令输出超过 50 行时，只保留首尾各 10 行 + 摘要，完整日志落盘到 `evidence/`
 - 使用话术（必须新对话/独立实例）：
   ```text
-  你现在是 Coder（必须独立对话/独立实例）。请点名使用 `devbooks-coder`，按 OpenSpec apply 阶段执行。
-  先读：`openspec/changes/<change-id>/tasks.md`、以及 Test Owner 的 `verification.md`（如已存在）。
+  你现在是 Coder（必须独立对话/独立实例）。请点名使用 `devbooks-coder`，按 DevBooks apply 阶段执行。
+  先读：`dev-playbooks/changes/<change-id>/tasks.md`、以及 Test Owner 的 `verification.md`（如已存在）。
   严格按 `tasks.md` 实现；每完成一项再勾选 `- [x]`。
   禁止修改 `tests/**`；如需调整测试只能交还 Test Owner。
-  以 tests/静态检查/build 为唯一完成判据；必要时把关键输出落盘到 `openspec/changes/<change-id>/evidence/`。
+  以 tests/静态检查/build 为唯一完成判据；必要时把关键输出落盘到 `dev-playbooks/changes/<change-id>/evidence/`。
   ```
 
 ---
@@ -265,7 +265,7 @@
   ```text
   你现在是 Reviewer。请点名使用 `devbooks-code-review`。
   请只做可读性/一致性/依赖健康度/坏味道审查，不讨论业务正确性；不改 tests/，不改设计。
-  输入：本次变更涉及的代码 + `openspec/specs/**`（如需要项目画像/术语表/坑库）。
+  输入：本次变更涉及的代码 + `dev-playbooks/specs/**`（如需要项目画像/术语表/坑库）。
   输出：严重问题 / 可维护性风险 / 一致性建议 / 需要新增的质量闸门建议。
   ```
 
@@ -281,7 +281,7 @@
   ```text
   你现在是 Design Doc Editor。请点名使用 `devbooks-design-backport`。
   触发：实现中发现设计缺口/冲突/临时决策。
-  请把需要上升到设计层的内容回写：`openspec/changes/<change-id>/design.md`（说明原因与影响），然后停止。
+  请把需要上升到设计层的内容回写：`dev-playbooks/changes/<change-id>/design.md`（说明原因与影响），然后停止。
   你必须明确提示我：需要回到 Planner 重跑 tasks；Test Owner 可能需要补测试/重跑 Red 基线。
   ```
 
@@ -296,8 +296,8 @@
 - 使用话术：
   ```text
   你现在是 Spec Gardener。请点名使用 `devbooks-spec-gardener`。
-  输入：`openspec/changes/<change-id>/specs/**` + `openspec/specs/**` + `openspec/changes/<change-id>/design.md`（如有）
-  只允许修改 `openspec/specs/**` 做合并/去重/归类/删除过时；不要修改 change 包内容。
+  输入：`dev-playbooks/changes/<change-id>/specs/**` + `dev-playbooks/specs/**` + `dev-playbooks/changes/<change-id>/design.md`（如有）
+  只允许修改 `dev-playbooks/specs/**` 做合并/去重/归类/删除过时；不要修改 change 包内容。
   输出按顺序：变更操作清单（CREATE/UPDATE/MOVE/DELETE）→ 每个 CREATE/UPDATE 的完整文件内容 → 合并映射摘要 → Open Questions（<=3）。
   ```
 
@@ -321,13 +321,13 @@
 
   项目根目录：$(pwd)
   本次 change-id：<change-id>
-  truth-root：openspec/specs
-  change-root：openspec/changes
+  truth-root：dev-playbooks/specs
+  change-root：dev-playbooks/changes
 
   请你依次建议并执行（等我确认）：
-  1) `change-scaffold.sh <change-id> --project-root \"$(pwd)\" --change-root openspec/changes --truth-root openspec/specs`
-  2) `change-check.sh <change-id> --mode proposal --project-root \"$(pwd)\" --change-root openspec/changes --truth-root openspec/specs`
-  3) （需要证据时）用 `change-evidence.sh` 把测试/命令输出落盘到 `openspec/changes/<change-id>/evidence/`
+  1) `change-scaffold.sh <change-id> --project-root \"$(pwd)\" --change-root dev-playbooks/changes --truth-root dev-playbooks/specs`
+  2) `change-check.sh <change-id> --mode proposal --project-root \"$(pwd)\" --change-root dev-playbooks/changes --truth-root dev-playbooks/specs`
+  3) （需要证据时）用 `change-evidence.sh` 把测试/命令输出落盘到 `dev-playbooks/changes/<change-id>/evidence/`
   ```
 
 ---
@@ -341,18 +341,18 @@
   - 领域概念：`<truth-root>/_meta/key-concepts.md`（来自 `mcp__ckb__listKeyConcepts`）
   - 项目画像模板：三层架构（语法层/语义层/上下文层）
 - 使用场景:
-  - 老项目想接入 DevBooks/OpenSpec，但没有当前真理与规格基线
+  - 老项目想接入 DevBooks/DevBooks，但没有当前真理与规格基线
   - 你想先把“现在是什么样”写清楚，再开始改动
 - 使用话术：
   ```text
   你现在是 Brownfield Bootstrapper。请点名使用 `devbooks-brownfield-bootstrap`。
-  先确认：本项目 truth-root = `openspec/specs`，change-root = `openspec/changes`。
+  先确认：本项目 truth-root = `dev-playbooks/specs`，change-root = `dev-playbooks/changes`。
   约束：只产出文档与基线规格，不做重构、不改业务行为、不输出实现计划。
   请按该 skill 的要求一次性补齐：
-    - `openspec/specs/_meta/project-profile.md`
-    - （可选）`openspec/specs/_meta/glossary.md`
-    - 一个 baseline change package：`openspec/changes/<baseline-id>/*`（proposal/design/specs/verification）
-  最后告诉我：如何把 baseline 合并进 `openspec/specs/`（归档/人工步骤）。
+    - `dev-playbooks/specs/_meta/project-profile.md`
+    - （可选）`dev-playbooks/specs/_meta/glossary.md`
+    - 一个 baseline change package：`dev-playbooks/changes/<baseline-id>/*`（proposal/design/specs/verification）
+  最后告诉我：如何把 baseline 合并进 `dev-playbooks/specs/`（归档/人工步骤）。
   ```
 
 ---
@@ -367,7 +367,7 @@
 - 使用话术：
   ```text
   你现在是 Entropy Monitor。请点名使用 `devbooks-entropy-monitor`。
-  先读：`openspec/project.md`（如存在）
+  先读：`dev-playbooks/project.md`（如存在）
   目标：采集当前系统的熵度量，并生成量化报告。
 
   请按以下步骤执行：
@@ -377,7 +377,7 @@
   4) 如果有超阈值指标：给出重构建议（可作为后续 proposal 的数据支撑）
 
   项目根目录：$(pwd)
-  truth-root：openspec/specs
+  truth-root：dev-playbooks/specs
   ```
 - 定期执行建议：
   - 小型项目（< 10K LOC）：每周手动运行

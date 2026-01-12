@@ -22,7 +22,7 @@ tools:
 
 ## 前置条件
 
-- 项目根目录存在 `.devbooks/federation.yaml` 或 `openspec/federation.yaml`
+- 项目根目录存在 `.devbooks/federation.yaml` 或 `dev-playbooks/federation.yaml`
 - 如需跨仓库搜索，需要 GitHub MCP 已配置
 
 ## 执行流程
@@ -33,8 +33,8 @@ tools:
 # 检测联邦配置文件
 if [ -f ".devbooks/federation.yaml" ]; then
   FEDERATION_CONFIG=".devbooks/federation.yaml"
-elif [ -f "openspec/federation.yaml" ]; then
-  FEDERATION_CONFIG="openspec/federation.yaml"
+elif [ -f "dev-playbooks/federation.yaml" ]; then
+  FEDERATION_CONFIG="dev-playbooks/federation.yaml"
 else
   echo "未找到联邦配置，请先创建 federation.yaml"
   exit 1
@@ -190,3 +190,75 @@ bash skills/devbooks-federation/scripts/federation-notify.sh \
 ## 参考
 
 - [API Versioning Best Practices](https://swagger.io/resources/articles/best-practices-in-api-versioning/)
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的分析范围。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测 `federation.yaml` 是否存在
+2. 检测本次变更是否涉及契约文件
+3. 检测是否有跨仓库影响标记
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **本地分析** | 契约变更但无跨仓库配置 | 只分析本仓库内引用 |
+| **联邦分析** | federation.yaml 存在 | 分析上下游仓库影响 |
+| **通知模式** | 配置 notify_on_change=true | 自动创建下游 Issue |
+
+### 检测输出示例
+
+```
+检测结果：
+- federation.yaml：存在
+- 契约变更：2 个文件
+- 跨仓库标记：是
+- 运行模式：联邦分析
+```
+
+---
+
+## MCP 增强
+
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+
+### 依赖的 MCP 服务
+
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__analyzeImpact` | 符号级影响分析 | 2s |
+| `mcp__ckb__findReferences` | 本仓库引用查找 | 2s |
+| `mcp__github__search_code` | 跨仓库代码搜索 | 5s |
+| `mcp__github__create_issue` | 创建下游通知 Issue | 5s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__findReferences` 检测本仓库引用（2s 超时）
+2. 若需跨仓库分析 → 调用 `mcp__github__search_code`（5s 超时）
+3. 若 GitHub MCP 不可用 → 跳过跨仓库搜索，只输出本仓库分析
+
+### 增强模式 vs 基础模式
+
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 本仓库引用 | CKB 精确分析 | Grep 文本搜索 |
+| 跨仓库搜索 | GitHub API 搜索 | 不可用 |
+| 自动通知 | 创建下游 Issue | 手动通知 |
+
+### 降级提示
+
+当 MCP 不可用时，输出以下提示：
+
+```
+⚠️ GitHub MCP 不可用，无法进行跨仓库搜索。
+只能分析本仓库内的引用情况，跨仓库影响需手动确认。
+```

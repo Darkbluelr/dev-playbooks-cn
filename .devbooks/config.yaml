@@ -4,27 +4,49 @@
 # 此文件由 DevBooks setup 自动生成，用于让 AI 自动发现项目配置。
 # 请勿删除或随意修改，除非你清楚每个字段的含义。
 
-# 协议类型：openspec | template | custom
-protocol: openspec
+# ==================== DevBooks 2.0 新配置格式 ====================
 
-# 目录根映射
+# 根目录（新格式）
+root: dev-playbooks/
+
+# 宪法文件（强制加载）
+constitution: constitution.md
+
+# 项目上下文
+project: project.md
+
+# 路径配置
+paths:
+  specs: specs/
+  changes: changes/
+  scripts: scripts/
+  staged: specs/_staged/
+  anti_patterns: specs/_meta/anti-patterns/
+
+# ==================== 向后兼容配置（保留 3 个版本） ====================
+
+# 协议类型：devbooks | template | custom
+# protocol: devbooks
+
+# 目录根映射（旧格式，向后兼容）
 # - truth_root: 当前真理源（规格/设计的最终版本）
 # - change_root: 变更包目录（每次变更的所有产物）
-truth_root: openspec/specs/
-change_root: openspec/changes/
+truth_root: dev-playbooks/specs/
+change_root: dev-playbooks/changes/
 
-# 规则文档位置
+# 规则文档位置（旧格式）
 # AI 在执行任何 Skill 前必须先阅读此文档
-agents_doc: openspec/project.md
+agents_doc: dev-playbooks/project.md
 
 # 项目画像（可选）
 # 包含技术栈、命令、约定、闸门等信息
-project_profile: openspec/specs/_meta/project-profile.md
+project_profile: dev-playbooks/specs/_meta/project-profile.md
 
-# 协议约束
+# ==================== 协议约束 ====================
+
 constraints:
   # apply 阶段是否必须指定角色
-  # 为 true 时，/openspec:apply 必须带 role 参数，否则显示菜单等待用户输入
+  # 为 true 时，/devbooks:apply 必须带 role 参数，否则显示菜单等待用户输入
   apply_requires_role: true
 
   # apply 阶段可用角色
@@ -45,7 +67,56 @@ constraints:
   # 为 true 时，遇到代理指标驱动要求必须停线评估
   structural_guardrails: true
 
-# 提案阶段配置（可选）
+  # 是否强制加载宪法（新增）
+  require_constitution: true
+
+# ==================== 宪法配置（新增） ====================
+
+constitution_config:
+  # 是否在每个 Skill 执行前输出宪法内容
+  output_on_skill: false
+
+  # 宪法检查模式：strict（失败则阻断）| warn（仅警告）
+  check_mode: strict
+
+# ==================== 适应度函数配置（新增） ====================
+
+fitness:
+  # 适应度检查模式：error（阻断）| warn（警告）| off（关闭）
+  mode: warn
+
+  # 规则文件路径
+  rules_file: specs/architecture/fitness-rules.md
+
+  # 性能目标
+  performance:
+    max_check_time_seconds: 5
+
+# ==================== AC 追溯配置（新增） ====================
+
+tracing:
+  # AC 覆盖率阈值
+  coverage_threshold: 80
+
+  # 输出格式：text | json
+  output_format: text
+
+# ==================== 三层同步配置（新增） ====================
+
+sync:
+  # 冲突检测级别
+  conflict_detection:
+    file_level: true
+    content_level: true
+    dependency_level: false
+
+  # 冲突解决超时
+  conflict:
+    human_timeout: 24h
+    escalation_timeout: 48h
+
+# ==================== 提案阶段配置 ====================
+
 proposal:
   # 是否启用三角对辩（Author/Challenger/Judge）
   enable_debate: true
@@ -54,6 +125,7 @@ proposal:
   require_impact_analysis: true
 
 # ==================== 功能特性配置 ====================
+
 features:
   # 复杂度加权热点：启用时热点分数 = 频率 × 复杂度
   complexity_weighted_hotspot: true
@@ -65,6 +137,7 @@ features:
   hotspot_limit: 5
 
 # ==================== CKB 索引配置 ====================
+
 ckb:
   # 是否启用索引引导提示
   index_hint_enabled: true
@@ -75,6 +148,7 @@ ckb:
     - .git/ckb/
 
 # ==================== 本地工具配置 ====================
+
 tools:
   complexity:
     threshold: 10           # 圈复杂度阈值

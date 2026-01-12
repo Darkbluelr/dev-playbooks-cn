@@ -1,0 +1,88 @@
+# .devbooks/config.yaml
+# DevBooks Protocol Discovery Configuration
+#
+# 此文件由 DevBooks 自动生成，用于让 AI 自动发现项目配置。
+# 请勿随意删除或修改，除非你清楚每个字段的含义。
+
+# ==================== DevBooks 配置 ====================
+
+# 根目录
+root: dev-playbooks/
+
+# 宪法文件（强制加载）
+constitution: constitution.md
+
+# 项目上下文
+project: project.md
+
+# 路径配置
+paths:
+  specs: specs/
+  changes: changes/
+  scripts: scripts/
+  staged: specs/_staged/
+  anti_patterns: specs/_meta/anti-patterns/
+
+# ==================== 向后兼容配置 ====================
+
+# 目录根映射（向后兼容）
+truth_root: dev-playbooks/specs/
+change_root: dev-playbooks/changes/
+
+# 规则文档位置
+agents_doc: dev-playbooks/project.md
+
+# 项目画像（可选）
+project_profile: dev-playbooks/specs/_meta/project-profile.md
+
+# ==================== 协议约束 ====================
+
+constraints:
+  # apply 阶段是否必须指定角色
+  apply_requires_role: true
+
+  # apply 阶段可用角色
+  apply_roles:
+    - test-owner
+    - coder
+    - reviewer
+    - test-reviewer
+
+  # Test Owner 与 Coder 是否必须独立对话
+  role_isolation: true
+
+  # Coder 是否禁止修改 tests/
+  coder_no_tests: true
+
+  # 是否启用结构质量守门
+  structural_guardrails: true
+
+  # 是否强制加载宪法
+  require_constitution: true
+
+# ==================== 适应度函数配置 ====================
+
+fitness:
+  # 适应度检查模式：error（阻断）| warn（警告）| off（关闭）
+  mode: warn
+
+  # 规则文件路径
+  rules_file: specs/architecture/fitness-rules.md
+
+# ==================== AC 追溯配置 ====================
+
+tracing:
+  # AC 覆盖率阈值
+  coverage_threshold: 80
+
+  # 输出格式：text | json
+  output_format: text
+
+# ==================== 提案阶段配置 ====================
+
+proposal:
+  # 是否启用三角对辩（Author/Challenger/Judge）
+  enable_debate: true
+
+  # 是否需要 Impact Analysis（跨模块变更）
+  require_impact_analysis: true

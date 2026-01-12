@@ -1,6 +1,6 @@
 ---
 name: devbooks-router
-description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 OpenSpec proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说"下一步怎么做/路由到合适 skill/按 openspec 跑闭环"等时使用。
+description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 DevBooks proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说"下一步怎么做/路由到合适 skill/按 devbooks 跑闭环"等时使用。
 tools:
   - Glob
   - Grep
@@ -18,9 +18,9 @@ tools:
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `openspec/project.md`（如存在）→ OpenSpec 协议，使用默认映射
-3. `project.md`（如存在）→ template 协议，使用默认映射
-4. 若仍无法确定 → **停止并询问用户**
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
@@ -73,7 +73,98 @@ fi
    - `<truth-root>` / `<change-root>` 在该项目最终取值是什么？
 2) 给出“下一步路由结果”（3–6 条即可）：
    - 每条包含：要用的 Skill + 产物路径 + 为什么需要
-3) 如果用户明确要你“直接开始产出文件内容”，再进入对应 Skill 的输出模式。
+3) 如果用户明确要你"直接开始产出文件内容"，再进入对应 Skill 的输出模式。
+
+---
+
+## Impact 画像解析（AC-003 / AC-012）
+
+当 `proposal.md` 存在时，Router **应自动解析** Impact 章节以生成更精确的执行计划。
+
+### Impact Profile 结构
+
+```yaml
+impact_profile:
+  external_api: true/false       # 对外 API 变更
+  architecture_boundary: true/false  # 架构边界变更
+  data_model: true/false         # 数据模型变更
+  cross_repo: true/false         # 跨仓库影响
+  risk_level: high/medium/low    # 风险等级
+  affected_modules:              # 受影响模块列表
+    - name: <module-path>
+      type: add/modify/delete
+      files: <count>
+```
+
+### 解析流程
+
+1. 检测 `proposal.md` 是否存在
+2. 若存在，查找 `## Impact` 章节
+3. 提取 `impact_profile:` YAML 块
+4. 验证必填字段：`external_api`、`risk_level`、`affected_modules`
+
+### 基于 Impact 画像的路由增强
+
+| Impact 字段 | 值 | 自动追加 Skill |
+|-------------|-----|---------------|
+| `external_api: true` | - | `devbooks-spec-contract` |
+| `architecture_boundary: true` | - | `devbooks-c4-map` |
+| `cross_repo: true` | - | `devbooks-federation` |
+| `risk_level: high` | - | `devbooks-proposal-debate-workflow` |
+| `affected_modules` 数量 > 5 | - | `devbooks-impact-analysis`（深度分析） |
+
+### 执行计划输出格式
+
+```markdown
+## 执行计划（基于 Impact 画像）
+
+### 必须执行
+1. `/devbooks:proposal` → proposal.md（提案已存在，跳过）
+2. `/devbooks:design` → design.md（必须）
+3. `/devbooks:plan` → tasks.md（必须）
+
+### 建议执行（基于 Impact 分析）
+4. `/devbooks:spec` → specs/**（检测到 external_api: true）
+5. `/devbooks:c4` → architecture/c4.md（检测到 architecture_boundary: true）
+
+### 可选执行
+6. `/devbooks:impact` → 深度影响分析（affected_modules > 5）
+```
+
+### 解析失败处理（AC-012）
+
+**无 Impact 画像时**：
+
+```
+⚠️ proposal.md 中未找到 Impact 画像。
+
+缺失项：
+- Impact 章节不存在
+- 或 impact_profile YAML 块缺失
+
+建议动作：
+1. 运行 `/devbooks:impact` 生成影响分析
+2. 或直接使用直达命令 `/devbooks:<skill>`
+
+直达命令列表：
+- /devbooks:design → 设计文档
+- /devbooks:plan → 编码计划
+- /devbooks:spec → 规格定义
+```
+
+**YAML 解析失败时**：
+
+```
+⚠️ Impact 画像解析失败。
+
+错误：<具体错误信息>
+
+建议动作：
+1. 检查 proposal.md 中 impact_profile YAML 格式
+2. 或使用直达命令 `/devbooks:<skill>` 绕过 Router
+```
+
+---
 
 ## 路由规则（质量优先默认）
 
@@ -179,7 +270,78 @@ LSC（大规模同质化修改）建议：
 1. 记录学习到的关键洞察到 `proposal.md` 的 Decision Log
 2. 删除 `prototype/` 目录
 
-## OpenSpec 命令适配（可选）
+## DevBooks 命令适配
 
-某些工具会以 `/openspec-proposal`、`/openspec-apply`、`/openspec-archive`（或 `/openspec:proposal` 等）作为入口。  
-当你检测到用户在跑 OpenSpec 流程时：按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。
+DevBooks 使用 `/devbooks:proposal`、`/devbooks:apply`、`/devbooks:archive` 作为入口。
+按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。
+
+---
+
+## 上下文感知
+
+本 Skill 在执行前自动检测上下文，选择合适的路由策略。
+
+检测规则参考：`skills/_shared/context-detection-template.md`
+
+### 检测流程
+
+1. 检测变更包是否存在
+2. 检测已有产物（proposal/design/tasks/verification）
+3. 推断当前阶段（proposal/apply/archive）
+4. 根据阶段选择默认路由
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **新变更** | 变更包不存在或为空 | 路由到 proposal 阶段，建议创建 proposal.md |
+| **进行中** | 变更包存在，有部分产物 | 根据缺失产物推荐下一步 |
+| **待归档** | 闸门通过，`evidence/green-final/` 存在 | 路由到 archive 阶段 |
+
+### 检测输出示例
+
+```
+检测结果：
+- 变更包状态：存在
+- 已有产物：proposal.md ✓, design.md ✓, tasks.md ✓, verification.md ✗
+- 当前阶段：apply
+- 建议路由：devbooks-test-owner（先建立 Red 基线）
+```
+
+---
+
+## MCP 增强
+
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
+
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+
+### 依赖的 MCP 服务
+
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 若 CKB 可用 → 在路由建议中标注"图基能力已激活"
+3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议运行 /devbooks:index
+
+### 增强模式 vs 基础模式
+
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 影响分析推荐 | 使用 CKB 精确分析 | 使用 Grep 文本搜索 |
+| 代码导航 | 符号级跳转可用 | 文件级搜索 |
+| 热点检测 | CKB 实时分析 | 不可用 |
+
+### 降级提示
+
+当 MCP 不可用时，输出以下提示：
+
+```
+⚠️ CKB 索引未激活，图基能力（影响分析、调用图等）将降级。
+建议运行 /devbooks:index 生成索引以启用完整功能。
+```
+

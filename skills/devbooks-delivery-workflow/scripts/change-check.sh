@@ -11,7 +11,7 @@ Defaults (can be overridden by flags or env):
   DEVBOOKS_TRUTH_ROOT:   specs
 
 Notes:
-- This script is protocol-agnostic. For OpenSpec, pass --change-root openspec/changes --truth-root openspec/specs.
+- Use --change-root and --truth-root to customize paths for your project layout.
 - "strict" is meant for archive-ready packages: tasks complete, decision approved, trace matrix not TODO, etc.
 EOF
 }
@@ -510,6 +510,71 @@ check_spec_deltas() {
 }
 
 # =============================================================================
+# Constitution Check (DevBooks 2.0)
+# Verify project constitution is present and valid
+# =============================================================================
+check_constitution() {
+  # Only run in strict mode
+  if [[ "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  # Find constitution-check.sh
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local constitution_script="${script_dir}/constitution-check.sh"
+
+  if [[ ! -x "$constitution_script" ]]; then
+    warn "constitution-check.sh not found; skipping constitution check"
+    return 0
+  fi
+
+  # Run constitution check
+  echo "  constitution check..."
+  if ! "$constitution_script" "$project_root" --quiet 2>/dev/null; then
+    err "constitution check failed (strict): 项目宪法缺失或无效"
+    return 0
+  fi
+}
+
+# =============================================================================
+# Fitness Check (DevBooks 2.0)
+# Verify architecture fitness rules
+# =============================================================================
+check_fitness() {
+  # Only run in apply/archive/strict modes
+  if [[ "$mode" != "apply" && "$mode" != "archive" && "$mode" != "strict" ]]; then
+    return 0
+  fi
+
+  # Find fitness-check.sh
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local fitness_script="${script_dir}/fitness-check.sh"
+
+  if [[ ! -x "$fitness_script" ]]; then
+    warn "fitness-check.sh not found; skipping fitness check"
+    return 0
+  fi
+
+  # Determine fitness mode based on change-check mode
+  local fitness_mode="warn"
+  if [[ "$mode" == "strict" ]]; then
+    fitness_mode="error"
+  fi
+
+  # Run fitness check
+  echo "  fitness check (mode=${fitness_mode})..."
+  if ! "$fitness_script" --project-root "$project_root" --mode "$fitness_mode" 2>/dev/null; then
+    if [[ "$fitness_mode" == "error" ]]; then
+      err "fitness check failed (strict): 架构适应度检查失败"
+    else
+      warn "fitness check warnings detected"
+    fi
+  fi
+}
+
+# =============================================================================
 # AC-001: Green Evidence Closure Check (《人月神话》第6章 "沟通")
 # Block archive when Green evidence is missing
 # =============================================================================
@@ -953,6 +1018,10 @@ else
   check_verification
   check_no_tests_changed
   check_implicit_changes
+  # DevBooks 2.0: Constitution check
+  check_constitution               # Constitution validity check (strict mode)
+  # DevBooks 2.0: Fitness check
+  check_fitness                    # Architecture fitness check (apply/archive/strict)
   # New quality gates (harden-devbooks-quality-gates)
   check_evidence_closure       # AC-001: Green evidence required for archive
   check_task_completion_rate   # AC-002: 100% completion for strict mode

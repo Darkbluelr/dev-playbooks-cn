@@ -1,0 +1,47 @@
+# 不包含在 npm 包中的文件
+
+# 变更包目录
+dev-playbooks/changes/
+
+# 备份目录
+.devbooks/backup/
+
+# 测试文件
+tests/
+
+# 日志文件
+*.log
+
+# 本地配置
+.claude/
+.git/
+.gitignore
+
+# 开发文件
+*.md
+!README.md
+
+# MCP 相关
+mcp/
+
+# 文档（仅保留 README）
+docs/
+
+# 设置文件（模板在 templates/ 中）
+setup/
+
+# 工具脚本（非必要）
+tools/
+
+# 本地脚本
+scripts/install-skills.sh
+
+# 开发提案
+DEVBOOKS-EVOLUTION-PROPOSAL.md
+
+# AI CLI 特定文件（DevBooks 应该是 AI 无关的）
+CLAUDE.md
+AGENTS.md
+templates/CLAUDE.md
+templates/AGENTS.md
+templates/claude-commands/

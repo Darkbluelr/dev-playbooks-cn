@@ -33,7 +33,7 @@ Exit Codes:
 Examples:
   progress-dashboard.sh my-change-001
   progress-dashboard.sh my-change-001 --format markdown
-  progress-dashboard.sh my-change-001 --change-root openspec/changes
+  progress-dashboard.sh my-change-001 --change-root dev-playbooks/changes
 EOF
 }
 

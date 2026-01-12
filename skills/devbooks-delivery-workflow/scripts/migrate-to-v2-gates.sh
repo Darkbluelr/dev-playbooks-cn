@@ -26,7 +26,7 @@ Options:
 Examples:
   migrate-to-v2-gates.sh my-change-001
   migrate-to-v2-gates.sh my-change-001 --dry-run
-  migrate-to-v2-gates.sh my-change-001 --change-root openspec/changes
+  migrate-to-v2-gates.sh my-change-001 --change-root dev-playbooks/changes
 EOF
 }
 
