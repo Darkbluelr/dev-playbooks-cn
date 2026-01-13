@@ -48,7 +48,7 @@
 
 ```
 ⚠️ CKB 不可用（超时或未配置），使用基础模式执行。
-如需启用增强功能，请运行 /devbooks:index 生成索引。
+如需启用增强功能，请运行 devbooks-index-bootstrap skill 生成索引。
 ```
 ```
 

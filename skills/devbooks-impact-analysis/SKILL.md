@@ -130,6 +130,6 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，使用 Grep 文本搜索进行影响分析。
-分析结果可能不够精确，建议运行 /devbooks:index 生成索引后重新分析。
+分析结果可能不够精确，建议运行 devbooks-index-bootstrap skill 生成索引后重新分析。
 ```
 

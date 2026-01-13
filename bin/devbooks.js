@@ -427,14 +427,14 @@ ${DEVBOOKS_MARKERS.start}
 - Coder 禁止修改 tests/
 - 任何新功能/破坏性变更/架构改动：必须先创建 \`dev-playbooks/changes/<id>/\`
 
-## 工作流命令
+## 工作流 Skills
 
-| 命令 | 说明 |
+| Skill | 说明 |
 |------|------|
-| \`/devbooks:proposal\` | 创建变更提案 |
-| \`/devbooks:design\` | 创建设计文档 |
-| \`/devbooks:apply <role>\` | 执行实现 |
-| \`/devbooks:archive\` | 归档变更包 |
+| \`devbooks-proposal-author\` | 创建变更提案 |
+| \`devbooks-design-doc\` | 创建设计文档 |
+| \`devbooks-test-owner / devbooks-coder\` | 执行实现 |
+| \`devbooks-spec-gardener\` | 归档变更包 |
 
 ${DEVBOOKS_MARKERS.end}
 `;
@@ -545,14 +545,14 @@ function generateAgentsContent(filename) {
 - Test Owner 与 Coder 必须独立对话/独立实例；Coder 禁止修改 tests/。
 - 任何新功能/破坏性变更/架构改动：必须先创建 \`dev-playbooks/changes/<id>/\`。
 
-## 工作流命令
+## 工作流 Skills
 
-| 命令 | 说明 |
+| Skill | 说明 |
 |------|------|
-| \`/devbooks:proposal\` | 创建变更提案 |
-| \`/devbooks:design\` | 创建设计文档 |
-| \`/devbooks:apply <role>\` | 执行实现（test-owner/coder/reviewer） |
-| \`/devbooks:archive\` | 归档变更包 |
+| \`devbooks-proposal-author\` | 创建变更提案 |
+| \`devbooks-design-doc\` | 创建设计文档 |
+| \`devbooks-test-owner / devbooks-coder\` | 执行实现（test-owner/coder/reviewer） |
+| \`devbooks-spec-gardener\` | 归档变更包 |
 
 ${DEVBOOKS_MARKERS.end}
 `;

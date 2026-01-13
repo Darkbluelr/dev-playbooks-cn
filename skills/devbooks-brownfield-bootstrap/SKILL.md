@@ -227,5 +227,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，使用传统分析方法生成项目画像。
-如需更精确的架构分析，请运行 /devbooks:index 生成索引。
+如需更精确的架构分析，请运行 devbooks-index-bootstrap skill 生成索引。
 ```

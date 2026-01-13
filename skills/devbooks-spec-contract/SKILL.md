@@ -187,5 +187,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，使用 Grep 文本搜索检测契约引用。
-结果可能不够精确，建议运行 /devbooks:index 生成索引。
+结果可能不够精确，建议运行 devbooks-index-bootstrap skill 生成索引。
 ```

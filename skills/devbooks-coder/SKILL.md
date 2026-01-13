@@ -214,6 +214,6 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，跳过热点检测。
-如需启用热点预警，请运行 /devbooks:index 生成索引。
+如需启用热点预警，请运行 devbooks-index-bootstrap skill 生成索引。
 ```
 

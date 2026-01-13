@@ -119,16 +119,16 @@ impact_profile:
 ## 执行计划（基于 Impact 画像）
 
 ### 必须执行
-1. `/devbooks:proposal` → proposal.md（提案已存在，跳过）
-2. `/devbooks:design` → design.md（必须）
-3. `/devbooks:plan` → tasks.md（必须）
+1. `devbooks-proposal-author skill` → proposal.md（提案已存在，跳过）
+2. `devbooks-design-doc skill` → design.md（必须）
+3. `devbooks-implementation-plan skill` → tasks.md（必须）
 
 ### 建议执行（基于 Impact 分析）
-4. `/devbooks:spec` → specs/**（检测到 external_api: true）
-5. `/devbooks:c4` → architecture/c4.md（检测到 architecture_boundary: true）
+4. `devbooks-spec-contract skill` → specs/**（检测到 external_api: true）
+5. `devbooks-c4-map skill` → architecture/c4.md（检测到 architecture_boundary: true）
 
 ### 可选执行
-6. `/devbooks:impact` → 深度影响分析（affected_modules > 5）
+6. `devbooks-impact-analysis skill` → 深度影响分析（affected_modules > 5）
 ```
 
 ### 解析失败处理（AC-012）
@@ -143,13 +143,13 @@ impact_profile:
 - 或 impact_profile YAML 块缺失
 
 建议动作：
-1. 运行 `/devbooks:impact` 生成影响分析
-2. 或直接使用直达命令 `/devbooks:<skill>`
+1. 运行 `devbooks-impact-analysis skill` 生成影响分析
+2. 或直接使用相应 skill
 
-直达命令列表：
-- /devbooks:design → 设计文档
-- /devbooks:plan → 编码计划
-- /devbooks:spec → 规格定义
+skill 列表：
+- devbooks-design-doc skill → 设计文档
+- devbooks-implementation-plan skill → 编码计划
+- devbooks-spec-contract skill → 规格定义
 ```
 
 **YAML 解析失败时**：
@@ -161,7 +161,7 @@ impact_profile:
 
 建议动作：
 1. 检查 proposal.md 中 impact_profile YAML 格式
-2. 或使用直达命令 `/devbooks:<skill>` 绕过 Router
+2. 或直接使用相应 skill 绕过 Router
 ```
 
 ---
@@ -270,9 +270,9 @@ LSC（大规模同质化修改）建议：
 1. 记录学习到的关键洞察到 `proposal.md` 的 Decision Log
 2. 删除 `prototype/` 目录
 
-## DevBooks 命令适配
+## DevBooks Skill 适配
 
-DevBooks 使用 `/devbooks:proposal`、`/devbooks:apply`、`/devbooks:archive` 作为入口。
+DevBooks 使用 `devbooks-proposal-author skill`、`devbooks-test-owner/coder skill`、`devbooks-spec-gardener skill` 作为入口。
 按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。
 
 ---
@@ -326,7 +326,7 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 1. 调用 `mcp__ckb__getStatus`（2s 超时）
 2. 若 CKB 可用 → 在路由建议中标注"图基能力已激活"
-3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议运行 /devbooks:index
+3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议运行 devbooks-index-bootstrap skill
 
 ### 增强模式 vs 基础模式
 
@@ -342,5 +342,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 索引未激活，图基能力（影响分析、调用图等）将降级。
-建议运行 /devbooks:index 生成索引以启用完整功能。
+建议运行 devbooks-index-bootstrap skill 生成索引以启用完整功能。
 ```

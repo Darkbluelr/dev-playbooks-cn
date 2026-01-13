@@ -146,6 +146,6 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，使用目录结构推断架构。
-生成的 C4 图可能不够精确，建议运行 /devbooks:index 生成索引。
+生成的 C4 图可能不够精确，建议运行 devbooks-index-bootstrap skill 生成索引。
 ```
 
