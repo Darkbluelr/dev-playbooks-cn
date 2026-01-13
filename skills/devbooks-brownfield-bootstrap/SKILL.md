@@ -21,17 +21,74 @@ tools:
 
 - `<truth-root>`：当前真理目录根
 - `<change-root>`：变更包目录根
+- `<devbooks-root>`：DevBooks 管理目录（通常是 `dev-playbooks/`）
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
 2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
 4. `project.md`（如存在）→ template 协议，使用默认映射
-5. 若仍无法确定 → **停止并询问用户**
+5. 若仍无法确定 → **创建 DevBooks 目录结构并初始化基础配置**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
 - 禁止猜测目录根
 - 禁止跳过规则文档阅读
+
+---
+
+## 核心职责
+
+存量项目初始化包含以下职责：
+
+### 1. 基础配置文件初始化（新增）
+
+在 `<devbooks-root>/`（通常是 `dev-playbooks/`）下检查并创建：
+
+| 文件 | 用途 | 创建条件 |
+|------|------|----------|
+| `constitution.md` | 项目宪法（GIP 原则） | 文件不存在时 |
+| `project.md` | 项目上下文（技术栈/约定） | 文件不存在时 |
+
+**创建方式**：
+- **不是简单复制模板**，而是根据代码分析结果定制内容
+- `constitution.md`：基于默认 GIP 原则，可根据项目特性调整
+- `project.md`：根据代码分析结果填充：
+  - 技术栈（语言/框架/数据库）
+  - 开发约定（代码风格/测试策略/Git 工作流）
+  - 领域上下文（核心概念/角色定义）
+  - 目录根映射
+
+### 2. 项目画像与元数据
+
+在 `<truth-root>/_meta/` 下生成：
+
+| 产物 | 路径 | 说明 |
+|------|------|------|
+| 项目画像 | `_meta/project-profile.md` | 三层架构的详细技术画像 |
+| 术语表 | `_meta/glossary.md` | 统一语言表（可选但推荐） |
+| 领域概念 | `_meta/key-concepts.md` | CKB 提取的概念（增强模式） |
+
+### 3. 架构分析产物
+
+在 `<truth-root>/architecture/` 下生成：
+
+| 产物 | 路径 | 数据来源 |
+|------|------|----------|
+| 模块依赖图 | `architecture/module-graph.md` | `mcp__ckb__getArchitecture` |
+| 技术债热点 | `architecture/hotspots.md` | `mcp__ckb__getHotspots` |
+
+### 4. 基线变更包
+
+在 `<change-root>/<baseline-id>/` 下生成：
+
+| 产物 | 说明 |
+|------|------|
+| `proposal.md` | 基线范围、In/Out、风险 |
+| `design.md` | 现状盘点（capability inventory） |
+| `specs/<cap>/spec.md` | 基线 spec deltas（ADDED 为主） |
+| `verification.md` | 最小验证锚点计划 |
+
+---
 
 ## COD 模型生成（Code Overview & Dependencies）
 
@@ -101,15 +158,19 @@ tools:
 
 ### 检测流程
 
-1. 检测 `<truth-root>/` 是否为空或基本为空
-2. 检测 CKB 索引是否可用
-3. 检测项目规模和语言栈
+1. 检测 `<devbooks-root>/constitution.md` 是否存在
+2. 检测 `<devbooks-root>/project.md` 是否存在
+3. 检测 `<truth-root>/` 是否为空或基本为空
+4. 检测 CKB 索引是否可用
+5. 检测项目规模和语言栈
 
 ### 本 Skill 支持的模式
 
 | 模式 | 触发条件 | 行为 |
 |------|----------|------|
-| **完整初始化** | truth-root 为空 | 生成所有基础产物 |
+| **全新初始化** | devbooks-root 不存在或为空 | 创建完整目录结构 + constitution + project + 画像 |
+| **补充配置** | constitution/project 缺失 | 只补充缺失的配置文件 |
+| **完整初始化** | truth-root 为空 | 生成所有基础产物（画像/基线/验证） |
 | **增量初始化** | truth-root 部分存在 | 只补充缺失产物 |
 | **增强模式** | CKB 索引可用 | 使用图分析生成更精确的画像 |
 | **基础模式** | CKB 索引不可用 | 使用传统分析方法 |
@@ -118,10 +179,13 @@ tools:
 
 ```
 检测结果：
+- devbooks-root：存在
+- constitution.md：不存在 → 将创建
+- project.md：不存在 → 将创建
 - truth-root：为空
 - CKB 索引：可用
 - 项目规模：中型（~50K LOC）
-- 运行模式：完整初始化 + 增强模式
+- 运行模式：补充配置 + 完整初始化 + 增强模式
 ```
 
 ---
