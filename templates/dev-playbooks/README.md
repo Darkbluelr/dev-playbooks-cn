@@ -438,6 +438,74 @@ Decision: `Approved`, `Revise`, `Rejected`
 
 ---
 
+## Migration from Other Frameworks
+
+DevBooks provides migration scripts to help you transition from other spec-driven development tools.
+
+### Migrate from OpenSpec
+
+If you're currently using [OpenSpec](https://github.com/Fission-AI/OpenSpec) with an `openspec/` directory:
+
+```bash
+# Download and run the migration script
+curl -sL https://raw.githubusercontent.com/ozbombor/dev-playbooks-cn/master/scripts/migrate-from-openspec.sh | bash
+
+# Or run with options
+./scripts/migrate-from-openspec.sh --project-root . --dry-run  # Preview changes
+./scripts/migrate-from-openspec.sh --project-root . --keep-old # Keep original directory
+```
+
+**What gets migrated:**
+- `openspec/specs/` → `dev-playbooks/specs/`
+- `openspec/changes/` → `dev-playbooks/changes/`
+- `openspec/project.md` → `dev-playbooks/project.md`
+- All path references are automatically updated
+
+### Migrate from GitHub spec-kit
+
+If you're using [GitHub spec-kit](https://github.com/github/spec-kit) with `specs/` and `memory/` directories:
+
+```bash
+# Download and run the migration script
+curl -sL https://raw.githubusercontent.com/ozbombor/dev-playbooks-cn/master/scripts/migrate-from-speckit.sh | bash
+
+# Or run with options
+./scripts/migrate-from-speckit.sh --project-root . --dry-run  # Preview changes
+./scripts/migrate-from-speckit.sh --project-root . --keep-old # Keep original directories
+```
+
+**Mapping rules:**
+
+| Spec-Kit | DevBooks |
+|----------|----------|
+| `memory/constitution.md` | `dev-playbooks/specs/_meta/constitution.md` |
+| `specs/[feature]/spec.md` | `changes/[feature]/design.md` |
+| `specs/[feature]/plan.md` | `changes/[feature]/proposal.md` |
+| `specs/[feature]/tasks.md` | `changes/[feature]/tasks.md` |
+| `specs/[feature]/quickstart.md` | `changes/[feature]/verification.md` |
+| `specs/[feature]/contracts/` | `changes/[feature]/specs/` |
+
+### Migration Features
+
+Both migration scripts support:
+
+- **Idempotent execution**: Safe to run multiple times
+- **Checkpoints**: Resume from where you left off if interrupted
+- **Dry-run mode**: Preview changes before applying
+- **Automatic backup**: Original files are backed up to `.devbooks/backup/`
+- **Reference updates**: Path references in documents are automatically updated
+
+### Post-Migration Steps
+
+After migration:
+
+1. Run `dev-playbooks-cn init` to set up DevBooks Skills
+2. Review migrated files in `dev-playbooks/`
+3. Update `verification.md` files with proper AC mappings
+4. Run `/devbooks:bootstrap` if you need baseline specs
+
+---
+
 ## Repository Structure
 
 ```
