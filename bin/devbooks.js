@@ -8,9 +8,13 @@
  * 用法：
  *   dev-playbooks-cn init [path] [options]
  *   dev-playbooks-cn update [path]
+ *   dev-playbooks-cn migrate --from <framework> [options]
  *
  * 选项：
  *   --tools <tools>    非交互式指定 AI 工具：all, none, 或逗号分隔的列表
+ *   --from <framework> 迁移来源框架：openspec, speckit
+ *   --dry-run          模拟运行，不实际修改文件
+ *   --keep-old         迁移后保留原目录
  *   --help             显示帮助信息
  */
 
@@ -18,6 +22,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
 import { checkbox, confirm } from '@inquirer/prompts';
 import chalk from 'chalk';
 import ora from 'ora';
@@ -888,6 +893,82 @@ async function updateCommand(projectDir) {
 }
 
 // ============================================================================
+// Migrate 命令
+// ============================================================================
+
+async function migrateCommand(projectDir, options) {
+  console.log();
+  console.log(chalk.bold('DevBooks 迁移工具'));
+  console.log();
+
+  const { from, dryRun, keepOld, force } = options;
+
+  if (!from) {
+    console.log(chalk.red('✗') + ' 请指定迁移来源框架：--from openspec 或 --from speckit');
+    console.log();
+    console.log(chalk.cyan('示例:'));
+    console.log(`  ${CLI_COMMAND} migrate --from openspec`);
+    console.log(`  ${CLI_COMMAND} migrate --from speckit`);
+    console.log(`  ${CLI_COMMAND} migrate --from openspec --dry-run`);
+    process.exit(1);
+  }
+
+  const validFrameworks = ['openspec', 'speckit'];
+  if (!validFrameworks.includes(from)) {
+    console.log(chalk.red('✗') + ` 不支持的框架: ${from}`);
+    console.log(chalk.gray(`  支持的框架: ${validFrameworks.join(', ')}`));
+    process.exit(1);
+  }
+
+  // 确定脚本路径
+  const scriptName = from === 'openspec' ? 'migrate-from-openspec.sh' : 'migrate-from-speckit.sh';
+  const scriptPath = path.join(__dirname, '..', 'scripts', scriptName);
+
+  if (!fs.existsSync(scriptPath)) {
+    console.log(chalk.red('✗') + ` 迁移脚本不存在: ${scriptPath}`);
+    process.exit(1);
+  }
+
+  // 构建参数
+  const args = ['--project-root', projectDir];
+  if (dryRun) args.push('--dry-run');
+  if (keepOld) args.push('--keep-old');
+  if (force) args.push('--force');
+
+  console.log(chalk.blue('ℹ') + ` 迁移来源: ${from}`);
+  console.log(chalk.blue('ℹ') + ` 项目目录: ${projectDir}`);
+  if (dryRun) console.log(chalk.yellow('ℹ') + ' 模式: DRY-RUN（模拟运行）');
+  console.log();
+
+  // 执行脚本
+  return new Promise((resolve, reject) => {
+    const child = spawn('bash', [scriptPath, ...args], {
+      stdio: 'inherit',
+      cwd: projectDir
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        console.log();
+        if (!dryRun) {
+          console.log(chalk.green('✓') + ' 迁移完成！');
+          console.log();
+          console.log(chalk.bold('下一步：'));
+          console.log(`  运行 ${chalk.cyan(`${CLI_COMMAND} init`)} 安装 DevBooks Skills`);
+        }
+        resolve();
+      } else {
+        reject(new Error(`迁移脚本退出码: ${code}`));
+      }
+    });
+
+    child.on('error', (err) => {
+      reject(new Error(`执行迁移脚本失败: ${err.message}`));
+    });
+  });
+}
+
+// ============================================================================
 // 帮助信息
 // ============================================================================
 
@@ -896,12 +977,17 @@ function showHelp() {
   console.log(chalk.bold('DevBooks') + ' - AI-agnostic spec-driven development workflow');
   console.log();
   console.log(chalk.cyan('用法:'));
-  console.log(`  ${CLI_COMMAND} init [path] [options]    初始化 DevBooks`);
-  console.log(`  ${CLI_COMMAND} update [path]            更新已配置的工具`);
+  console.log(`  ${CLI_COMMAND} init [path] [options]              初始化 DevBooks`);
+  console.log(`  ${CLI_COMMAND} update [path]                      更新已配置的工具`);
+  console.log(`  ${CLI_COMMAND} migrate --from <framework> [opts]  从其他框架迁移`);
   console.log();
   console.log(chalk.cyan('选项:'));
   console.log('  --tools <tools>    非交互式指定 AI 工具');
   console.log('                     可用值: all, none, 或逗号分隔的工具 ID');
+  console.log('  --from <framework> 迁移来源框架 (openspec, speckit)');
+  console.log('  --dry-run          模拟运行，不实际修改文件');
+  console.log('  --keep-old         迁移后保留原目录');
+  console.log('  --force            强制重新执行所有步骤');
   console.log('  -h, --help         显示此帮助信息');
   console.log();
   console.log(chalk.cyan('支持的 AI 工具:'));
@@ -943,6 +1029,9 @@ function showHelp() {
   console.log(`  ${CLI_COMMAND} init my-project             # 在 my-project 目录初始化`);
   console.log(`  ${CLI_COMMAND} init --tools claude,cursor  # 非交互式`);
   console.log(`  ${CLI_COMMAND} update                      # 更新已配置的工具`);
+  console.log(`  ${CLI_COMMAND} migrate --from openspec     # 从 OpenSpec 迁移`);
+  console.log(`  ${CLI_COMMAND} migrate --from speckit      # 从 spec-kit 迁移`);
+  console.log(`  ${CLI_COMMAND} migrate --from openspec --dry-run  # 模拟迁移`);
 }
 
 // ============================================================================
@@ -965,6 +1054,14 @@ async function main() {
       process.exit(0);
     } else if (arg === '--tools') {
       options.tools = args[++i];
+    } else if (arg === '--from') {
+      options.from = args[++i];
+    } else if (arg === '--dry-run') {
+      options.dryRun = true;
+    } else if (arg === '--keep-old') {
+      options.keepOld = true;
+    } else if (arg === '--force') {
+      options.force = true;
     } else if (!arg.startsWith('-')) {
       if (!command) {
         command = arg;
@@ -983,6 +1080,8 @@ async function main() {
       await initCommand(projectDir, options);
     } else if (command === 'update') {
       await updateCommand(projectDir);
+    } else if (command === 'migrate') {
+      await migrateCommand(projectDir, options);
     } else {
       console.log(chalk.red(`未知命令: ${command}`));
       showHelp();

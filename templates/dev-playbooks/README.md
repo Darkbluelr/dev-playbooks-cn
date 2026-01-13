@@ -447,12 +447,14 @@ DevBooks provides migration scripts to help you transition from other spec-drive
 If you're currently using [OpenSpec](https://github.com/Fission-AI/OpenSpec) with an `openspec/` directory:
 
 ```bash
-# Download and run the migration script
-curl -sL https://raw.githubusercontent.com/ozbombor/dev-playbooks-cn/master/scripts/migrate-from-openspec.sh | bash
+# Using CLI (recommended)
+dev-playbooks-cn migrate --from openspec
 
-# Or run with options
-./scripts/migrate-from-openspec.sh --project-root . --dry-run  # Preview changes
-./scripts/migrate-from-openspec.sh --project-root . --keep-old # Keep original directory
+# Preview changes first
+dev-playbooks-cn migrate --from openspec --dry-run
+
+# Keep original directory after migration
+dev-playbooks-cn migrate --from openspec --keep-old
 ```
 
 **What gets migrated:**
@@ -460,18 +462,21 @@ curl -sL https://raw.githubusercontent.com/ozbombor/dev-playbooks-cn/master/scri
 - `openspec/changes/` → `dev-playbooks/changes/`
 - `openspec/project.md` → `dev-playbooks/project.md`
 - All path references are automatically updated
+- AI tool command directories are cleaned up (`.claude/commands/openspec/`, etc.)
 
 ### Migrate from GitHub spec-kit
 
 If you're using [GitHub spec-kit](https://github.com/github/spec-kit) with `specs/` and `memory/` directories:
 
 ```bash
-# Download and run the migration script
-curl -sL https://raw.githubusercontent.com/ozbombor/dev-playbooks-cn/master/scripts/migrate-from-speckit.sh | bash
+# Using CLI (recommended)
+dev-playbooks-cn migrate --from speckit
 
-# Or run with options
-./scripts/migrate-from-speckit.sh --project-root . --dry-run  # Preview changes
-./scripts/migrate-from-speckit.sh --project-root . --keep-old # Keep original directories
+# Preview changes first
+dev-playbooks-cn migrate --from speckit --dry-run
+
+# Keep original directories after migration
+dev-playbooks-cn migrate --from speckit --keep-old
 ```
 
 **Mapping rules:**
