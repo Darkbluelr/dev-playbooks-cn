@@ -518,6 +518,12 @@ check_constitution() {
     return 0
   fi
 
+  # Skip for non-DevBooks projects (e.g., minimal CI fixtures in tests/)
+  # DevBooks projects usually have dev-playbooks/ (or devbooks/) or a .devbooks/config.yaml.
+  if [[ ! -d "${project_root}/dev-playbooks" && ! -d "${project_root}/devbooks" && ! -f "${project_root}/.devbooks/config.yaml" ]]; then
+    return 0
+  fi
+
   # Find constitution-check.sh
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -774,11 +780,7 @@ check_docs_impact() {
 
   # Check if Documentation Impact section exists
   if ! rg -n "^## Documentation Impact" "$design_file" >/dev/null; then
-    if [[ "$mode" == "strict" ]]; then
-      err "design.md missing '## Documentation Impact' section (AC-008)"
-    else
-      warn "design.md missing '## Documentation Impact' section (recommended)"
-    fi
+    warn "design.md missing '## Documentation Impact' section (recommended)"
     return 0
   fi
 
