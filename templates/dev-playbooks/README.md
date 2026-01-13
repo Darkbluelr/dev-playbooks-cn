@@ -7,6 +7,8 @@
 [![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
 
+![DevBooks 工作流](docs/workflow-diagram.svg)
+
 ---
 
 ## 为什么选择 DevBooks？
@@ -45,8 +47,6 @@ AI 编码助手很强大，但往往**不可预测**：
 ---
 
 ## 工作原理
-
-![DevBooks 工作流](docs/workflow-diagram.svg)
 
 **核心约束**：Test Owner 与 Coder **必须在独立对话**中工作。这是硬性约束，不是建议。Coder 不能修改 `tests/**`，完成由测试/构建验证，而非 AI 自评。
 
