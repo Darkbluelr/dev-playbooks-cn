@@ -30,7 +30,7 @@ tools:
 ## 参考骨架（按需读取）
 
 - 工作流：`references/提案对辩工作流.md`
-- 模板：`references/11 提案对辩模板.md`
+- 模板：`references/提案对辩模板.md`
 
 ## 可选检查脚本
 

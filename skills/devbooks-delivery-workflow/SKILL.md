@@ -31,7 +31,7 @@ tools:
 ## 参考骨架（按需读取）
 
 - 工作流：`references/交付验收工作流.md`
-- 模板：`references/9 变更验证与追溯模板.md`
+- 模板：`references/变更验证与追溯模板.md`
 
 ## 可选检查脚本
 

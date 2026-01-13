@@ -89,7 +89,7 @@ tools:
 - 代码导航策略：`references/代码导航策略.md`
 - **项目画像模板（三层架构）**：`templates/project-profile-template.md`
 - 一次性提示词：`references/存量项目初始化提示词.md`
-- 模板（按需）：`references/10 术语表模板.md`
+- 模板（按需）：`references/术语表模板.md`
 
 ---
 
@@ -165,4 +165,3 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 ⚠️ CKB 不可用，使用传统分析方法生成项目画像。
 如需更精确的架构分析，请运行 /devbooks:index 生成索引。
 ```
-

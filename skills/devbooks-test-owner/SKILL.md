@@ -122,7 +122,7 @@ tools:
 2) 阅读方法论参考：`references/测试驱动.md`（需要时再读）。
 3) 阅读测试分层指南：`references/测试分层策略.md`。
 4) 严格按完整提示词执行：`references/测试代码提示词.md`。
-5) 模板（按需）：`references/9 变更验证与追溯模板.md`。
+5) 模板（按需）：`references/变更验证与追溯模板.md`。
 
 ---
 
