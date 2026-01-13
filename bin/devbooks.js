@@ -624,6 +624,7 @@ function createProjectStructure(projectDir) {
     'dev-playbooks/specs/architecture',
     'dev-playbooks/changes',
     'dev-playbooks/scripts',
+    'dev-playbooks/docs',
     '.devbooks'
   ];
 
@@ -640,6 +641,18 @@ function createProjectStructure(projectDir) {
     { src: 'dev-playbooks/specs/architecture/fitness-rules.md', dest: 'dev-playbooks/specs/architecture/fitness-rules.md' },
     { src: '.devbooks/config.yaml', dest: '.devbooks/config.yaml' }
   ];
+
+  // 动态添加 docs 目录下的所有文件
+  const docsDir = path.join(templateDir, 'dev-playbooks', 'docs');
+  if (fs.existsSync(docsDir)) {
+    const docFiles = fs.readdirSync(docsDir).filter(f => f.endsWith('.md'));
+    for (const docFile of docFiles) {
+      templateFiles.push({
+        src: `dev-playbooks/docs/${docFile}`,
+        dest: `dev-playbooks/docs/${docFile}`
+      });
+    }
+  }
 
   let copiedCount = 0;
   for (const { src, dest } of templateFiles) {
