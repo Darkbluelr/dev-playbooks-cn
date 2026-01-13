@@ -334,6 +334,18 @@ function installSkills(toolIds, update = false) {
 
       fs.mkdirSync(skillsDestDir, { recursive: true });
 
+      // 先安装共享目录 _shared（如果存在）
+      const sharedSrcDir = path.join(skillsSrcDir, '_shared');
+      if (fs.existsSync(sharedSrcDir)) {
+        const sharedDestDir = path.join(skillsDestDir, '_shared');
+        if (update || !fs.existsSync(sharedDestDir)) {
+          if (fs.existsSync(sharedDestDir)) {
+            fs.rmSync(sharedDestDir, { recursive: true, force: true });
+          }
+          copyDirSync(sharedSrcDir, sharedDestDir);
+        }
+      }
+
       let installedCount = 0;
       for (const skillName of skillDirs) {
         const srcPath = path.join(skillsSrcDir, skillName);
