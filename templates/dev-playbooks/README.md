@@ -1,183 +1,183 @@
 # DevBooks
 
-**An agentic AI development workflow for Claude Code / Codex CLI**
+**面向 Claude Code / Codex CLI 的代理式 AI 开发工作流**
 
-> Turn large changes into a controlled, traceable, verifiable loop: Skills + quality gates + role isolation.
+> 把大型变更变成可控、可追溯、可验证的闭环：Skills + 质量闸门 + 角色隔离。
 
 [![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
 
 ---
 
-## Why DevBooks?
+## 为什么选择 DevBooks？
 
-AI coding assistants are powerful, but often **unpredictable**:
+AI 编码助手很强大，但往往**不可预测**：
 
-| Pain point | Outcome |
+| 痛点 | 后果 |
 |------|------|
-| **AI self-declares "done"** | Tests fail, edge cases are missed |
-| **Writing tests and code in the same chat** | Tests turn into “pass tests” instead of spec verification |
-| **No verification gates** | False completion silently ships |
-| **Only works for greenfield (0→1)** | Brownfield repos have no on-ramp |
-| **Too few commands** | Complex changes are not just "spec/apply/archive" |
+| **AI 自评"已完成"** | 实际测试不过、边界条件遗漏 |
+| **同一对话写测试又写代码** | 测试沦为"通过性测试"，而非验证规格 |
+| **无验证闸门** | 伪完成悄悄进入生产环境 |
+| **只支持 0→1 项目** | 存量代码库无从下手 |
+| **命令太少** | 复杂变更不只是"spec/apply/archive" |
 
-**DevBooks provides**:
-- **Evidence-based done**: completion is defined by tests/build/evidence, not AI self-evaluation
-- **Enforced role isolation**: Test Owner and Coder must work in separate conversations
-- **Multiple quality gates**: green evidence checks, task completion, role boundary checks
-- **21 Skills**: proposal, design, debate, review, entropy metrics, federation, and more
+**DevBooks 的解决方案**：
+- **基于证据的完成**：完成由测试/构建/证据定义，而非 AI 自我评估
+- **强制角色隔离**：Test Owner 与 Coder 必须在独立对话中工作
+- **多重质量闸门**：Green 证据检查、任务完成率、角色边界检查
+- **21 个 Skills**：覆盖提案、设计、对辩、评审、熵度量、联邦分析等
 
 ---
 
-## DevBooks At a Glance (Comparison)
+## DevBooks 对比一览
 
-| Dimension | DevBooks | OpenSpec | spec-kit | No spec |
+| 维度 | DevBooks | OpenSpec | spec-kit | 无规格 |
 |------|----------|----------|----------|--------|
-| Spec-driven workflow | Yes | Yes | Yes | No |
-| Artifact traceability | Change package (proposal/design/spec/tasks/verification/evidence) | Mostly folder/file organization | Docs + tasks orchestration | None |
-| Role & responsibility boundaries | **Enforced** (Test Owner / Coder) | Convention-based (not enforced) | Convention-based (not enforced) | None |
-| Definition of Done (DoD) | **Evidence + gates** (tests/build/audit) | Manual definition/checks | Manual definition/checks | Often subjective |
-| Code quality assurance | Gates + metrics (entropy/hotspots) + review roles | External tools / manual review | External tools / manual review | Unstable |
-| Impact analysis | CKB graph capability (falls back to grep) | Text search / manual reasoning | Text search / manual reasoning | Easy to miss |
-| Brownfield onboarding | Baseline specs/glossary/minimal verification anchors | Manual | Limited | - |
-| Automation coverage | 21 Skills (proposal→implementation→archive loop) | 3 core commands | Toolkit (greenfield-leaning) | - |
+| 规格驱动工作流 | 是 | 是 | 是 | 否 |
+| 变更产物的可追溯性 | 变更包集中存档（proposal/design/spec/tasks/verification/evidence） | 主要以变更目录/文件组织为主 | 以文档+任务编排为主 | 无 |
+| 角色与职责边界 | **强制隔离**（Test Owner / Coder） | 约定为主（不强制） | 约定为主（不强制） | 无 |
+| 完成判据（DoD） | **证据驱动 + 闸门**（测试/构建/审计） | 人工定义/人工检查 | 人工定义/人工检查 | 常依赖主观判断 |
+| 代码质量保障 | 守门 + 指标（熵度量/热点）+ Review 角色 | 依赖外部工具/人工 review | 依赖外部工具/人工 review | 不稳定 |
+| 影响面分析 | CKB 图基能力（可降级 Grep） | 文本搜索/人工推导 | 文本搜索/人工推导 | 容易漏改 |
+| 存量项目起步 | 自动生成基线规格/术语表/最小验证锚点 | 手动补齐 | 有限 | - |
+| 自动化覆盖面 | 21 个 Skills（提案→实现→归档闭环） | 3 个核心命令 | 工具包（偏 0→1） | - |
 
 ---
 
-## How It Works
+## 工作原理
 
 ```
-                           DevBooks Workflow
+                           DevBooks 工作流
 
-    PROPOSAL stage                 APPLY stage                      ARCHIVE stage
-    (no coding)                    (role isolation enforced)         (quality gates)
+    PROPOSAL 阶段                  APPLY 阶段                     ARCHIVE 阶段
+    (禁止编码)                     (角色隔离强制)                  (质量闸门)
 
-    ┌─────────────────┐            ┌─────────────────┐              ┌─────────────────┐
-    │  /devbooks:     │            │   Chat A        │              │  /devbooks:     │
-    │   proposal      │            │  ┌───────────┐  │              │   gardener      │
-    │   impact        │────────────│  │Test Owner │  │──────────────│   delivery      │
-    │   design        │            │  │(Red first)│  │              │                 │
-    │   spec          │            │  └───────────┘  │              │  Gates:         │
-    │   plan          │            │                 │              │  ✓ Green evidence│
-    └─────────────────┘            │   Chat B        │              │  ✓ Tasks done   │
-           │                       │  ┌───────────┐  │              │  ✓ Role boundary│
-           ▼                       │  │  Coder    │  │              │  ✓ No failures  │
-    ┌─────────────────┐            │  │(no tests!)│  │              └─────────────────┘
-    │ Triangle debate │            │  └───────────┘  │
+    ┌─────────────────┐            ┌─────────────────┐            ┌─────────────────┐
+    │  /devbooks:     │            │   对话 A        │            │  /devbooks:     │
+    │   proposal      │            │  ┌───────────┐  │            │   gardener      │
+    │   impact        │────────────│  │Test Owner │  │────────────│   delivery      │
+    │   design        │            │  │(先跑 Red) │  │            │                 │
+    │   spec          │            │  └───────────┘  │            │  质量闸门:       │
+    │   plan          │            │                 │            │  ✓ Green 证据   │
+    └─────────────────┘            │   对话 B        │            │  ✓ 任务完成     │
+           │                       │  ┌───────────┐  │            │  ✓ 角色边界     │
+           ▼                       │  │  Coder    │  │            │  ✓ 无失败       │
+    ┌─────────────────┐            │  │(禁改测试!)│  │            └─────────────────┘
+    │ 三角对辩        │            │  └───────────┘  │
     │ Author/Challenger│            └─────────────────┘
     │ /Judge          │
     └─────────────────┘
 ```
 
-**Hard constraint**: Test Owner and Coder **must work in separate conversations**. This is not a suggestion. Coder cannot modify `tests/**`. “Done” is defined by tests/build verification, not AI self-evaluation.
+**核心约束**：Test Owner 与 Coder **必须在独立对话**中工作。这是硬性约束，不是建议。Coder 不能修改 `tests/**`，完成由测试/构建验证，而非 AI 自评。
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Supported AI tools
+### 支持的 AI 工具
 
-| Tool | Support Level | Slash Commands | Config File |
-|------|---------------|----------------|-------------|
-| **Claude Code** | Full Skills | `/devbooks:*` | `CLAUDE.md` |
-| **Codex CLI** | Full Skills | `/devbooks:*` | `AGENTS.md` |
-| **Qoder** | Full Skills | `/devbooks:*` | `AGENTS.md` |
-| **Cursor** | Rules | - | `.cursor/rules/` |
-| **Windsurf** | Rules | - | `.windsurf/rules/` |
-| **Gemini CLI** | Rules | - | `GEMINI.md` |
-| **Continue** | Rules | - | `.continue/rules/` |
-| **GitHub Copilot** | Instructions | - | `.github/copilot-instructions.md` |
+| 工具 | Slash 命令 | 自然语言 | 配置文件 |
+|------|-----------|----------|----------|
+| **Claude Code** | `/devbooks:*` | 支持 | `CLAUDE.md` |
+| **Codex CLI** | `/devbooks:*` | 支持 | `AGENTS.md` |
+| **Cursor** | - | 支持 | `.cursorrules` |
+| **Windsurf** | - | 支持 | `.windsurfrules` |
+| **Continue.dev** | - | 支持 | `.continuerules` |
+| **GitHub Copilot** | - | 支持 | `.github/copilot-instructions.md` |
+| **Gemini Code Assist** | - | 支持 | - |
+| **Aider** | - | 支持 | `.aider.conf.yml` |
+| **Cline** | - | 支持 | `.clinerules` |
 
-> **Tip**: For tools without Slash command support, use natural language, e.g., "Run DevBooks proposal skill..."
+> **提示**：对于不支持 Slash 命令的工具，使用自然语言指令，例如："运行 DevBooks proposal skill..."
 
-### Install & init
+### 安装与初始化
 
-**Install via npm (recommended):**
+**npm 安装（推荐）：**
 
 ```bash
-# global install
+# 全局安装
 npm install -g dev-playbooks-cn
 
-# init inside your project
+# 在项目中初始化
 dev-playbooks-cn init
 ```
 
-**One-off usage:**
+**一次性使用：**
 
 ```bash
 npx dev-playbooks-cn@latest init
 ```
 
-**From source (contributors):**
+**从源码安装（贡献者）：**
 
 ```bash
-../scripts/install-skills.sh
+./scripts/install-skills.sh
 ```
 
-### Install targets
+### 安装落点
 
-After initialization:
-- Claude Code: `~/.claude/skills/devbooks-*`
-- Codex CLI: `~/.codex/skills/devbooks-*`
-- Qoder: `~/.qoder/` (manual setup required)
+初始化后：
+- Claude Code：`~/.claude/skills/devbooks-*`
+- Codex CLI：`$CODEX_HOME/skills/devbooks-*`（默认 `~/.codex/skills/devbooks-*`）
 
-### Quick integration
+### 快速集成
 
-DevBooks uses two directory roots:
+DevBooks 使用两个目录根：
 
-| Directory | Purpose | Default |
+| 目录 | 用途 | 默认值 |
 |------|------|--------|
-| `<truth-root>` | Current specs (read-only truth) | `dev-playbooks/specs/` |
-| `<change-root>` | Change packages (workspace) | `dev-playbooks/changes/` |
+| `<truth-root>` | 当前规格（只读真理） | `dev-playbooks/specs/` |
+| `<change-root>` | 变更包（工作区） | `dev-playbooks/changes/` |
 
-See `../docs/DevBooks集成模板（协议无关）.md` (currently in Chinese), or use `../docs/DevBooks安装提示词.md` to let your assistant configure it automatically.
+详见 `../docs/DevBooks集成模板（协议无关）.md` 或使用 `../docs/DevBooks安装提示词.md` 让 AI 自动配置。
 
 ---
 
-## Day-to-Day Change Workflow
+## 日常变更工作流
 
-### Use Router (recommended)
-
-```
-/devbooks:router <your request>
-```
-
-Router analyzes your request and outputs an execution plan (which command to run next).
-
-### Direct commands
-
-Once you know the flow, call the Skills directly:
-
-**1) Proposal stage (no coding)**
+### 使用 Router（推荐）
 
 ```
-/devbooks:proposal Add OAuth2 user authentication
+/devbooks:router <你的需求>
 ```
 
-Artifacts: `proposal.md` (required), `design.md`, `tasks.md`
+Router 分析需求并输出执行计划，告诉你下一步用哪个命令。
 
-**2) Apply stage (role isolation enforced)**
+### 直达命令
 
-You must use **two separate conversations**:
+熟悉流程后，直接调用 Skill：
+
+**1. Proposal 阶段（禁止编码）**
 
 ```
-# Chat A - Test Owner
+/devbooks:proposal 添加 OAuth2 用户认证
+```
+
+产物：`proposal.md`（必需）、`design.md`、`tasks.md`
+
+**2. Apply 阶段（强制角色隔离）**
+
+必须开 **2 个独立对话**：
+
+```
+# 对话 A - Test Owner
 /devbooks:test add-oauth2
 
-# Chat B - Coder
+# 对话 B - Coder
 /devbooks:code add-oauth2
 ```
 
-- Test Owner: writes `verification.md` + tests, runs **Red** first
-- Coder: implements per `tasks.md`, makes gates **Green** (cannot modify tests)
+- Test Owner：写 `verification.md` + 测试，先跑 **Red**
+- Coder：按 `tasks.md` 实现，让闸门 **Green**（禁止改测试）
 
-**3) Review stage**
+**3. Review 阶段**
 
 ```
 /devbooks:review add-oauth2
 ```
 
-**4) Archive stage**
+**4. Archive 阶段**
 
 ```
 /devbooks:gardener add-oauth2
@@ -185,301 +185,301 @@ You must use **two separate conversations**:
 
 ---
 
-## Command Reference
+## 命令参考
 
-### Proposal stage
+### Proposal 阶段
 
-| Command | Skill | Description |
+| 命令 | Skill | 说明 |
 |------|-------|------|
-| `/devbooks:router` | devbooks-router | Route to the right Skill |
-| `/devbooks:proposal` | devbooks-proposal-author | Create a change proposal |
-| `/devbooks:impact` | devbooks-impact-analysis | Cross-module impact analysis |
-| `/devbooks:challenger` | devbooks-proposal-challenger | Challenge a proposal |
-| `/devbooks:judge` | devbooks-proposal-judge | Adjudicate a proposal |
-| `/devbooks:debate` | devbooks-proposal-debate-workflow | Triangle debate (Author/Challenger/Judge) |
-| `/devbooks:design` | devbooks-design-doc | Create a design doc |
-| `/devbooks:spec` | devbooks-spec-contract | Define specs & contracts |
-| `/devbooks:c4` | devbooks-c4-map | Generate a C4 map |
-| `/devbooks:plan` | devbooks-implementation-plan | Create an implementation plan |
+| `/devbooks:router` | devbooks-router | 智能路由到合适的 Skill |
+| `/devbooks:proposal` | devbooks-proposal-author | 创建变更提案 |
+| `/devbooks:impact` | devbooks-impact-analysis | 跨模块影响分析 |
+| `/devbooks:challenger` | devbooks-proposal-challenger | 质疑和挑战提案 |
+| `/devbooks:judge` | devbooks-proposal-judge | 裁决提案 |
+| `/devbooks:debate` | devbooks-proposal-debate-workflow | 三角对辩（Author/Challenger/Judge） |
+| `/devbooks:design` | devbooks-design-doc | 创建设计文档 |
+| `/devbooks:spec` | devbooks-spec-contract | 定义规格与契约 |
+| `/devbooks:c4` | devbooks-c4-map | 生成 C4 架构地图 |
+| `/devbooks:plan` | devbooks-implementation-plan | 创建实现计划 |
 
-### Apply stage
+### Apply 阶段
 
-| Command | Skill | Description |
+| 命令 | Skill | 说明 |
 |------|-------|------|
-| `/devbooks:test` | devbooks-test-owner | Test Owner role (separate chat required) |
-| `/devbooks:code` | devbooks-coder | Coder role (separate chat required) |
-| `/devbooks:backport` | devbooks-design-backport | Backport discoveries to design |
+| `/devbooks:test` | devbooks-test-owner | Test Owner 角色（必须独立对话） |
+| `/devbooks:code` | devbooks-coder | Coder 角色（必须独立对话） |
+| `/devbooks:backport` | devbooks-design-backport | 回写发现到设计文档 |
 
-### Review stage
+### Review 阶段
 
-| Command | Skill | Description |
+| 命令 | Skill | 说明 |
 |------|-------|------|
-| `/devbooks:review` | devbooks-code-review | Code review (readability/consistency) |
-| `/devbooks:test-review` | devbooks-test-reviewer | Test quality & coverage review |
+| `/devbooks:review` | devbooks-code-review | 代码评审（可读性/一致性） |
+| `/devbooks:test-review` | devbooks-test-reviewer | 测试质量与覆盖率评审 |
 
-### Archive stage
+### Archive 阶段
 
-| Command | Skill | Description |
+| 命令 | Skill | 说明 |
 |------|-------|------|
-| `/devbooks:gardener` | devbooks-spec-gardener | Maintain/dedupe specs |
-| `/devbooks:delivery` | devbooks-delivery-workflow | End-to-end delivery workflow |
+| `/devbooks:gardener` | devbooks-spec-gardener | 规格维护与去重 |
+| `/devbooks:delivery` | devbooks-delivery-workflow | 完整交付闭环 |
 
-### Standalone Skills
+### 独立技能
 
-| Command | Skill | Description |
+| 命令 | Skill | 说明 |
 |------|-------|------|
-| `/devbooks:entropy` | devbooks-entropy-monitor | System entropy metrics |
-| `/devbooks:federation` | devbooks-federation | Cross-repo federation analysis |
-| `/devbooks:bootstrap` | devbooks-brownfield-bootstrap | Brownfield project bootstrap |
-| `/devbooks:index` | devbooks-index-bootstrap | Generate a SCIP index |
+| `/devbooks:entropy` | devbooks-entropy-monitor | 系统熵度量 |
+| `/devbooks:federation` | devbooks-federation | 跨仓库联邦分析 |
+| `/devbooks:bootstrap` | devbooks-brownfield-bootstrap | 存量项目初始化 |
+| `/devbooks:index` | devbooks-index-bootstrap | 生成 SCIP 索引 |
 
 ---
 
-## DevBooks Comparisons
+## DevBooks 对比
 
 ### vs. OpenSpec
 
-[OpenSpec](https://github.com/Fission-AI/OpenSpec) is a lightweight spec-driven framework with three core commands (proposal/apply/archive), organizing changes by feature folders.
+[OpenSpec](https://github.com/Fission-AI/OpenSpec) 是轻量级规格驱动框架，用三个核心命令（proposal/apply/archive）对齐人与 AI，按功能文件夹分组变更。
 
-**What DevBooks adds:**
-- **Role isolation**: hard boundary between Test Owner and Coder (separate chats)
-- **Quality gates**: 5+ verification gates to block false completion
-- **21 Skills**: proposal, debate, review, entropy metrics, federation, etc.
-- **Evidence-based done**: tests/build define “done”, not self-evaluation
+**DevBooks 新增：**
+- **角色隔离**：Test Owner 与 Coder 硬边界（必须独立对话）
+- **质量闸门**：5+ 验证闸门拦截伪完成
+- **21 个 Skills**：覆盖提案、对辩、评审、熵度量、联邦分析
+- **基于证据的完成**：测试/构建定义"完成"，而非 AI 自评
 
-**Choose OpenSpec**: you want a lightweight spec workflow.
+**选择 OpenSpec**：简单规格驱动变更，需要轻量工作流。
 
-**Choose DevBooks**: you need role separation and verification gates for larger changes.
+**选择 DevBooks**：大型变更、需要角色分离和质量验证。
 
 ### vs. spec-kit
 
-[GitHub spec-kit](https://github.com/github/spec-kit) is a spec-driven toolkit with a constitution file, multi-step refinement, and structured planning.
+[GitHub spec-kit](https://github.com/github/spec-kit) 提供规格驱动开发工具包，有 constitution 文件、多步骤细化和结构化规划。
 
-**What DevBooks adds:**
-- **Brownfield-first**: generates baseline specs for existing repos
-- **Role isolation**: test authoring and implementation are separated
-- **Quality gates**: runtime verification, not just workflow guidance
-- **Prototype mode**: safe experiments without polluting main `src/`
+**DevBooks 新增：**
+- **存量优先**：自动为现有代码库生成基线规格
+- **角色隔离**：测试编写与实现强制分离
+- **质量闸门**：运行时验证，不只是工作流引导
+- **原型模式**：安全实验不污染主 src/
 
-**Choose spec-kit**: greenfield projects with supported AI tools.
+**选择 spec-kit**：0→1 绿地项目，使用支持的 AI 工具。
 
-**Choose DevBooks**: brownfield repos or when you want enforced gates.
+**选择 DevBooks**：存量项目或需要强制质量闸门。
 
 ### vs. Kiro.dev
 
-[Kiro](https://kiro.dev/) is an AWS agentic IDE with a three-phase workflow (EARS requirements, design, tasks), but stores specs separately from implementation artifacts.
+[Kiro](https://kiro.dev/) 是 AWS 的代理式 IDE，用三阶段工作流（EARS 格式需求、设计、任务），但规格与实现产物分开存储。
 
-**DevBooks differences:**
-- **Change package**: proposal/design/spec/plan/verification/evidence in one place for lifecycle traceability
-- **Role isolation**: Test Owner and Coder are separated
-- **Quality gates**: verified through gates, not just task completion
+**DevBooks 差异：**
+- **变更包**：每个变更包含 proposal/design/spec/plan/verification/evidence，整个生命周期可在一个位置追溯
+- **角色隔离**：Test Owner 与 Coder 强制分离
+- **质量闸门**：通过闸门验证，不只是任务完成
 
-**Choose Kiro**: you want an IDE experience and AWS ecosystem integration.
+**选择 Kiro**：想要集成 IDE 体验和 AWS 生态。
 
-**Choose DevBooks**: you want change packages to bundle artifacts and enforce role boundaries.
+**选择 DevBooks**：想要变更包捆绑所有产物并强制角色边界。
 
-### vs. no spec
+### vs. 无规格
 
-Without specs, the assistant generates code from vague prompts, leading to unpredictable output, scope creep, and “hallucinated completion”.
+没有规格时，AI 从模糊提示生成代码，导致不可预测的输出、范围蔓延和"幻觉式完成"。
 
-**DevBooks brings:**
-- Specs agreed before implementation
-- Quality gates that verify real completion
-- Role isolation to prevent self-verification
-- Evidence chain per change
+**DevBooks 带来：**
+- 实现前商定规格
+- 验证真实完成的质量闸门
+- 防止自我验证的角色隔离
+- 每个变更的证据链
 
 ---
 
-## Core Principles
+## 核心原则
 
-| Principle | Meaning |
+| 原则 | 说明 |
 |------|------|
-| **Protocol first** | truth/change/archive live in the repo, not only in chat logs |
-| **Anchor first** | done is defined by tests/static checks/build/evidence |
-| **Role isolation** | Test Owner and Coder must work in separate conversations |
-| **Truth root separation** | `<truth-root>` is read-only truth; `<change-root>` is the workspace |
-| **Structural gates** | prioritize complexity/coupling/test quality, not proxy metrics |
+| **协议优先** | 真理/变更/归档写进项目，不只存在聊天记录里 |
+| **锚点优先** | 完成由测试、静态分析、构建和证据定义 |
+| **角色隔离** | Test Owner 与 Coder 必须在独立对话中工作 |
+| **真理源分离** | `<truth-root>` 是只读真理；`<change-root>` 是临时工作区 |
+| **结构闸门** | 优先关注复杂度/耦合/测试质量，而非代理指标 |
 
 ---
 
-## Advanced Features
+## 高级功能
 
 <details>
-<summary><strong>Quality gates</strong></summary>
+<summary><strong>质量闸门</strong></summary>
 
-DevBooks uses quality gates to block “false done”:
+DevBooks 提供质量闸门拦截"伪完成"：
 
-| Gate | Trigger mode | What it checks |
+| 闸门 | 触发模式 | 检查内容 |
 |------|----------|----------|
-| Green evidence | archive, strict | `evidence/green-final/` exists and is non-empty |
-| Task completion | strict | all tasks are done or SKIP-APPROVED |
-| Test failure block | archive, strict | no failures in green evidence |
-| P0 skip approval | strict | P0 skips require an approval record |
-| Role boundary | apply --role | Coder cannot modify tests/, Test Owner cannot modify src/ |
+| Green 证据检查 | archive, strict | `evidence/green-final/` 存在且非空 |
+| 任务完成检查 | strict | tasks.md 中所有任务完成或 SKIP-APPROVED |
+| 测试失败拦截 | archive, strict | Green 证据中无失败模式 |
+| P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
+| 角色边界检查 | apply --role | Coder 不能改 tests/，Test Owner 不能改 src/ |
 
-Core scripts (in `../skills/devbooks-delivery-workflow/scripts/`):
+核心脚本（位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`）：
 - `change-check.sh --mode proposal|apply|archive|strict`
-- `handoff-check.sh` - handoff boundary checks
-- `audit-scope.sh` - full audit scan
-- `progress-dashboard.sh` - progress visualization
+- `handoff-check.sh` - 角色交接验证
+- `audit-scope.sh` - 全量审计扫描
+- `progress-dashboard.sh` - 进度可视化
 
 </details>
 
 <details>
-<summary><strong>Prototype mode</strong></summary>
+<summary><strong>原型模式</strong></summary>
 
-When the technical approach is uncertain:
+技术方案不确定时：
 
-1. Create a prototype: `change-scaffold.sh <change-id> --prototype`
-2. Test Owner with `--prototype`: characterization tests (no Red baseline required)
-3. Coder with `--prototype`: output to `prototype/src/` (isolates main src)
-4. Promote or discard: `prototype-promote.sh <change-id>`
+1. 创建原型：`change-scaffold.sh <change-id> --prototype`
+2. Test Owner 用 `--prototype`：表征测试（无需 Red 基线）
+3. Coder 用 `--prototype`：输出到 `prototype/src/`（隔离主 src）
+4. 提升或丢弃：`prototype-promote.sh <change-id>`
 
-Prototype mode prevents experimental code from polluting the main tree.
+原型模式防止实验代码污染主源码树。
 
-Scripts live in `../skills/devbooks-delivery-workflow/scripts/`.
+脚本位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`。
 
 </details>
 
 <details>
-<summary><strong>Entropy monitoring</strong></summary>
+<summary><strong>熵度量监控</strong></summary>
 
-DevBooks tracks four dimensions of system entropy:
+DevBooks 跟踪四维系统熵：
 
-| Metric | What it measures |
+| 指标 | 测量内容 |
 |------|----------|
-| Structural entropy | module complexity and coupling |
-| Change entropy | change patterns and volatility |
-| Test entropy | coverage/quality decay over time |
-| Dependency entropy | external dependency health |
+| 结构熵 | 模块复杂度和耦合 |
+| 变更熵 | 变动和波动模式 |
+| 测试熵 | 测试覆盖率和质量衰减 |
+| 依赖熵 | 外部依赖健康度 |
 
-Use `/devbooks:entropy` to generate reports and identify refactor opportunities.
+用 `/devbooks:entropy` 生成报告，识别重构机会。
 
-Scripts (in `../skills/devbooks-entropy-monitor/scripts/`): `entropy-measure.sh`, `entropy-report.sh`
+脚本（位于 `~/.claude/skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
 
 </details>
 
 <details>
-<summary><strong>Brownfield project bootstrap</strong></summary>
+<summary><strong>存量项目初始化</strong></summary>
 
-When `<truth-root>` is empty:
+当 `<truth-root>` 为空时：
 
 ```
 /devbooks:bootstrap
 ```
 
-Generates:
-- project profile and glossary
-- baseline specs from existing code
-- minimal verification anchors
-- module dependency map
-- technical debt hotspots
+生成：
+- 项目画像和术语表
+- 从现有代码生成基线规格
+- 最小验证锚点
+- 模块依赖图
+- 技术债热点
 
 </details>
 
 <details>
-<summary><strong>Cross-repo federation</strong></summary>
+<summary><strong>跨仓库联邦</strong></summary>
 
-For multi-repo analysis:
+多仓库分析：
 
 ```
 /devbooks:federation
 ```
 
-Analyzes cross-repo contracts and dependencies to support coordinated changes.
+分析跨仓库边界的契约和依赖，支持协调变更。
 
 </details>
 
 <details>
-<summary><strong>MCP auto-detection</strong></summary>
+<summary><strong>MCP 自动检测</strong></summary>
 
-DevBooks Skills support graceful MCP (Model Context Protocol) degradation: you can run the full workflow without MCP/CKB; when CKB (Code Knowledge Base) is detected, DevBooks automatically enables graph-based capabilities for more accurate “scope/reference/call chain” analysis.
+DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把"范围/引用/调用链"分析做得更准。
 
-### What is it for?
+### 它有什么用？
 
-- **More accurate impact analysis**: upgrades from “file-level guesses” to “symbol references + call graphs”
-- **More focused reviews**: automatically pulls hotspots and prioritizes high-risk areas (tech debt/high churn)
-- **Less manual grep**: reduces noise and repeated confirmation in large repos
+- **影响分析更精确**：从"文件级猜测"升级到"符号级引用 + 调用图"，降低漏改风险
+- **审查更有重点**：自动拉取热点文件，优先关注高风险区域（技术债/高变动）
+- **大仓库更省心**：减少手动 Grep 的噪音与反复确认
 
-### MCP status and behavior
+### MCP 状态与行为
 
-| MCP status | Behavior |
+| MCP 状态 | 行为 |
 |----------|------|
-| CKB available | Enhanced mode: symbol-level impact/references/call graph/hotspots (`mcp__ckb__analyzeImpact`, `mcp__ckb__findReferences`, `mcp__ckb__getCallGraph`, `mcp__ckb__getHotspots`) |
-| CKB unavailable | Basic mode: Grep + Glob text search (full functionality, lower precision) |
+| CKB 可用 | 增强模式：符号级影响分析/引用查找/调用图/热点（`mcp__ckb__analyzeImpact`、`mcp__ckb__findReferences`、`mcp__ckb__getCallGraph`、`mcp__ckb__getHotspots`） |
+| CKB 不可用 | 基础模式：Grep + Glob 文本搜索（功能完整，精度降低） |
 
-### Auto detection
+### 自动检测
 
-- Skills that depend on MCP call `mcp__ckb__getStatus` first (2s timeout)
-- Timeout/failure → silently falls back to basic mode (non-blocking)
-- No manual “basic/enhanced” switch required
+- 需要 MCP 的 Skills 会先调用 `mcp__ckb__getStatus` 探测可用性（2s 超时）
+- 超时/失败 → 静默降级到基础模式，不阻塞执行
+- 无需手动选择"基础/增强"模式
 
-To enable enhanced mode: configure CKB per `../docs/推荐MCP.md` and run `/devbooks:index` to generate `index.scip`.
+如需启用增强能力：按 `../docs/推荐MCP.md` 配置 CKB，并运行 `/devbooks:index` 生成 `index.scip`。
 
 </details>
 
 <details>
-<summary><strong>Proposal debate workflow</strong></summary>
+<summary><strong>提案对辩工作流</strong></summary>
 
-For strict proposal review, run the triangle debate:
+严格提案审查用三角对辩：
 
 ```
 /devbooks:debate
 ```
 
-Three roles:
-1. **Author**: creates and defends the proposal
-2. **Challenger**: challenges assumptions, finds gaps, identifies risks
-3. **Judge**: makes the final decision and records rationale
+三个角色：
+1. **Author**：创建并捍卫提案
+2. **Challenger**：质疑假设、发现缺口、识别风险
+3. **Judge**：做最终决定、记录理由
 
-Decision: `Approved`, `Revise`, `Rejected`
+决定结果：`Approved`、`Revise`、`Rejected`
 
 </details>
 
 ---
 
-## Migration from Other Frameworks
+## 从其他框架迁移
 
-DevBooks provides migration scripts to help you transition from other spec-driven development tools.
+DevBooks 提供迁移脚本帮助从其他规格驱动开发工具迁移。
 
-### Migrate from OpenSpec
+### 从 OpenSpec 迁移
 
-If you're currently using [OpenSpec](https://github.com/Fission-AI/OpenSpec) with an `openspec/` directory:
+如果你当前使用 [OpenSpec](https://github.com/Fission-AI/OpenSpec)，有 `openspec/` 目录：
 
 ```bash
-# Using CLI (recommended)
+# 使用 CLI（推荐）
 dev-playbooks-cn migrate --from openspec
 
-# Preview changes first
+# 先预览变更
 dev-playbooks-cn migrate --from openspec --dry-run
 
-# Keep original directory after migration
+# 迁移后保留原目录
 dev-playbooks-cn migrate --from openspec --keep-old
 ```
 
-**What gets migrated:**
+**迁移内容：**
 - `openspec/specs/` → `dev-playbooks/specs/`
 - `openspec/changes/` → `dev-playbooks/changes/`
 - `openspec/project.md` → `dev-playbooks/project.md`
-- All path references are automatically updated
-- AI tool command directories are cleaned up (`.claude/commands/openspec/`, etc.)
+- 所有路径引用自动更新
+- AI 工具命令目录自动清理（`.claude/commands/openspec/` 等）
 
-### Migrate from GitHub spec-kit
+### 从 GitHub spec-kit 迁移
 
-If you're using [GitHub spec-kit](https://github.com/github/spec-kit) with `specs/` and `memory/` directories:
+如果你使用 [GitHub spec-kit](https://github.com/github/spec-kit)，有 `specs/` 和 `memory/` 目录：
 
 ```bash
-# Using CLI (recommended)
+# 使用 CLI（推荐）
 dev-playbooks-cn migrate --from speckit
 
-# Preview changes first
+# 先预览变更
 dev-playbooks-cn migrate --from speckit --dry-run
 
-# Keep original directories after migration
+# 迁移后保留原目录
 dev-playbooks-cn migrate --from speckit --keep-old
 ```
 
-**Mapping rules:**
+**映射规则：**
 
 | Spec-Kit | DevBooks |
 |----------|----------|
@@ -490,47 +490,47 @@ dev-playbooks-cn migrate --from speckit --keep-old
 | `specs/[feature]/quickstart.md` | `changes/[feature]/verification.md` |
 | `specs/[feature]/contracts/` | `changes/[feature]/specs/` |
 
-### Migration Features
+### 迁移功能
 
-Both migration scripts support:
+两个迁移脚本都支持：
 
-- **Idempotent execution**: Safe to run multiple times
-- **Checkpoints**: Resume from where you left off if interrupted
-- **Dry-run mode**: Preview changes before applying
-- **Automatic backup**: Original files are backed up to `.devbooks/backup/`
-- **Reference updates**: Path references in documents are automatically updated
+- **幂等执行**：可安全多次运行
+- **断点续传**：中断后可从断点恢复
+- **试运行模式**：预览变更再执行
+- **自动备份**：原文件备份到 `.devbooks/backup/`
+- **引用更新**：文档中的路径引用自动更新
 
-### Post-Migration Steps
+### 迁移后步骤
 
-After migration:
+迁移后：
 
-1. Run `dev-playbooks-cn init` to set up DevBooks Skills
-2. Review migrated files in `dev-playbooks/`
-3. Update `verification.md` files with proper AC mappings
-4. Run `/devbooks:bootstrap` if you need baseline specs
-
----
-
-## Repository Structure
-
-```
-skills/                    # devbooks-* Skill sources (some ship scripts/)
-templates/                 # project init templates (used by `dev-playbooks-cn init`)
-templates/dev-playbooks/   # DevBooks protocol directory template (copied into your project as `dev-playbooks/`)
-scripts/                   # install & helper scripts
-docs/                      # documentation
-bin/                       # CLI entry
-```
+1. 运行 `dev-playbooks-cn init` 设置 DevBooks Skills
+2. 检查 `dev-playbooks/` 中的迁移文件
+3. 更新 `verification.md` 文件的 AC 映射
+4. 如需基线规格，运行 `/devbooks:bootstrap`
 
 ---
 
-## Documentation
+## 仓库结构
 
-- [Slash command guide](../docs/Slash 命令使用指南.md)
-- [Skills guide](../skills/Skills使用说明.md)
-- [MCP configuration recommendations](../docs/推荐MCP.md)
-- [Integration template (protocol-agnostic)](../docs/DevBooks集成模板（协议无关）.md)
-- [Installation prompt](../docs/DevBooks安装提示词.md)
+```
+skills/                    # devbooks-* Skills 源码（部分 Skill 自带 scripts/）
+templates/                 # 项目初始化模板（`dev-playbooks-cn init` 使用）
+templates/dev-playbooks/   # DevBooks 协议目录模板（初始化后写入项目为 `dev-playbooks/`）
+scripts/                   # 安装与辅助脚本
+docs/                      # 支持文档
+bin/                       # CLI 入口
+```
+
+---
+
+## 文档
+
+- [Slash 命令使用指南](../docs/Slash 命令使用指南.md)
+- [Skills 使用说明](../skills/Skills使用说明.md)
+- [MCP 配置建议](../docs/推荐MCP.md)
+- [集成模板（协议无关）](../docs/DevBooks集成模板（协议无关）.md)
+- [安装提示词](../docs/DevBooks安装提示词.md)
 
 ---
 
