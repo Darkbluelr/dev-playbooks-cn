@@ -130,7 +130,7 @@ DevBooks 使用两个目录根：
 | `<truth-root>` | 当前规格（只读真理） | `dev-playbooks/specs/` |
 | `<change-root>` | 变更包（工作区） | `dev-playbooks/changes/` |
 
-详见 `../docs/DevBooks集成模板（协议无关）.md` 或使用 `../docs/DevBooks安装提示词.md` 让 AI 自动配置。
+详见 `docs/DevBooks集成模板（协议无关）.md` 或使用 `docs/DevBooks安装提示词.md` 让 AI 自动配置。
 
 ---
 
@@ -414,7 +414,7 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 - 超时/失败 → 静默降级到基础模式，不阻塞执行
 - 无需手动选择"基础/增强"模式
 
-如需启用增强能力：按 `../docs/推荐MCP.md` 配置 CKB，并运行 `/devbooks:index` 生成 `index.scip`。
+如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `/devbooks:index` 生成 `index.scip`。
 
 </details>
 
@@ -511,26 +511,33 @@ dev-playbooks-cn migrate --from speckit --keep-old
 
 ---
 
-## 仓库结构
+## 目录结构
 
 ```
-skills/                    # devbooks-* Skills 源码（部分 Skill 自带 scripts/）
-templates/                 # 项目初始化模板（`dev-playbooks-cn init` 使用）
-templates/dev-playbooks/   # DevBooks 协议目录模板（初始化后写入项目为 `dev-playbooks/`）
-scripts/                   # 安装与辅助脚本
-docs/                      # 支持文档
-bin/                       # CLI 入口
+dev-playbooks/
+├── README.md              # 本文档
+├── constitution.md        # 项目宪法（GIP 原则）
+├── project.md             # 项目上下文（技术栈/约定）
+├── specs/                 # 当前规格（只读真理）
+│   ├── _meta/             # 元数据（术语表、项目画像）
+│   └── architecture/      # 架构规格（fitness-rules）
+├── changes/               # 变更包（工作区）
+├── scripts/               # 辅助脚本
+└── docs/                  # 文档
+    ├── Slash 命令使用指南.md
+    ├── 推荐MCP.md
+    ├── DevBooks集成模板（协议无关）.md
+    └── DevBooks安装提示词.md
 ```
 
 ---
 
 ## 文档
 
-- [Slash 命令使用指南](../docs/Slash 命令使用指南.md)
-- [Skills 使用说明](../skills/Skills使用说明.md)
-- [MCP 配置建议](../docs/推荐MCP.md)
-- [集成模板（协议无关）](../docs/DevBooks集成模板（协议无关）.md)
-- [安装提示词](../docs/DevBooks安装提示词.md)
+- [Slash 命令使用指南](docs/Slash%20命令使用指南.md)
+- [MCP 配置建议](docs/推荐MCP.md)
+- [集成模板（协议无关）](docs/DevBooks集成模板（协议无关）.md)
+- [安装提示词](docs/DevBooks安装提示词.md)
 
 ---
 
