@@ -171,28 +171,6 @@
 
 ---
 
-## `devbooks-c4-map`（C4 Map Maintainer）
-
-- 作用：维护/更新项目的权威 C4 架构地图（当前真理），并按变更输出 C4 Delta。
-- 使用场景：
-  - **Proposal 阶段**：需要在 `design.md` 里写清“边界/依赖方向变化”（只写 **C4 Delta**，不改当前真理）
-  - **Review/Archive 阶段**：变更已实现并准备合并当前真理，更新权威地图 `(<truth-root>/architecture/c4.md)`
-- 使用话术：
-  - Proposal（只写 C4 Delta，不改当前真理）：
-    ```text
-    你现在是 C4 Map Maintainer。请点名使用 `devbooks-c4-map`，但在 proposal 阶段**不要修改** `dev-playbooks/specs/architecture/c4.md`（当前真理）。
-    先读：`dev-playbooks/specs/architecture/c4.md`（如存在）+ 本次 `dev-playbooks/changes/<change-id>/proposal.md` + `dev-playbooks/changes/<change-id>/design.md`
-    请输出：一段可直接粘贴进 `dev-playbooks/changes/<change-id>/design.md` 的 **C4 Delta** 小节（C1/C2/C3 新增/修改/移除 + 依赖方向变化 + 建议的 Architecture Guardrails/fitness tests 条目）。
-    ```
-  - Review/Archive（更新当前真理的权威地图）：
-  ```text
-  你现在是 C4 Map Maintainer。请点名使用 `devbooks-c4-map`。
-  先读：`dev-playbooks/specs/architecture/c4.md`（如存在）+ 本次 `dev-playbooks/changes/<change-id>/design.md` + 相关代码改动（用于确认变更已真实落地）
-  请更新（或创建最小骨架并标 TODO）：`dev-playbooks/specs/architecture/c4.md`。
-  ```
-
----
-
 ## `devbooks-implementation-plan`（Planner / tasks.md）
 
 - 作用：从 `design.md` 推导编码计划 `tasks.md`（主线计划/临时计划/断点区），并绑定验收锚点（不得参考 tests/）。

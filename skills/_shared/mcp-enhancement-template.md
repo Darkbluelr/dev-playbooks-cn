@@ -91,7 +91,6 @@
 | devbooks-index-bootstrap | mcp__ckb__getStatus | 索引状态检测 |
 | devbooks-federation | mcp__ckb__*, mcp__github__* | 跨仓库分析 |
 | devbooks-router | mcp__ckb__getStatus | 索引可用性检测 |
-| devbooks-c4-map | mcp__ckb__getArchitecture | 模块依赖图 |
 | devbooks-spec-contract | mcp__ckb__findReferences | 引用检测 |
 | devbooks-entropy-monitor | mcp__ckb__getHotspots | 热点趋势分析 |
 | devbooks-delivery-workflow | mcp__ckb__getStatus | 索引检测 |

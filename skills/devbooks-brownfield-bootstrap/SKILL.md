@@ -74,8 +74,12 @@ tools:
 
 | 产物 | 路径 | 数据来源 |
 |------|------|----------|
+| **C4 架构地图** | `architecture/c4.md` | 综合分析 + CKB（增强模式） |
 | 模块依赖图 | `architecture/module-graph.md` | `mcp__ckb__getArchitecture` |
 | 技术债热点 | `architecture/hotspots.md` | `mcp__ckb__getHotspots` |
+| 分层约束 | `architecture/layering-constraints.md` | 代码分析（可选） |
+
+> **设计决策**：C4 架构地图现在由 brownfield-bootstrap 在初始化时生成，后续架构变更通过 design.md 的 Architecture Impact 章节记录，由 spec-gardener 在归档时合并。
 
 ### 4. 基线变更包
 
@@ -98,10 +102,51 @@ tools:
 
 | 产物 | 路径 | 数据来源 |
 |------|------|----------|
+| **C4 架构地图** | `<truth-root>/architecture/c4.md` | 综合分析 |
 | 模块依赖图 | `<truth-root>/architecture/module-graph.md` | `mcp__ckb__getArchitecture` |
 | 技术债热点 | `<truth-root>/architecture/hotspots.md` | `mcp__ckb__getHotspots` |
 | 领域概念 | `<truth-root>/_meta/key-concepts.md` | `mcp__ckb__listKeyConcepts` |
 | 项目画像 | `<truth-root>/_meta/project-profile.md` | 综合分析 |
+
+### C4 架构地图生成规则
+
+初始化时生成的 C4 地图应包含：
+
+1. **Context 层**：系统与外部参与者（用户、外部系统）的关系
+2. **Container 层**：系统内的容器（应用、数据库、服务）
+3. **Component 层**：主要容器内的组件（模块、类）
+
+**输出格式**：
+
+```markdown
+# C4 Architecture Map
+
+## System Context
+
+[描述系统边界与外部交互]
+
+## Container Diagram
+
+| Container | 技术栈 | 职责 |
+|-----------|--------|------|
+| <name> | <tech> | <responsibility> |
+
+## Component Diagram
+
+### <Container Name>
+
+| Component | 职责 | 依赖 |
+|-----------|------|------|
+| <name> | <responsibility> | <dependencies> |
+
+## Architecture Guardrails
+
+### Layering Constraints
+
+| 层级 | 可依赖 | 禁止依赖 |
+|------|--------|----------|
+| <layer> | <allowed> | <forbidden> |
+```
 
 ### 热点计算公式
 

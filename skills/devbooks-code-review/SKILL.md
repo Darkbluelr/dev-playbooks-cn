@@ -35,7 +35,7 @@ tools:
 - 代码格式化
 
 ### 2. 依赖健康审查
-- 分层约束遵守（参见 devbooks-c4-map）
+- 分层约束遵守（参见 `<truth-root>/architecture/c4.md`）
 - 循环依赖检测
 - 内部模块封装（禁止深度导入 *Internal 文件）
 - 依赖方向正确性

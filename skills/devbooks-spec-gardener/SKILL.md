@@ -27,6 +27,62 @@ tools:
 - 禁止猜测目录根
 - 禁止跳过规则文档阅读
 
+---
+
+## 核心职责
+
+### 1. 规格合并与维护
+
+在归档阶段，将变更包中的规格产物合并到 `<truth-root>`：
+
+| 源路径 | 目标路径 | 合并策略 |
+|--------|----------|----------|
+| `<change-root>/<change-id>/specs/**` | `<truth-root>/specs/**` | 增量合并 |
+| `<change-root>/<change-id>/contracts/**` | `<truth-root>/contracts/**` | 版本化合并 |
+
+### 2. C4 架构地图合并（新增）
+
+> **设计决策**：C4 架构变更现在通过 design.md 的 Architecture Impact 章节记录，由 spec-gardener 在归档时合并到真理。
+
+在归档阶段，检测并合并架构变更：
+
+| 检测源 | 目标路径 | 合并逻辑 |
+|--------|----------|----------|
+| `<change-root>/<change-id>/design.md` 的 "Architecture Impact" 章节 | `<truth-root>/architecture/c4.md` | 增量更新 |
+
+**C4 合并流程**：
+
+1. **检测架构变更**：解析 `design.md` 中的 "Architecture Impact" 章节
+2. **判断是否需要合并**：
+   - 若 "无架构变更" 被勾选 → 跳过合并
+   - 若 "有架构变更" → 执行合并
+3. **执行合并**：
+   - 读取 `<truth-root>/architecture/c4.md`（若不存在则创建）
+   - 根据 Architecture Impact 中的变更描述更新对应章节
+   - 更新 Container/Component 表格
+   - 更新依赖关系
+   - 更新分层约束（如有变更）
+4. **记录合并日志**：在 c4.md 末尾添加变更记录
+
+**合并输出格式**（追加到 c4.md）：
+
+```markdown
+## Change History
+
+| Date | Change ID | Impact Summary |
+|------|-----------|----------------|
+| <date> | <change-id> | <brief description of architecture changes> |
+```
+
+### 3. 去重与清理
+
+在维护模式下执行：
+
+- 检测重复的规格定义
+- 清理过时/废弃的规格
+- 整理目录结构
+- 修复一致性问题
+
 ## 执行方式
 
 1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。

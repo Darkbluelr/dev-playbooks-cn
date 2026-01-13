@@ -108,7 +108,7 @@ impact_profile:
 | Impact 字段 | 值 | 自动追加 Skill |
 |-------------|-----|---------------|
 | `external_api: true` | - | `devbooks-spec-contract` |
-| `architecture_boundary: true` | - | `devbooks-c4-map` |
+| `architecture_boundary: true` | - | `devbooks-design-doc`（确保 Architecture Impact 章节完整） |
 | `cross_repo: true` | - | `devbooks-federation` |
 | `risk_level: high` | - | `devbooks-proposal-debate-workflow` |
 | `affected_modules` 数量 > 5 | - | `devbooks-impact-analysis`（深度分析） |
@@ -125,7 +125,7 @@ impact_profile:
 
 ### 建议执行（基于 Impact 分析）
 4. `devbooks-spec-contract skill` → specs/**（检测到 external_api: true）
-5. `devbooks-c4-map skill` → architecture/c4.md（检测到 architecture_boundary: true）
+5. `devbooks-design-doc skill` → design.md Architecture Impact 章节（检测到 architecture_boundary: true）
 
 ### 可选执行
 6. `devbooks-impact-analysis skill` → 深度影响分析（affected_modules > 5）
@@ -182,7 +182,7 @@ skill 列表：
 - **风险/争议/取舍明显**：`devbooks-proposal-debate-workflow`（Author/Challenger/Judge，对辩后写回 Decision Log）
 - **对外行为/契约/数据不变量变化**：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + `design.md` Contract 章节
   - 若需要"确定性创建 spec delta 文件/避免路径写错"：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
-- **模块边界/依赖方向/架构形态变化**：`devbooks-c4-map` → `(<truth-root>/architecture/c4.md)`
+- **模块边界/依赖方向/架构形态变化**：确保 `devbooks-design-doc` 输出完整的 Architecture Impact 章节 → 归档时由 `devbooks-spec-gardener` 合并到 `(<truth-root>/architecture/c4.md)`
 
 硬约束提醒：
 - proposal 阶段禁止写实现代码；实现发生在 apply 阶段并以测试/闸门为完成判据。

@@ -177,7 +177,6 @@ DevBooks 使用两个目录根：
 | `devbooks-proposal-debate-workflow` | 三角对辩（Author/Challenger/Judge） |
 | `devbooks-design-doc` | 创建设计文档 |
 | `devbooks-spec-contract` | 定义规格与契约 |
-| `devbooks-c4-map` | 生成 C4 架构地图 |
 | `devbooks-implementation-plan` | 创建实现计划 |
 
 ### Apply 阶段
