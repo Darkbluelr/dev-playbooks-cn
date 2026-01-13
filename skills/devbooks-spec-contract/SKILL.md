@@ -22,8 +22,8 @@ tools:
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
 2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
-4. `project.md`（如存在）→ template 协议，使用默认映射
-5. 若仍无法确定 → **停止并询问用户**
+3. `project.md`（如存在）→ template 协议，使用默认映射
+4. 若仍无法确定 → **停止并询问用户**
 
 **关键约束**：
 - 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
