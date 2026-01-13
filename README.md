@@ -34,14 +34,13 @@ AI 编码助手很强大，但往往**不可预测**：
 | 维度 | DevBooks | OpenSpec | spec-kit | 无规格 |
 |------|----------|----------|----------|--------|
 | 规格驱动工作流 | 是 | 是 | 是 | 否 |
-| **角色隔离** | **强制** | 无 | 无 | 无 |
-| **质量闸门** | **5+ 闸门** | 无 | 无 | 无 |
-| **基于证据的完成** | **必需** | 无 | 无 | 无 |
-| 存量项目支持 | **自动生成基线** | 手动 | 有限 | - |
-| 命令/技能数 | **21** | 3 | ~5 | - |
-| 提案对辩工作流 | **三角对辩** | 无 | 无 | 无 |
-| 熵度量监控 | **内置** | 无 | 无 | 无 |
-| 跨仓库联邦 | **支持** | 无 | 无 | 无 |
+| 变更产物的可追溯性 | 变更包集中存档（proposal/design/spec/tasks/verification/evidence） | 主要以变更目录/文件组织为主 | 以文档+任务编排为主 | 无 |
+| 角色与职责边界 | **强制隔离**（Test Owner / Coder） | 约定为主（不强制） | 约定为主（不强制） | 无 |
+| 完成判据（DoD） | **证据驱动 + 闸门**（测试/构建/审计） | 人工定义/人工检查 | 人工定义/人工检查 | 常依赖主观判断 |
+| 代码质量保障 | 守门 + 指标（熵度量/热点）+ Review 角色 | 依赖外部工具/人工 review | 依赖外部工具/人工 review | 不稳定 |
+| 影响面分析 | CKB 图基能力（可降级 Grep） | 文本搜索/人工推导 | 文本搜索/人工推导 | 容易漏改 |
+| 存量项目起步 | 自动生成基线规格/术语表/最小验证锚点 | 手动补齐 | 有限 | - |
+| 自动化覆盖面 | 21 个 Skills（提案→实现→归档闭环） | 3 个核心命令 | 工具包（偏 0→1） | - |
 
 ---
 
@@ -310,7 +309,7 @@ DevBooks 提供质量闸门拦截"伪完成"：
 | P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
 | 角色边界检查 | apply --role | Coder 不能改 tests/，Test Owner 不能改 src/ |
 
-**核心脚本：**
+核心脚本（位于 `skills/devbooks-delivery-workflow/scripts/`）：
 - `change-check.sh --mode proposal|apply|archive|strict`
 - `handoff-check.sh` - 角色交接验证
 - `audit-scope.sh` - 全量审计扫描
@@ -330,6 +329,8 @@ DevBooks 提供质量闸门拦截"伪完成"：
 
 原型模式防止实验代码污染主源码树。
 
+脚本位于 `skills/devbooks-delivery-workflow/scripts/`。
+
 </details>
 
 <details>
@@ -346,7 +347,7 @@ DevBooks 跟踪四维系统熵：
 
 用 `/devbooks:entropy` 生成报告，识别重构机会。
 
-工具：`tools/devbooks-complexity.sh`、`tools/devbooks-entropy-viz.sh`
+脚本（位于 `skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
 
 </details>
 
@@ -384,14 +385,28 @@ DevBooks 跟踪四维系统熵：
 <details>
 <summary><strong>MCP 自动检测</strong></summary>
 
-DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：
+DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把“范围/引用/调用链”分析做得更准。
+
+### 它有什么用？
+
+- **影响分析更精确**：从“文件级猜测”升级到“符号级引用 + 调用图”，降低漏改风险
+- **审查更有重点**：自动拉取热点文件，优先关注高风险区域（技术债/高变动）
+- **大仓库更省心**：减少手动 Grep 的噪音与反复确认
+
+### MCP 状态与行为
 
 | MCP 状态 | 行为 |
 |----------|------|
-| CKB 可用 | 增强模式：图工具（`analyzeImpact`、`getCallGraph`、`getHotspots`） |
-| CKB 不可用 | 基础模式：Grep + Glob 文本搜索（功能完整，增强减少） |
+| CKB 可用 | 增强模式：符号级影响分析/引用查找/调用图/热点（`mcp__ckb__analyzeImpact`、`mcp__ckb__findReferences`、`mcp__ckb__getCallGraph`、`mcp__ckb__getHotspots`） |
+| CKB 不可用 | 基础模式：Grep + Glob 文本搜索（功能完整，精度降低） |
 
-自动检测，2 秒超时。无需手动配置。
+### 自动检测
+
+- 需要 MCP 的 Skills 会先调用 `mcp__ckb__getStatus` 探测可用性（2s 超时）
+- 超时/失败 → 静默降级到基础模式，不阻塞执行
+- 无需手动选择“基础/增强”模式
+
+如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `/devbooks:index` 生成 `index.scip`。
 
 </details>
 
@@ -418,12 +433,12 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：
 ## 仓库结构
 
 ```
-skills/          # 21 个 devbooks-* Skills 源码
-templates/       # 项目初始化模板
-scripts/         # 安装和辅助脚本
-tools/           # 复杂度和熵度量工具
-docs/            # 支持文档
-bin/             # CLI 入口
+skills/                    # devbooks-* Skills 源码（部分 Skill 自带 scripts/）
+templates/                 # 项目初始化模板（`dev-playbooks init` 使用）
+templates/dev-playbooks/   # DevBooks 协议目录模板（初始化后写入项目为 `dev-playbooks/`）
+scripts/                   # 安装与辅助脚本
+docs/                      # 支持文档
+bin/                       # CLI 入口
 ```
 
 ---

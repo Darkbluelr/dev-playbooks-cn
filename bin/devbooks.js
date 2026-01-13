@@ -606,6 +606,7 @@ function createProjectStructure(projectDir) {
   }
 
   const templateFiles = [
+    { src: 'dev-playbooks/README.md', dest: 'dev-playbooks/README.md' },
     { src: 'dev-playbooks/constitution.md', dest: 'dev-playbooks/constitution.md' },
     { src: 'dev-playbooks/project.md', dest: 'dev-playbooks/project.md' },
     { src: 'dev-playbooks/specs/_meta/project-profile.md', dest: 'dev-playbooks/specs/_meta/project-profile.md' },
