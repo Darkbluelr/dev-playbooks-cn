@@ -4,7 +4,7 @@
 
 > 把大型变更变成可控、可追溯、可验证的闭环：Skills + 质量闸门 + 角色隔离。
 
-[![npm](https://img.shields.io/npm/v/dev-playbooks)](https://www.npmjs.com/package/dev-playbooks)
+[![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
@@ -77,11 +77,19 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ### 支持的 AI 工具
 
-| 工具 | Slash 命令 | 自然语言 |
-|------|-----------|----------|
-| **Claude Code** | `/devbooks:*` | 支持 |
-| **Codex CLI** | `/devbooks:*` | 支持 |
-| 其他 AI 助手 | - | "运行 DevBooks proposal skill..." |
+| 工具 | Slash 命令 | 自然语言 | 配置文件 |
+|------|-----------|----------|----------|
+| **Claude Code** | `/devbooks:*` | 支持 | `CLAUDE.md` |
+| **Codex CLI** | `/devbooks:*` | 支持 | `AGENTS.md` |
+| **Cursor** | - | 支持 | `.cursorrules` |
+| **Windsurf** | - | 支持 | `.windsurfrules` |
+| **Continue.dev** | - | 支持 | `.continuerules` |
+| **GitHub Copilot** | - | 支持 | `.github/copilot-instructions.md` |
+| **Gemini Code Assist** | - | 支持 | - |
+| **Aider** | - | 支持 | `.aider.conf.yml` |
+| **Cline** | - | 支持 | `.clinerules` |
+
+> **提示**：对于不支持 Slash 命令的工具，使用自然语言指令，例如："运行 DevBooks proposal skill..."
 
 ### 安装与初始化
 
@@ -89,16 +97,16 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ```bash
 # 全局安装
-npm install -g dev-playbooks
+npm install -g dev-playbooks-cn
 
 # 在项目中初始化
-dev-playbooks init
+dev-playbooks-cn init
 ```
 
 **一次性使用：**
 
 ```bash
-npx dev-playbooks@latest init
+npx dev-playbooks-cn@latest init
 ```
 
 **从源码安装（贡献者）：**
@@ -434,7 +442,7 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 
 ```
 skills/                    # devbooks-* Skills 源码（部分 Skill 自带 scripts/）
-templates/                 # 项目初始化模板（`dev-playbooks init` 使用）
+templates/                 # 项目初始化模板（`dev-playbooks-cn init` 使用）
 templates/dev-playbooks/   # DevBooks 协议目录模板（初始化后写入项目为 `dev-playbooks/`）
 scripts/                   # 安装与辅助脚本
 docs/                      # 支持文档
