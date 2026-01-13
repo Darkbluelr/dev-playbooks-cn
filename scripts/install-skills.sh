@@ -11,7 +11,7 @@ Installs DevBooks skills (skills/devbooks-*) to:
   - Codex CLI:   $CODEX_HOME/skills (default: ~/.codex/skills/)
 
 Optionally installs Codex prompt entrypoints (templates/claude-commands/devbooks/*.md) to:
-  - Codex CLI:   $CODEX_HOME/prompts/devbooks (default: ~/.codex/prompts/devbooks/)
+  - Codex CLI:   $CODEX_HOME/prompts (default: ~/.codex/prompts/)
 EOF
 }
 
@@ -125,7 +125,7 @@ install_prompts_into() {
   done
 
   if [[ ${#prompt_files[@]} -eq 0 ]]; then
-    echo "error: no *.md prompts found in $prompts_src" >&2
+    echo "error: no prompts found in $prompts_src" >&2
     exit 1
   fi
 
@@ -138,7 +138,7 @@ install_prompts_into() {
   for src in "${prompt_files[@]}"; do
     local name
     name="$(basename "$src")"
-    local dest="${dest_root}/${name}"
+    local dest="${dest_root}/devbooks-${name}"
     if [[ "$dry_run" == true ]]; then
       echo "[dry-run] install prompt: $src -> $dest"
       continue
@@ -156,7 +156,7 @@ if [[ "$install_codex" == true ]]; then
   codex_home="${CODEX_HOME:-${HOME}/.codex}"
   install_into "${codex_home}/skills"
   if [[ "$install_codex_prompts" == true ]]; then
-    install_prompts_into "${codex_home}/prompts/devbooks"
+    install_prompts_into "${codex_home}/prompts"
   fi
 fi
 

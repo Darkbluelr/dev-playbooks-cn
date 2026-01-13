@@ -6,8 +6,8 @@
  * AI-agnostic spec-driven development workflow
  *
  * 用法：
- *   devbooks init [path] [options]
- *   devbooks update [path]
+ *   dev-playbooks init [path] [options]
+ *   dev-playbooks update [path]
  *
  * 选项：
  *   --tools <tools>    非交互式指定 AI 工具：all, none, 或逗号分隔的列表
@@ -24,6 +24,8 @@ import ora from 'ora';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const CLI_COMMAND = 'dev-playbooks';
 
 // ============================================================================
 // Skills 支持级别定义
@@ -146,7 +148,7 @@ const AI_TOOLS = [
     description: 'OpenAI Codex CLI',
     skillsSupport: SKILLS_SUPPORT.BASIC,
     slashDir: null,
-    globalSlashDir: path.join(os.homedir(), '.codex', 'prompts', 'devbooks'),
+    globalSlashDir: path.join(os.homedir(), '.codex', 'prompts'),
     instructionFile: 'AGENTS.md',
     available: true
   }
@@ -188,6 +190,26 @@ function copyDirSync(src, dest) {
       count++;
     }
   }
+  return count;
+}
+
+function copyCodexPromptsSync(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return 0;
+  fs.mkdirSync(destDir, { recursive: true });
+
+  let count = 0;
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    if (!entry.name.endsWith('.md')) continue;
+
+    const srcPath = path.join(srcDir, entry.name);
+    const destName = entry.name.startsWith('devbooks-') ? entry.name : `devbooks-${entry.name}`;
+    const destPath = path.join(destDir, destName);
+    fs.copyFileSync(srcPath, destPath);
+    count++;
+  }
+
   return count;
 }
 
@@ -289,7 +311,7 @@ async function promptToolSelection() {
 // ============================================================================
 
 function installSlashCommands(toolIds, projectDir) {
-  const slashSrcDir = path.join(__dirname, '..', 'slash-commands', 'devbooks');
+  const slashSrcDir = path.join(__dirname, '..', 'templates', 'claude-commands', 'devbooks');
 
   if (!fs.existsSync(slashSrcDir)) {
     return { results: [], total: 0 };
@@ -310,7 +332,9 @@ function installSlashCommands(toolIds, projectDir) {
       continue;
     }
 
-    const count = copyDirSync(slashSrcDir, destDir);
+    const count = toolId === 'codex'
+      ? copyCodexPromptsSync(slashSrcDir, destDir)
+      : copyDirSync(slashSrcDir, destDir);
     results.push({ tool: tool.name, count, path: destDir });
   }
 
@@ -695,7 +719,7 @@ async function initCommand(projectDir, options) {
   if (selectedTools.length === 0) {
     console.log();
     console.log(chalk.green('✓') + ' DevBooks 项目结构已创建！');
-    console.log(chalk.gray('  运行 `devbooks init` 并选择 AI 工具来配置集成。'));
+    console.log(chalk.gray(`  运行 \`${CLI_COMMAND} init\` 并选择 AI 工具来配置集成。`));
     return;
   }
 
@@ -791,7 +815,7 @@ async function updateCommand(projectDir) {
   // 检查是否已初始化
   const configPath = path.join(projectDir, '.devbooks', 'config.yaml');
   if (!fs.existsSync(configPath)) {
-    console.log(chalk.red('✗') + ' 未找到 DevBooks 配置。请先运行 `devbooks init`。');
+    console.log(chalk.red('✗') + ` 未找到 DevBooks 配置。请先运行 \`${CLI_COMMAND} init\`。`);
     process.exit(1);
   }
 
@@ -800,7 +824,7 @@ async function updateCommand(projectDir) {
   const configuredTools = config.aiTools;
 
   if (configuredTools.length === 0) {
-    console.log(chalk.yellow('⚠') + ' 未配置任何 AI 工具。运行 `devbooks init` 进行配置。');
+    console.log(chalk.yellow('⚠') + ` 未配置任何 AI 工具。运行 \`${CLI_COMMAND} init\` 进行配置。`);
     return;
   }
 
@@ -850,8 +874,8 @@ function showHelp() {
   console.log(chalk.bold('DevBooks') + ' - AI-agnostic spec-driven development workflow');
   console.log();
   console.log(chalk.cyan('用法:'));
-  console.log('  devbooks init [path] [options]    初始化 DevBooks');
-  console.log('  devbooks update [path]            更新已配置的工具');
+  console.log(`  ${CLI_COMMAND} init [path] [options]    初始化 DevBooks`);
+  console.log(`  ${CLI_COMMAND} update [path]            更新已配置的工具`);
   console.log();
   console.log(chalk.cyan('选项:'));
   console.log('  --tools <tools>    非交互式指定 AI 工具');
@@ -898,10 +922,10 @@ function showHelp() {
 
   console.log();
   console.log(chalk.cyan('示例:'));
-  console.log('  devbooks init                        # 交互式初始化');
-  console.log('  devbooks init my-project             # 在 my-project 目录初始化');
-  console.log('  devbooks init --tools claude,cursor  # 非交互式');
-  console.log('  devbooks update                      # 更新已配置的工具');
+  console.log(`  ${CLI_COMMAND} init                        # 交互式初始化`);
+  console.log(`  ${CLI_COMMAND} init my-project             # 在 my-project 目录初始化`);
+  console.log(`  ${CLI_COMMAND} init --tools claude,cursor  # 非交互式`);
+  console.log(`  ${CLI_COMMAND} update                      # 更新已配置的工具`);
 }
 
 // ============================================================================
