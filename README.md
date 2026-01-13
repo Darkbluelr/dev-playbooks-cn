@@ -430,10 +430,11 @@ bin/             # CLI 入口
 
 ## 文档
 
-- [Slash 命令指南](docs/Slash命令指南.md)
-- [Skills 使用指南](skills/skills-usage-guide.md)
-- [MCP 配置建议](docs/MCP配置建议.md)
-- [集成模板](docs/DevBooks集成模板（协议无关）.md)
+- [Slash 命令使用指南](docs/Slash 命令使用指南.md)
+- [Skills 使用说明](skills/Skills使用说明.md)
+- [MCP 配置建议](docs/推荐MCP.md)
+- [集成模板（协议无关）](docs/DevBooks集成模板（协议无关）.md)
+- [安装提示词](docs/DevBooks安装提示词.md)
 
 ---
 
