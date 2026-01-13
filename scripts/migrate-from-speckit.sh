@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 # Default configuration
 project_root="."
@@ -52,7 +52,16 @@ Migration Steps:
   3. [FEATURES]     Migrate specs/[feature]/ to changes/
   4. [CONFIG]       Create/update .devbooks/config.yaml
   5. [REFS]         Update path references in all documents
-  6. [CLEANUP]      Cleanup (optionally keep old directories)
+  6. [COMMANDS]     Remove spec-kit AI tool commands
+  7. [CLEANUP]      Cleanup (optionally keep old directories)
+
+Cleanup includes:
+  - specs/ directory (backed up)
+  - memory/ directory (backed up)
+  - templates/ directory (spec-kit templates, backed up)
+  - scripts/bash/ and scripts/powershell/ (spec-kit scripts)
+  - .claude/commands/speckit/ and similar AI tool directories
+  - spec-kit references in CLAUDE.md, AGENTS.md, etc.
 
 Mapping Rules:
   Spec-Kit                         DevBooks
@@ -464,9 +473,138 @@ step_refs() {
     log_pass "Updated references in ${files_updated} files"
 }
 
-# Step 6: Cleanup
+# Step 6: Remove spec-kit AI tool commands
+step_commands() {
+    log_step "6. Removing spec-kit AI tool commands"
+
+    if is_step_done "COMMANDS" && [[ "$force" == false ]]; then
+        log_info "Commands already cleaned up (skipping)"
+        return 0
+    fi
+
+    local removed_count=0
+
+    # AI tool command directories to remove (spec-kit uses "speckit" prefix)
+    local command_dirs=(
+        ".claude/commands/speckit"
+        ".codex/commands/speckit"
+        ".cursor/commands/speckit"
+        ".windsurf/workflows/speckit"
+        ".continue/prompts/speckit"
+        ".gemini/commands/speckit"
+        ".qoder/commands/speckit"
+        ".qwen/commands/speckit"
+        ".opencode/command/speckit"
+        ".github/agents/speckit"
+        ".kilocode/rules/speckit"
+        ".augment/rules/speckit"
+        ".roo/rules/speckit"
+        ".codebuddy/commands/speckit"
+        ".amazonq/prompts/speckit"
+        ".agents/commands/speckit"
+        ".shai/commands/speckit"
+        ".bob/commands/speckit"
+    )
+
+    for cmd_dir in "${command_dirs[@]}"; do
+        local full_path="${project_root}/${cmd_dir}"
+        if [[ -d "$full_path" ]]; then
+            if [[ "$dry_run" == true ]]; then
+                log_info "[DRY-RUN] rm -rf $full_path"
+            else
+                local backup_dir="${project_root}/.devbooks/backup/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$backup_dir")"
+                mv "$full_path" "$backup_dir"
+                log_info "Backed up ${cmd_dir} to ${backup_dir}"
+            fi
+            removed_count=$((removed_count + 1))
+        fi
+    done
+
+    # Remove spec-kit specific directories
+    local speckit_dirs=(
+        "scripts/bash"
+        "scripts/powershell"
+    )
+
+    for sk_dir in "${speckit_dirs[@]}"; do
+        local full_path="${project_root}/${sk_dir}"
+        if [[ -d "$full_path" ]]; then
+            # Check if it contains spec-kit scripts (by looking for spec-kit patterns)
+            if ls "${full_path}"/*.sh 2>/dev/null | xargs grep -l "spec-kit\|speckit\|SPEC_FILE\|create-new-feature" 2>/dev/null | head -1 > /dev/null; then
+                if [[ "$dry_run" == true ]]; then
+                    log_info "[DRY-RUN] backup and remove $full_path (spec-kit scripts)"
+                else
+                    local backup_dir="${project_root}/.devbooks/backup/speckit-scripts-$(date +%Y%m%d%H%M%S)"
+                    mkdir -p "$(dirname "$backup_dir")"
+                    mv "$full_path" "$backup_dir"
+                    log_info "Backed up ${sk_dir}/ to ${backup_dir}"
+                fi
+                removed_count=$((removed_count + 1))
+            fi
+        fi
+    done
+
+    # Check for templates/ directory with spec-kit templates
+    local templates_dir="${project_root}/templates"
+    if [[ -d "$templates_dir" ]]; then
+        # Check if it's spec-kit templates (look for spec-template.md or commands/)
+        if [[ -f "${templates_dir}/spec-template.md" ]] || [[ -d "${templates_dir}/commands" ]]; then
+            if [[ "$dry_run" == true ]]; then
+                log_info "[DRY-RUN] backup and remove $templates_dir (spec-kit templates)"
+            else
+                local backup_dir="${project_root}/.devbooks/backup/speckit-templates-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$backup_dir")"
+                mv "$templates_dir" "$backup_dir"
+                log_info "Backed up templates/ to ${backup_dir}"
+            fi
+            removed_count=$((removed_count + 1))
+        fi
+    fi
+
+    # Clean up spec-kit references in instruction files
+    local instruction_files=(
+        "CLAUDE.md"
+        "AGENTS.md"
+        "GEMINI.md"
+        ".github/copilot-instructions.md"
+    )
+
+    for inst_file in "${instruction_files[@]}"; do
+        local full_path="${project_root}/${inst_file}"
+        if [[ -f "$full_path" ]]; then
+            # Check if contains spec-kit references
+            if grep -qiE "(spec-kit|speckit|/speckit\.|spec-driven)" "$full_path" 2>/dev/null; then
+                if [[ "$dry_run" == true ]]; then
+                    log_info "[DRY-RUN] Removing spec-kit references from $inst_file"
+                else
+                    # Create backup
+                    cp "$full_path" "${full_path}.speckit-backup"
+
+                    # Remove spec-kit-specific blocks
+                    if [[ "$(uname)" == "Darwin" ]]; then
+                        sed -i '' '/<!-- SPECKIT:START -->/,/<!-- SPECKIT:END -->/d' "$full_path"
+                        sed -i '' '/<!-- SPEC-KIT:START -->/,/<!-- SPEC-KIT:END -->/d' "$full_path"
+                        # Remove speckit command references
+                        sed -i '' 's|/speckit\.[a-z]*||g' "$full_path"
+                    else
+                        sed -i '/<!-- SPECKIT:START -->/,/<!-- SPECKIT:END -->/d' "$full_path"
+                        sed -i '/<!-- SPEC-KIT:START -->/,/<!-- SPEC-KIT:END -->/d' "$full_path"
+                        sed -i 's|/speckit\.[a-z]*||g' "$full_path"
+                    fi
+                    log_info "Cleaned spec-kit references from $inst_file (backup: ${inst_file}.speckit-backup)"
+                fi
+            fi
+        fi
+    done
+
+    save_checkpoint "COMMANDS"
+    log_pass "Removed ${removed_count} spec-kit directories/commands"
+}
+
+# Step 7: Cleanup
 step_cleanup() {
-    log_step "6. Cleanup"
+    log_step "7. Cleanup"
 
     if is_step_done "CLEANUP" && [[ "$force" == false ]]; then
         log_info "Cleanup already complete (skipping)"
@@ -575,6 +713,7 @@ main() {
     step_features
     step_config
     step_refs
+    step_commands
     step_cleanup
 
     # Verify

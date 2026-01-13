@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 # Default configuration
 project_root="."
@@ -51,7 +51,17 @@ Migration Steps:
   2. [CONTENT]   Migrate specs/ and changes/ content
   3. [CONFIG]    Create/update .devbooks/config.yaml
   4. [REFS]      Update path references in all documents
-  5. [CLEANUP]   Cleanup (optionally keep old directory)
+  5. [COMMANDS]  Remove OpenSpec AI tool commands
+  6. [CLEANUP]   Cleanup (optionally keep old directory)
+
+Cleanup includes:
+  - openspec/ directory (backed up)
+  - .claude/commands/openspec/ (Claude Code commands)
+  - .codex/commands/openspec/ (Codex CLI commands)
+  - .cursor/commands/openspec/ (Cursor commands)
+  - .windsurf/workflows/openspec/ (Windsurf workflows)
+  - .continue/prompts/openspec/ (Continue prompts)
+  - OpenSpec references in CLAUDE.md, AGENTS.md, etc.
 
 Features:
   - Idempotent execution: safe to run repeatedly
@@ -274,9 +284,84 @@ step_refs() {
     log_pass "Updated references in ${files_updated} files"
 }
 
-# Step 5: Cleanup
+# Step 5: Remove OpenSpec AI tool commands
+step_commands() {
+    log_step "5. Removing OpenSpec AI tool commands"
+
+    if is_step_done "COMMANDS" && [[ "$force" == false ]]; then
+        log_info "Commands already cleaned up (skipping)"
+        return 0
+    fi
+
+    local removed_count=0
+
+    # AI tool command directories to remove
+    local command_dirs=(
+        ".claude/commands/openspec"
+        ".codex/commands/openspec"
+        ".cursor/commands/openspec"
+        ".windsurf/workflows/openspec"
+        ".continue/prompts/openspec"
+        ".gemini/commands/openspec"
+        ".qoder/commands/openspec"
+    )
+
+    for cmd_dir in "${command_dirs[@]}"; do
+        local full_path="${project_root}/${cmd_dir}"
+        if [[ -d "$full_path" ]]; then
+            if [[ "$dry_run" == true ]]; then
+                log_info "[DRY-RUN] rm -rf $full_path"
+            else
+                local backup_dir="${project_root}/.devbooks/backup/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$backup_dir")"
+                mv "$full_path" "$backup_dir"
+                log_info "Backed up ${cmd_dir} to ${backup_dir}"
+            fi
+            removed_count=$((removed_count + 1))
+        fi
+    done
+
+    # Clean up OpenSpec references in instruction files
+    local instruction_files=(
+        "CLAUDE.md"
+        "AGENTS.md"
+        "GEMINI.md"
+        ".github/copilot-instructions.md"
+    )
+
+    for inst_file in "${instruction_files[@]}"; do
+        local full_path="${project_root}/${inst_file}"
+        if [[ -f "$full_path" ]]; then
+            # Check if contains OpenSpec references
+            if grep -qi "openspec" "$full_path" 2>/dev/null; then
+                if [[ "$dry_run" == true ]]; then
+                    log_info "[DRY-RUN] Removing OpenSpec references from $inst_file"
+                else
+                    # Create backup
+                    cp "$full_path" "${full_path}.openspec-backup"
+
+                    # Remove OpenSpec-specific blocks (between OPENSPEC:START and OPENSPEC:END)
+                    if [[ "$(uname)" == "Darwin" ]]; then
+                        sed -i '' '/<!-- OPENSPEC:START -->/,/<!-- OPENSPEC:END -->/d' "$full_path"
+                        # Also remove any remaining openspec/ references
+                        sed -i '' 's|openspec/|dev-playbooks/|g' "$full_path"
+                    else
+                        sed -i '/<!-- OPENSPEC:START -->/,/<!-- OPENSPEC:END -->/d' "$full_path"
+                        sed -i 's|openspec/|dev-playbooks/|g' "$full_path"
+                    fi
+                    log_info "Cleaned OpenSpec references from $inst_file (backup: ${inst_file}.openspec-backup)"
+                fi
+            fi
+        fi
+    done
+
+    save_checkpoint "COMMANDS"
+    log_pass "Removed ${removed_count} OpenSpec command directories"
+}
+
+# Step 6: Cleanup
 step_cleanup() {
-    log_step "5. Cleanup"
+    log_step "6. Cleanup"
 
     if is_step_done "CLEANUP" && [[ "$force" == false ]]; then
         log_info "Cleanup already complete (skipping)"
@@ -371,6 +456,7 @@ main() {
     step_content
     step_config
     step_refs
+    step_commands
     step_cleanup
 
     # Verify
