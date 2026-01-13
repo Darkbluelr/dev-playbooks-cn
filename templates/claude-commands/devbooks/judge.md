@@ -4,16 +4,16 @@ skill: devbooks-proposal-judge
 
 # /devbooks:judge
 
-Triggers Skill: `devbooks-proposal-judge`
+触发 Skill：`devbooks-proposal-judge`
 
-## Purpose
+## 用途
 
-Make final decision on proposal phase, output Approved/Revise/Rejected and write back to proposal.md's Decision Log.
+对 proposal 阶段进行裁决，输出 Approved/Revise/Rejected 并写回 proposal.md 的 Decision Log。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Proposal debate completed and needs final decision
-- Need to decide if proposal can proceed to implementation phase
-- Record decision rationale and conditions
+- 提案对辩完成后需要最终裁决
+- 需要决定提案是否可以进入实现阶段
+- 记录决策理由和条件
 
-Please invoke `devbooks-proposal-judge` to execute the corresponding task.
+请点名使用 `devbooks-proposal-judge` 执行相应任务。

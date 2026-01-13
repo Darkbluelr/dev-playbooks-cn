@@ -1,6 +1,6 @@
 ---
 name: devbooks-test-owner
-description: "devbooks-test-owner: As Test Owner role, converts design/specs into executable acceptance tests and traceability documentation (verification.md), emphasizing independent conversation from implementation (Coder) and establishing Red baseline first. Use when user says 'write tests/acceptance tests/traceability matrix/verification.md/Red-Green/contract tests/fitness tests', or during DevBooks apply phase as test owner."
+description: devbooks-test-owner：以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现（Coder）独立对话、先跑出 Red 基线。用户说"写测试/验收测试/追溯矩阵/verification.md/Red-Green/contract tests/fitness tests"，或在 DevBooks apply 阶段以 test owner 执行时使用。
 tools:
   - Glob
   - Grep
@@ -10,163 +10,163 @@ tools:
   - Bash
 ---
 
-# DevBooks: Test Owner
+# DevBooks：测试负责人（Test Owner）
 
-## Prerequisite: Configuration Discovery (Protocol Agnostic)
+## 前置：配置发现（协议无关）
 
-- `<truth-root>`: Current truth directory root
-- `<change-root>`: Change package directory root
+- `<truth-root>`：当前真理目录根
+- `<change-root>`：变更包目录根
 
-Before execution, **must** search for configuration in the following order (stop when found):
-1. `.devbooks/config.yaml` (if exists) -> Parse and use its mappings
-2. `dev-playbooks/project.md` (if exists) -> DevBooks 2.0 protocol, use default mappings
-4. `project.md` (if exists) -> template protocol, use default mappings
-5. If still cannot determine -> **Stop and ask user**
+执行前**必须**按以下顺序查找配置（找到后停止）：
+1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
-**Key Constraints**:
-- If configuration specifies `agents_doc` (rules document), **must read that document first** before executing any operation
-- Guessing directory roots is prohibited
-- Skipping rules document reading is prohibited
+**关键约束**：
+- 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
+- 禁止猜测目录根
+- 禁止跳过规则文档阅读
 
-## Artifact Locations
+## 产物落点
 
-- Test plan and traceability: `<change-root>/<change-id>/verification.md`
-- Test code: According to repository conventions (e.g., `tests/**`)
-
----
-
-## Output Management Constraints (Observation Masking)
-
-Prevent large outputs from polluting context:
-
-| Scenario | Handling Method |
-|----------|-----------------|
-| Test output > 50 lines | Keep only first and last 10 lines + failure summary |
-| Red baseline logs | Save to `evidence/red-baseline/`, only reference path in conversation |
-| Green evidence logs | Save to `evidence/green-final/`, only reference path in conversation |
-| Large test case lists | Use table summary, don't paste item by item |
-
-**Example**:
-```
-Bad: Paste 500 lines of test output
-Good: Red baseline established, 3 tests failed, see evidence/red-baseline/test-2024-01-05.log
-      Failure summary:
-      - FAIL test_pagination_invalid_page (expected 400, got 500)
-      - FAIL test_pagination_boundary (assertion error)
-      - FAIL test_sorting_desc (timeout)
-```
+- 测试计划与追溯：`<change-root>/<change-id>/verification.md`
+- 测试代码：按仓库惯例（例如 `tests/**`）
 
 ---
 
-## Test Layering Mandatory Convention (Borrowing from VS Code)
+## 输出管理约束（Observation Masking）
 
-### Test Types and Naming Convention
+防止大量输出污染 context：
 
-| Test Type | File Naming | Directory Location | Expected Execution Time |
-|-----------|-------------|-------------------|------------------------|
-| Unit tests | `*.test.ts` / `*.test.js` | `src/**/test/` or `tests/unit/` | < 5s/file |
-| Integration tests | `*.integrationTest.ts` | `tests/integration/` | < 30s/file |
-| E2E tests | `*.e2e.ts` / `*.spec.ts` | `tests/e2e/` | < 60s/file |
-| Contract tests | `*.contract.ts` | `tests/contract/` | < 10s/file |
-| Smoke tests | `*.smoke.ts` | `tests/smoke/` | Variable |
+| 场景 | 处理方式 |
+|------|----------|
+| 测试输出 > 50 行 | 只保留首尾各 10 行 + 失败摘要 |
+| Red 基线日志 | 落盘到 `evidence/red-baseline/`，对话中只引用路径 |
+| Green 证据日志 | 落盘到 `evidence/green-final/`，对话中只引用路径 |
+| 大量测试用例列表 | 用表格摘要，不要逐条贴出 |
 
-### Test Pyramid Ratio Recommendation
+**示例**：
+```
+❌ 错误：贴入 500 行测试输出
+✅ 正确：Red 基线已建立，3 个测试失败，详见 evidence/red-baseline/test-2024-01-05.log
+        失败摘要：
+        - FAIL test_pagination_invalid_page (expected 400, got 500)
+        - FAIL test_pagination_boundary (assertion error)
+        - FAIL test_sorting_desc (timeout)
+```
+
+---
+
+## 测试分层强制约定（借鉴 VS Code）
+
+### 测试类型与命名约定
+
+| 测试类型 | 文件命名 | 目录位置 | 预期执行时间 |
+|----------|----------|----------|--------------|
+| 单元测试 | `*.test.ts` / `*.test.js` | `src/**/test/` 或 `tests/unit/` | < 5s/文件 |
+| 集成测试 | `*.integrationTest.ts` | `tests/integration/` | < 30s/文件 |
+| E2E 测试 | `*.e2e.ts` / `*.spec.ts` | `tests/e2e/` | < 60s/文件 |
+| 契约测试 | `*.contract.ts` | `tests/contract/` | < 10s/文件 |
+| 烟雾测试 | `*.smoke.ts` | `tests/smoke/` | 可变 |
+
+### 测试金字塔比例建议
 
 ```
         /\
-       /E2E\        ~10% (critical user paths)
-      /-----\
-     /Integration\  ~20% (module boundaries)
-    /-------------\
-   /  Unit Tests   \ ~70% (business logic)
-  /-----------------\
+       /E2E\        ≈ 10%（关键用户路径）
+      /─────\
+     /Integration\  ≈ 20%（模块边界）
+    /─────────────\
+   /  Unit Tests   \ ≈ 70%（业务逻辑）
+  /─────────────────\
 ```
 
-### verification.md Must Include Test Layering Information
+### verification.md 必须包含的测试分层信息
 
 ```markdown
-## Test Layering Strategy
+## 测试分层策略
 
-| Type | Count | Covered Scenarios | Expected Execution Time |
-|------|-------|-------------------|------------------------|
-| Unit tests | X | AC-001, AC-002 | < Ys |
-| Integration tests | Y | AC-003 | < Zs |
-| E2E tests | Z | Critical paths | < Ws |
+| 类型 | 数量 | 覆盖场景 | 预期执行时间 |
+|------|------|----------|--------------|
+| 单元测试 | X | AC-001, AC-002 | < Ys |
+| 集成测试 | Y | AC-003 | < Zs |
+| E2E 测试 | Z | 关键路径 | < Ws |
 
-## Test Environment Requirements
+## 测试环境要求
 
-| Test Type | Runtime Environment | Dependencies |
-|-----------|---------------------|--------------|
-| Unit tests | Node.js | No external dependencies |
-| Integration tests | Node.js + Test DB | Docker |
-| E2E tests | Browser (Playwright) | Full application |
+| 测试类型 | 运行环境 | 依赖 |
+|----------|----------|------|
+| 单元测试 | Node.js | 无外部依赖 |
+| 集成测试 | Node.js + 测试数据库 | Docker |
+| E2E 测试 | Browser (Playwright) | 完整应用 |
 ```
 
-### Test Isolation Requirements
+### 测试隔离要求
 
-- [ ] Each test must run independently, not depending on other tests' execution order
-- [ ] Integration tests must have `beforeEach`/`afterEach` cleanup
-- [ ] Using shared mutable state is prohibited
-- [ ] Tests must clean up created files/data after completion
+- [ ] 每个测试必须独立运行，不依赖其他测试的执行顺序
+- [ ] 集成测试必须有 `beforeEach`/`afterEach` 清理
+- [ ] 禁止使用共享的可变状态
+- [ ] 测试结束后必须清理创建的文件/数据
 
-### Test Stability Requirements
+### 测试稳定性要求
 
-- [ ] Committing `test.only` / `it.only` / `describe.only` is prohibited
-- [ ] Flaky tests must be marked and fixed within deadline (no more than 1 week)
-- [ ] Test timeouts must be reasonably set (unit tests < 5s, integration tests < 30s)
-- [ ] Depending on external network is prohibited (mock all external calls)
+- [ ] 禁止提交 `test.only` / `it.only` / `describe.only`
+- [ ] Flaky 测试必须标记并限期修复（不超过 1 周）
+- [ ] 测试超时必须合理设置（单元测试 < 5s，集成测试 < 30s）
+- [ ] 禁止依赖外部网络（mock 所有外部调用）
 
-## Execution Method
+## 执行方式
 
-1) First read and follow: `_shared/references/universal-gate-protocol.md` (verifiability + structural quality gates).
-2) Read methodology reference: `references/test-driven.md` (read when needed).
-3) Read test layering guide: `references/test-layering-strategy.md`.
-4) Execute strictly according to full prompt: `references/test-code-prompt.md`.
-5) Template (on demand): `references/9-change-verification-traceability-template.md`.
+1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+2) 阅读方法论参考：`references/测试驱动.md`（需要时再读）。
+3) 阅读测试分层指南：`references/测试分层策略.md`。
+4) 严格按完整提示词执行：`references/测试代码提示词.md`。
+5) 模板（按需）：`references/9 变更验证与追溯模板.md`。
 
 ---
 
-## Context Awareness
+## 上下文感知
 
-This Skill automatically detects context before execution, ensuring role isolation and prerequisites are met.
+本 Skill 在执行前自动检测上下文，确保角色隔离和前置条件满足。
 
-Detection rules reference: `skills/_shared/context-detection-template.md`
+检测规则参考：`skills/_shared/context-detection-template.md`
 
-### Detection Flow
+### 检测流程
 
-1. Detect if `design.md` exists
-2. Detect if current session has executed Coder role
-3. Detect if `verification.md` already exists
-4. Detect `tests/` directory status
+1. 检测 `design.md` 是否存在
+2. 检测当前会话是否已执行过 Coder 角色
+3. 检测 `verification.md` 是否已存在
+4. 检测 `tests/` 目录状态
 
-### Modes Supported by This Skill
+### 本 Skill 支持的模式
 
-| Mode | Trigger Condition | Behavior |
-|------|-------------------|----------|
-| **First write** | `verification.md` doesn't exist | Create complete acceptance test suite |
-| **Add tests** | `verification.md` exists but has `[TODO]` | Add missing test cases |
-| **Red baseline verification** | Tests exist, need to confirm Red status | Run tests and record failure logs |
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **首次编写** | `verification.md` 不存在 | 创建完整验收测试套件 |
+| **补充测试** | `verification.md` 存在但有 `[TODO]` | 补充缺失的测试用例 |
+| **Red 基线验证** | 测试存在，需要确认 Red 状态 | 运行测试并记录失败日志 |
 
-### Prerequisite Checks
+### 前置检查
 
-- [ ] `design.md` exists
-- [ ] Current session has not executed Coder
-- [ ] Has AC-xxx for traceability
+- [ ] `design.md` 存在
+- [ ] 当前会话未执行过 Coder
+- [ ] 有 AC-xxx 可供追溯
 
-### Detection Output Example
+### 检测输出示例
 
 ```
-Detection Result:
-- Artifact existence: design.md OK, verification.md missing
-- Role isolation: OK (current session has not executed Coder)
-- AC count: 14
-- Operating mode: First write
+检测结果：
+- 产物存在性：design.md ✓, verification.md ✗
+- 角色隔离：✓（当前会话未执行 Coder）
+- AC 数量：14 个
+- 运行模式：首次编写
 ```
 
 ---
 
-## MCP Enhancement
+## MCP 增强
 
-This Skill does not depend on MCP services, no runtime detection needed.
+本 Skill 不依赖 MCP 服务，无需运行时检测。
 
-MCP enhancement rules reference: `skills/_shared/mcp-enhancement-template.md`
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`

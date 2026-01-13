@@ -4,16 +4,16 @@ skill: devbooks-federation
 
 # /devbooks:federation
 
-Triggers Skill: `devbooks-federation`
+触发 Skill：`devbooks-federation`
 
-## Purpose
+## 用途
 
-Cross-repository federation analysis and contract synchronization. Use when changes involve external APIs/contracts or need to analyze cross-repository impact.
+跨仓库联邦分析与契约同步。当变更涉及对外 API/契约、或需要分析跨仓库影响时使用。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Analyze cross-repository impact
-- Synchronize upstream/downstream dependency contracts
-- Coordinate changes across multiple repositories
+- 分析跨仓库影响
+- 同步上下游依赖契约
+- 多仓库协调变更
 
-Please invoke `devbooks-federation` to execute the corresponding task.
+请点名使用 `devbooks-federation` 执行相应任务。

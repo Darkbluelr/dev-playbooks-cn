@@ -1,6 +1,6 @@
 ---
 name: devbooks-spec-contract
-description: "devbooks-spec-contract: Define external behavior specs and contracts (Requirements/Scenarios/API/Schema/compatibility strategy/migration), and suggest or generate contract tests. Merges functionality from original spec-delta and contract-data. Use when user says 'write spec/spec/contract/OpenAPI/Schema/compatibility strategy/contract tests' etc."
+description: devbooks-spec-contract：定义对外行为规格与契约（Requirements/Scenarios/API/Schema/兼容策略/迁移），并建议或生成 contract tests。合并了原 spec-delta 和 contract-data 的功能。用户说"写规格/spec/契约/OpenAPI/Schema/兼容策略/contract tests"等时使用。
 tools:
   - Glob
   - Grep
@@ -10,182 +10,182 @@ tools:
   - Bash
 ---
 
-# DevBooks: Spec & Contract
+# DevBooks：规格与契约（Spec & Contract）
 
-> This skill merges functionality from original `devbooks-spec-delta` and `devbooks-contract-data`, reducing decision difficulty.
+> 本 skill 合并了原 `devbooks-spec-delta` 和 `devbooks-contract-data` 的功能，减少选择困难。
 
-## Prerequisite: Configuration Discovery (Protocol Agnostic)
+## 前置：配置发现（协议无关）
 
-- `<truth-root>`: Current truth directory root
-- `<change-root>`: Change package directory root
+- `<truth-root>`：当前真理目录根
+- `<change-root>`：变更包目录根
 
-Before execution, **must** search for configuration in the following order (stop when found):
-1. `.devbooks/config.yaml` (if exists) -> Parse and use its mappings
-2. `dev-playbooks/project.md` (if exists) -> DevBooks 2.0 protocol, use default mappings
-4. `project.md` (if exists) -> template protocol, use default mappings
-5. If still cannot determine -> **Stop and ask user**
+执行前**必须**按以下顺序查找配置（找到后停止）：
+1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
-**Key Constraints**:
-- If configuration specifies `agents_doc` (rules document), **must read that document first** before executing any operation
-- Guessing directory roots is prohibited
-- Skipping rules document reading is prohibited
-
----
-
-## Artifact Locations
-
-| Artifact Type | Location Path |
-|---------------|---------------|
-| Spec delta | `<change-root>/<change-id>/specs/<capability>/spec.md` |
-| Contract plan | `<change-root>/<change-id>/design.md` (Contract section) or standalone `contract-plan.md` |
-| Contract Test IDs | Written to traceability matrix in `verification.md` |
-| Implicit change report | `<change-root>/<change-id>/evidence/implicit-changes.json` |
+**关键约束**：
+- 如果配置中指定了 `agents_doc`（规则文档），**必须先阅读该文档**再执行任何操作
+- 禁止猜测目录根
+- 禁止跳过规则文档阅读
 
 ---
 
-## Use Case Determination
+## 产物落点
 
-| Scenario | What to Do |
-|----------|------------|
-| Behavior change only (no API/Schema) | Only output spec.md (Requirements/Scenarios) |
-| Has API/Schema/event changes | Output spec.md + contract plan + Contract Test IDs |
-| Has compatibility risks | Additionally output compatibility strategy, deprecation strategy, migration plan |
-| Dependency/config/build changes | Run implicit change detection |
+| 产物类型 | 落点路径 |
+|----------|----------|
+| 规格 delta | `<change-root>/<change-id>/specs/<capability>/spec.md` |
+| 契约计划 | `<change-root>/<change-id>/design.md`（Contract 章节）或独立 `contract-plan.md` |
+| Contract Test IDs | 写入 `verification.md` 的追溯矩阵 |
+| 隐式变更报告 | `<change-root>/<change-id>/evidence/implicit-changes.json` |
 
 ---
 
-## Execution Method
+## 使用场景判断
 
-### Standard Flow
+| 场景 | 需要做什么 |
+|------|-----------|
+| 只有行为变化（无 API/Schema） | 只输出 spec.md（Requirements/Scenarios） |
+| 有 API/Schema/事件变化 | 输出 spec.md + 契约计划 + Contract Test IDs |
+| 有兼容性风险 | 额外输出兼容策略、弃用策略、迁移方案 |
+| 依赖/配置/构建变更 | 运行隐式变更检测 |
 
-1) First read and follow: `_shared/references/universal-gate-protocol.md`
-2) Spec part: Output Requirements/Scenarios according to `references/spec-change-prompt.md`
-3) Contract part: Output contract plan according to `references/contract-data-definition-prompt.md`
-4) **Implicit change detection (on demand)**: `references/implicit-change-detection-prompt.md`
+---
 
-### Output Structure (Single Output)
+## 执行方式
+
+### 标准流程
+
+1) 先阅读并遵守：`_shared/references/通用守门协议.md`
+2) 规格部分：按 `references/规格变更提示词.md` 输出 Requirements/Scenarios
+3) 契约部分：按 `references/契约与数据定义提示词.md` 输出契约计划
+4) **隐式变更检测（按需）**：`references/隐式变更检测提示词.md`
+
+### 输出结构（一次性产出）
 
 ```markdown
-## Spec Delta
+## 规格 Delta（Spec）
 
 ### Requirements
-- REQ-XXX-001: <requirement description>
+- REQ-XXX-001: <需求描述>
 
 ### Scenarios
-- SC-001: <scenario description>
+- SC-001: <场景描述>
   - Given: ...
   - When: ...
   - Then: ...
 
 ---
 
-## Contract Plan
+## 契约计划（Contract）
 
-### API Changes
-- Added/modified endpoint: `POST /api/v1/orders`
-- OpenAPI diff location: `contracts/openapi/orders.yaml`
+### API 变更
+- 新增/修改端点：`POST /api/v1/orders`
+- OpenAPI diff 位置：`contracts/openapi/orders.yaml`
 
-### Compatibility Strategy
-- Backward compatible: Yes/No
-- Deprecation strategy: <if any>
-- Migration plan: <if any>
+### 兼容策略
+- 向后兼容：是/否
+- 弃用策略：<如有>
+- 迁移方案：<如有>
 
 ### Contract Test IDs
-| Test ID | Type | Covered Scenario |
-|---------|------|------------------|
+| Test ID | 类型 | 覆盖场景 |
+|---------|------|----------|
 | CT-001 | schema | REQ-XXX-001 |
 | CT-002 | behavior | SC-001 |
 ```
 
 ---
 
-## Scripts
+## 脚本
 
-- Implicit change detection: `scripts/implicit-change-detect.sh <change-id> [--base <commit>] [--project-root <dir>] [--change-root <dir>]`
-
----
-
-## Context Awareness
-
-This Skill automatically detects context before execution and selects appropriate operating mode.
-
-Detection rules reference: `skills/_shared/context-detection-template.md`
-
-### Detection Flow
-
-1. Detect if `<change-root>/<change-id>/specs/` exists
-2. If exists, determine completeness (whether has placeholders, whether REQ has Scenario)
-3. Select operating mode based on detection result
-
-### Modes Supported by This Skill
-
-| Mode | Trigger Condition | Behavior |
-|------|-------------------|----------|
-| **Create from scratch** | `specs/` directory doesn't exist or empty | Create complete spec document structure including Requirements/Scenarios |
-| **Patch mode** | `specs/` exists but incomplete (has `[TODO]`, REQ missing Scenario) | Add missing Requirement/Scenario, preserve existing content |
-| **Sync mode** | `specs/` complete, needs sync with implementation | Check implementation-spec consistency, output diff report |
-
-### Detection Output Example
-
-```
-Detection Result:
-- Artifact existence: specs/ exists
-- Completeness: incomplete (missing items: REQ-002 has no Scenario)
-- Current phase: apply
-- Operating mode: Patch mode
-```
+- 隐式变更检测：`scripts/implicit-change-detect.sh <change-id> [--base <commit>] [--project-root <dir>] [--change-root <dir>]`
 
 ---
 
-## Implicit Change Detection (Extended Feature)
+## 上下文感知
 
-> Source: "The Mythical Man-Month" Chapter 7 "Why Did the Tower of Babel Fail?" - "Groups slowly modify their own programs' functionality, implicitly changing agreements"
+本 Skill 在执行前自动检测上下文，选择合适的运行模式。
 
-Implicit change = changes that are not explicitly declared but will change system behavior.
+检测规则参考：`skills/_shared/context-detection-template.md`
 
-**Detection Scope**:
-- Dependency changes (package.json / requirements.txt / go.mod etc.)
-- Configuration changes (*.env / *.config.* / *.yaml etc.)
-- Build changes (tsconfig.json / Dockerfile / CI configs etc.)
+### 检测流程
 
-**Integration with change-check.sh**:
-- Automatically check implicit change report in `apply` / `archive` / `strict` modes
-- High-risk implicit changes need to be declared in `design.md`
+1. 检测 `<change-root>/<change-id>/specs/` 是否存在
+2. 若存在，判断完整性（是否有占位符、REQ 是否有 Scenario）
+3. 根据检测结果选择运行模式
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **从零创建** | `specs/` 目录不存在或为空 | 创建完整规格文档结构，包含 Requirements/Scenarios |
+| **补漏模式** | `specs/` 存在但不完整（有 `[TODO]`、REQ 缺 Scenario） | 补充缺失的 Requirement/Scenario，保留已有内容 |
+| **同步模式** | `specs/` 完整，需要与实现同步 | 检查实现与规格一致性，输出 diff 报告 |
+
+### 检测输出示例
+
+```
+检测结果：
+- 产物存在性：specs/ 存在
+- 完整性：不完整（缺失项：REQ-002 无 Scenario）
+- 当前阶段：apply
+- 运行模式：补漏模式
+```
 
 ---
 
-## MCP Enhancement
+## 隐式变更检测（扩展功能）
 
-This Skill supports MCP runtime enhancement, automatically detecting and enabling advanced features.
+> 来源：《人月神话》第7章"巴比伦塔" — "小组慢慢地修改自己程序的功能，隐含地更改了约定"
 
-MCP enhancement rules reference: `skills/_shared/mcp-enhancement-template.md`
+隐式变更 = 没有显式声明但会改变系统行为的变更。
 
-### Dependent MCP Services
+**检测范围**：
+- 依赖变更（package.json / requirements.txt / go.mod 等）
+- 配置变更（*.env / *.config.* / *.yaml 等）
+- 构建变更（tsconfig.json / Dockerfile / CI 配置等）
 
-| Service | Purpose | Timeout |
-|---------|---------|---------|
-| `mcp__ckb__findReferences` | Detect contract reference scope | 2s |
-| `mcp__ckb__getStatus` | Detect CKB index availability | 2s |
+**与 change-check.sh 集成**：
+- 在 `apply` / `archive` / `strict` 模式下自动检查隐式变更报告
+- 高风险隐式变更需在 `design.md` 中声明
 
-### Detection Flow
+---
 
-1. Call `mcp__ckb__getStatus` (2s timeout)
-2. If CKB available -> Use `findReferences` to detect contract symbol reference scope
-3. If timeout or failure -> Degrade to Grep text search
+## MCP 增强
 
-### Enhanced Mode vs Basic Mode
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
 
-| Feature | Enhanced Mode | Basic Mode |
-|---------|---------------|------------|
-| Reference detection | Symbol-level precise match | Grep text search |
-| Contract impact scope | Call graph analysis | Direct reference statistics |
-| Compatibility risk | Auto-evaluation | Manual judgment |
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
-### Degradation Notice
+### 依赖的 MCP 服务
 
-When MCP unavailable, output the following notice:
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__findReferences` | 检测契约引用范围 | 2s |
+| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+
+### 检测流程
+
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 若 CKB 可用 → 使用 `findReferences` 检测契约符号的引用范围
+3. 若超时或失败 → 降级到 Grep 文本搜索
+
+### 增强模式 vs 基础模式
+
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 引用检测 | 符号级精确匹配 | Grep 文本搜索 |
+| 契约影响范围 | 调用图分析 | 直接引用统计 |
+| 兼容性风险 | 自动评估 | 手动判断 |
+
+### 降级提示
+
+当 MCP 不可用时，输出以下提示：
 
 ```
-Warning: CKB unavailable, using Grep text search for contract reference detection.
-Results may be imprecise, recommend running /devbooks:index to generate index.
+⚠️ CKB 不可用，使用 Grep 文本搜索检测契约引用。
+结果可能不够精确，建议运行 /devbooks:index 生成索引。
 ```

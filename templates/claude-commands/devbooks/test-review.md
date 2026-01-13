@@ -4,16 +4,16 @@ skill: devbooks-test-reviewer
 
 # /devbooks:test-review
 
-Triggers Skill: `devbooks-test-reviewer`
+触发 Skill：`devbooks-test-reviewer`
 
-## Purpose
+## 用途
 
-Review test code quality, check test coverage, test isolation, whether Mock usage is reasonable, etc.
+审查测试代码质量，检查测试覆盖率、测试隔离性、Mock 使用是否合理等。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Test code needs quality review
-- Check if tests follow best practices
-- Verify if test coverage is sufficient
+- 测试代码需要质量审查
+- 检查测试是否符合最佳实践
+- 验证测试覆盖是否充分
 
-Please invoke `devbooks-test-reviewer` to execute the corresponding task.
+请点名使用 `devbooks-test-reviewer` 执行相应任务。

@@ -4,16 +4,16 @@ skill: devbooks-implementation-plan
 
 # /devbooks:plan
 
-Triggers Skill: `devbooks-implementation-plan`
+触发 Skill：`devbooks-implementation-plan`
 
-## Purpose
+## 用途
 
-Derive coding plan (tasks.md) from design document, output trackable main plan, temporary plan, checkpoint zones, with bound verification anchors.
+从设计文档推导编码计划（tasks.md），输出可跟踪的主线计划、临时计划、断点区，并绑定验收锚点。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Need to break down implementation tasks after design is complete
-- Need trackable milestones and verification anchors
-- Plan parallel and sequential task dependencies
+- 设计完成后需要拆分实现任务
+- 需要可跟踪的里程碑和验收锚点
+- 规划并行和串行任务依赖
 
-Please invoke `devbooks-implementation-plan` to execute the corresponding task.
+请点名使用 `devbooks-implementation-plan` 执行相应任务。

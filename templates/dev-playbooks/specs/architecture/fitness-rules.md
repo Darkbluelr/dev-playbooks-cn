@@ -1,95 +1,95 @@
-# Fitness Rules
+# 适应度规则 (Fitness Rules)
 
-> This document defines the project's architectural fitness functions.
-> These rules are used to automatically verify compliance with architectural constraints.
-
----
-
-## What are Fitness Functions?
-
-Fitness functions are executable architectural constraint checks. They help teams:
-- Automate validation of architectural decisions
-- Continuously check architectural health in CI/CD
-- Prevent architectural decay
+> 本文档定义项目的架构适应度函数（Fitness Functions）。
+> 这些规则用于自动验证架构约束的遵守情况。
 
 ---
 
-## Rule Definition Format
+## 什么是适应度函数？
+
+适应度函数是可执行的架构约束检查。它们帮助团队：
+- 自动化架构决策的验证
+- 在 CI/CD 中持续检查架构健康
+- 防止架构腐化
+
+---
+
+## 规则定义格式
 
 ```markdown
-### FT-XXX: Rule Name
+### FT-XXX: 规则名称
 
-> Source: <rule source, such as design document or architectural decision>
+> 来源：<规则来源，如设计文档或架构决策>
 
-**Rule**: <rule description>
+**规则**：<规则描述>
 
-**Check Command**:
+**检查命令**：
 \`\`\`bash
-<check command>
+<检查命令>
 \`\`\`
 
-**Severity**: Critical | High | Medium | Low
+**严重程度**：Critical | High | Medium | Low
 ```
 
 ---
 
-## Rule List
+## 规则列表
 
-### FT-001: Layered Dependency Direction
+### FT-001: 分层依赖方向
 
-> Source: Architecture Design
+> 来源：架构设计
 
-**Rule**: Upper layers can depend on lower layers; lower layers are prohibited from depending on upper layers.
+**规则**：上层可依赖下层，下层禁止依赖上层。
 
-**Check Command**:
+**检查命令**：
 ```bash
-# Example: Check if domain layer depends on ui layer
+# 示例：检查 domain 层是否依赖 ui 层
 grep -r "import.*from.*ui" src/domain/ && echo "FAIL" || echo "OK"
 ```
 
-**Severity**: Critical
+**严重程度**：Critical
 
 ---
 
-### FT-002: Circular Dependencies Prohibited
+### FT-002: 循环依赖禁止
 
-> Source: Architecture Design
+> 来源：架构设计
 
-**Rule**: Circular dependencies between modules are prohibited.
+**规则**：模块之间禁止循环依赖。
 
-**Check Command**:
+**检查命令**：
 ```bash
-# Use madge or similar tool to check
+# 使用 madge 或类似工具检查
 npx madge --circular src/
 ```
 
-**Severity**: High
+**严重程度**：High
 
 ---
 
-### FT-003: Test Coverage
+### FT-003: 测试覆盖率
 
-> Source: Quality Requirements
+> 来源：质量要求
 
-**Rule**: Unit test coverage must not be lower than 80%.
+**规则**：单元测试覆盖率不低于 80%。
 
-**Check Command**:
+**检查命令**：
 ```bash
 npm run test:coverage -- --coverage-threshold='{"global":{"lines":80}}'
 ```
 
-**Severity**: High
+**严重程度**：High
 
 ---
 
-## Process for Adding New Rules
+## 添加新规则的流程
 
-1. Propose new rules in the change package's `design.md`
-2. Go through Challenger questioning and Judge adjudication
-3. Add rules to this document upon archival
-4. Add corresponding check scripts in CI
+1. 在变更包的 `design.md` 中提出新规则
+2. 经过 Challenger 质疑和 Judge 裁决
+3. 归档时将规则添加到本文档
+4. 在 CI 中添加对应的检查脚本
 
 ---
 
-**Rule Set Version**: v1.0.0
-**Last Updated**: {{DATE}}
+**规则集版本**：v1.0.0
+**最后更新**：{{DATE}}

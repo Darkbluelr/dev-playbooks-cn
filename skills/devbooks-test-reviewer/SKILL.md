@@ -1,189 +1,189 @@
-# DevBooks: Test Reviewer
+# DevBooks：测试评审（Test Reviewer）
 
-## Prerequisite: Configuration Discovery (Protocol Agnostic)
+## 前置：配置发现（协议无关）
 
-Before execution, **must** search for configuration in the following order (stop when found):
-1. `.devbooks/config.yaml` (if exists) -> Parse and use its mappings
-2. `dev-playbooks/project.md` (if exists) -> DevBooks 2.0 protocol, use default mappings
-4. `project.md` (if exists) -> template protocol, use default mappings
-5. If still cannot determine -> **Stop and ask user**
-
----
-
-## Role Definition
-
-**test-reviewer** is a dedicated test review role in the DevBooks Apply phase, complementary to reviewer (code review).
-
-### Scope of Responsibility
-
-| Dimension | test-reviewer | reviewer |
-|-----------|:-------------:|:--------:|
-| Review target | `tests/` (test code) | `src/` (implementation code) |
-| Coverage evaluation | Yes | No |
-| Boundary condition checking | Yes | No |
-| Test readability | Yes | No |
-| Test maintainability | Yes | No |
-| Spec consistency | Yes (compare with verification.md) | No |
-| Logic/style/dependencies | No | Yes |
-| Code modification permission | No | No |
+执行前**必须**按以下顺序查找配置（找到后停止）：
+1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
+2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+4. `project.md`（如存在）→ template 协议，使用默认映射
+5. 若仍无法确定 → **停止并询问用户**
 
 ---
 
-## Key Constraints
+## 角色定义
 
-### CON-ROLE-001: Only Review tests/ Directory
-- **Prohibited** from reading or reviewing implementation code under `src/` directory
-- Only focus on test files: `tests/**`, `__tests__/**`, `*.test.*`, `*.spec.*`
+**test-reviewer** 是 DevBooks Apply 阶段的专门测试评审角色，与 reviewer（代码评审）互补。
 
-### CON-ROLE-002: Do Not Modify Any Code
-- Only output review comments, **prohibited** from directly modifying files
-- If modification needed, can only suggest for Test Owner to execute
+### 职责范围
 
-### CON-ROLE-003: Check Test and Spec Consistency
-- Must compare against `verification.md` to check if tests cover all ACs
-- If test gaps found, clearly specify the missing AC-ID
-
----
-
-## Review Dimensions
-
-### 1. Coverage Evaluation
-- [ ] All ACs (Acceptance Criteria) have corresponding tests
-- [ ] Critical paths have end-to-end tests
-- [ ] Boundary conditions covered (null values, extremes, error inputs)
-- [ ] Error handling paths covered
-
-### 2. Test Quality
-- [ ] Tests are independent (don't depend on execution order)
-- [ ] Tests are repeatable (no randomness or time dependency)
-- [ ] Assertions are clear (each test verifies one thing)
-- [ ] Test data is reasonable (avoid magic numbers)
-
-### 3. Readability and Maintainability
-- [ ] Test naming is clear (describe/it describes business intent)
-- [ ] Test structure is consistent (Given-When-Then or Arrange-Act-Assert)
-- [ ] Appropriate test utility functions exist (avoid duplicate code)
-- [ ] Necessary comments exist (complex test scenarios)
-
-### 4. Spec Consistency
-- [ ] Tests correspond to VT-ID in `verification.md`
-- [ ] Test scenarios match AC scenarios
-- [ ] Any extra tests (behavior not in specs)
+| 维度 | test-reviewer | reviewer |
+|------|:-------------:|:--------:|
+| 评审对象 | `tests/`（测试代码） | `src/`（实现代码） |
+| 覆盖率评估 | ✅ | ❌ |
+| 边界条件检查 | ✅ | ❌ |
+| 测试可读性 | ✅ | ❌ |
+| 测试可维护性 | ✅ | ❌ |
+| 规格一致性 | ✅（与 verification.md 对比） | ❌ |
+| 逻辑/风格/依赖 | ❌ | ✅ |
+| 修改代码权限 | ❌ | ❌ |
 
 ---
 
-## Execution Flow
+## 关键约束
 
-1. **Read specs**: Open `<change-root>/<change-id>/verification.md`, understand test plan
-2. **Locate test files**: Locate corresponding tests based on traceability matrix in verification.md
-3. **Review item by item**: Check each test file according to review dimensions
-4. **Output report**: Generate review report including issue list and suggestions
+### CON-ROLE-001：只评审 tests/ 目录
+- **禁止**读取或评审 `src/` 目录下的实现代码
+- 只关注测试文件：`tests/**`, `__tests__/**`, `*.test.*`, `*.spec.*`
+
+### CON-ROLE-002：不修改任何代码
+- 只输出评审意见，**禁止**直接修改文件
+- 如需修改，只能提出建议由 Test Owner 执行
+
+### CON-ROLE-003：检查测试与规格的一致性
+- 必须对照 `verification.md` 检查测试是否覆盖所有 AC
+- 如发现测试缺失，明确指出缺失的 AC-ID
 
 ---
 
-## Output Format
+## 评审维度
+
+### 1. 覆盖率评估
+- [ ] 所有 AC（验收准则）是否有对应测试
+- [ ] 关键路径是否有端到端测试
+- [ ] 边界条件是否覆盖（空值、极值、错误输入）
+- [ ] 错误处理路径是否覆盖
+
+### 2. 测试质量
+- [ ] 测试是否独立（不依赖执行顺序）
+- [ ] 测试是否可重复（无随机性或时间依赖）
+- [ ] 断言是否明确（每个测试只验证一件事）
+- [ ] 测试数据是否合理（避免魔法数字）
+
+### 3. 可读性与可维护性
+- [ ] 测试命名是否清晰（describe/it 描述业务意图）
+- [ ] 测试结构是否一致（Given-When-Then 或 Arrange-Act-Assert）
+- [ ] 是否有适当的测试工具函数（避免重复代码）
+- [ ] 是否有必要的注释（复杂测试场景）
+
+### 4. 规格一致性
+- [ ] 测试是否与 `verification.md` 的 VT-ID 对应
+- [ ] 测试场景是否与 AC 场景一致
+- [ ] 是否有额外测试（未在规格中的行为）
+
+---
+
+## 执行流程
+
+1. **读取规格**：打开 `<change-root>/<change-id>/verification.md`，了解测试计划
+2. **定位测试文件**：根据 verification.md 中的追溯矩阵定位对应测试
+3. **逐项评审**：按评审维度检查每个测试文件
+4. **输出报告**：生成评审报告，包含问题列表和建议
+
+---
+
+## 输出格式
 
 ```markdown
 # Test Review Report: <change-id>
 
-## Overview
-- Review date: YYYY-MM-DD
-- Review scope: `tests/feature-x/`
-- Test file count: N
-- Total issues: N (Critical: N, Major: N, Minor: N)
+## 概览
+- 评审日期：YYYY-MM-DD
+- 评审范围：`tests/feature-x/`
+- 测试文件数：N
+- 问题总数：N（Critical: N, Major: N, Minor: N）
 
-## Coverage Analysis
+## 覆盖率分析
 
-| AC-ID | Test File | Coverage Status | Notes |
-|-------|-----------|-----------------|-------|
-| AC-001 | test-a.ts | Covered | - |
-| AC-002 | - | Missing | Need to add |
-| AC-003 | test-b.ts | Partial | Missing boundary conditions |
+| AC-ID | 测试文件 | 覆盖状态 | 备注 |
+|-------|----------|----------|------|
+| AC-001 | test-a.ts | ✅ 已覆盖 | - |
+| AC-002 | - | ❌ 缺失 | 需要添加 |
+| AC-003 | test-b.ts | ⚠️ 部分覆盖 | 缺少边界条件 |
 
-## Issue List
+## 问题清单
 
-### Critical (Must Fix)
-1. **[C-001]** `test-a.ts:42` - Test depends on external service, no mock
-   - Suggestion: Add mock to ensure test independence
+### Critical (必须修复)
+1. **[C-001]** `test-a.ts:42` - 测试依赖外部服务，无 mock
+   - 建议：添加 mock，确保测试独立
 
-### Major (Should Fix)
-1. **[M-001]** `test-b.ts` - Missing error path tests
-   - Suggestion: Add `expect(...).toThrow()` tests
+### Major (建议修复)
+1. **[M-001]** `test-b.ts` - 缺少错误路径测试
+   - 建议：添加 `expect(...).toThrow()` 测试
 
-### Minor (Optional Fix)
-1. **[m-001]** `test-c.ts:15` - Test naming unclear
-   - Suggestion: Change `it('should do X')` to `it('should return Y when given X')`
+### Minor (可选修复)
+1. **[m-001]** `test-c.ts:15` - 测试命名不清晰
+   - 建议：`it('should do X')` 改为 `it('should return Y when given X')`
 
-## Suggestions
+## 建议
 
-1. [Suggestion 1]
-2. [Suggestion 2]
+1. [建议1]
+2. [建议2]
 
 ---
-*This report generated by devbooks-test-reviewer*
+*此报告由 devbooks-test-reviewer 生成*
 ```
 
 ---
 
-## Interaction with Other Roles
+## 与其他角色的交互
 
-| Scenario | Counterpart | Action |
-|----------|-------------|--------|
-| Test gaps found | Test Owner | Make suggestion, Test Owner adds tests |
-| Test-spec inconsistency found | Test Owner | Raise issue, confirm if spec problem or test problem |
-| Implementation issue found (through tests) | Reviewer | Notify Reviewer to pay attention, don't directly review implementation |
-
----
-
-## Metadata
-
-| Field | Value |
-|-------|-------|
-| Skill Name | devbooks-test-reviewer |
-| Phase | Apply |
-| Artifacts | Review report (not written to change package) |
-| Constraints | CON-ROLE-001~003 |
+| 场景 | 交互方 | 动作 |
+|------|--------|------|
+| 发现测试缺失 | Test Owner | 提出建议，由 Test Owner 补充测试 |
+| 发现测试与规格不一致 | Test Owner | 提出问题，确认是规格问题还是测试问题 |
+| 发现实现问题（通过测试） | Reviewer | 通知 Reviewer 关注，不直接评审实现 |
 
 ---
 
-## Context Awareness
+## 元数据
 
-This Skill automatically detects context before execution and selects appropriate review scope.
+| 字段 | 值 |
+|------|-----|
+| Skill 名称 | devbooks-test-reviewer |
+| 阶段 | Apply |
+| 产物 | 评审报告（不写入变更包） |
+| 约束 | CON-ROLE-001~003 |
 
-Detection rules reference: `skills/_shared/context-detection-template.md`
+---
 
-### Detection Flow
+## 上下文感知
 
-1. Detect if `verification.md` exists
-2. Detect test file change scope
-3. Detect AC coverage status
+本 Skill 在执行前自动检测上下文，选择合适的评审范围。
 
-### Modes Supported by This Skill
+检测规则参考：`skills/_shared/context-detection-template.md`
 
-| Mode | Trigger Condition | Behavior |
-|------|-------------------|----------|
-| **Full review** | First review for new change package | Review all test files |
-| **Incremental review** | Review report already exists | Only review added/modified tests |
-| **Coverage check** | With --coverage parameter | Only check AC coverage |
+### 检测流程
 
-### Detection Output Example
+1. 检测 `verification.md` 是否存在
+2. 检测测试文件变更范围
+3. 检测 AC 覆盖状态
+
+### 本 Skill 支持的模式
+
+| 模式 | 触发条件 | 行为 |
+|------|----------|------|
+| **完整评审** | 新变更包首次评审 | 评审所有测试文件 |
+| **增量评审** | 已有评审报告 | 只评审新增/修改的测试 |
+| **覆盖率检查** | 带 --coverage 参数 | 只检查 AC 覆盖情况 |
+
+### 检测输出示例
 
 ```
-Detection Result:
-- verification.md: exists
-- Test file changes: 5
-- AC coverage status: 8/10
-- Operating mode: Incremental review
+检测结果：
+- verification.md：存在
+- 测试文件变更：5 个
+- AC 覆盖状态：8/10
+- 运行模式：增量评审
 ```
 
 ---
 
-## MCP Enhancement
+## MCP 增强
 
-This Skill does not depend on MCP services, no runtime detection needed.
+本 Skill 不依赖 MCP 服务，无需运行时检测。
 
-MCP enhancement rules reference: `skills/_shared/mcp-enhancement-template.md`
+MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ---
 
-*This Skill document follows devbooks-* specification.*
+*此 Skill 文档遵循 devbooks-* 规范。*

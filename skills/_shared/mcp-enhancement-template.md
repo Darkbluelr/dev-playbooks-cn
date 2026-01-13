@@ -1,134 +1,134 @@
-# MCP Enhancement Template
+# MCP 增强模板（MCP Enhancement Template）
 
-> This template is referenced by each SKILL.md to define the standard section format for MCP runtime detection and graceful degradation strategies.
-
----
-
-## Core Principles
-
-1. **2s timeout**: All MCP calls must return within 2s, otherwise considered unavailable
-2. **Graceful degradation**: When MCP is unavailable, Skill continues executing basic functionality without blocking
-3. **Silent detection**: Detection process is transparent to users, only outputs notification on degradation
+> 本模板供各 SKILL.md 引用，定义 MCP 运行时检测与降级策略的标准章节格式。
 
 ---
 
-## Standard Section Format
+## 核心原则
 
-Each SKILL.md's "MCP Enhancement" section should include the following:
+1. **2s 超时**：所有 MCP 调用必须在 2s 内返回，否则视为不可用
+2. **优雅降级**：MCP 不可用时，Skill 继续执行基础功能，不阻塞
+3. **静默检测**：检测过程对用户透明，只在降级时输出提示
+
+---
+
+## 标准章节格式
+
+每个 SKILL.md 的"MCP 增强"章节应包含以下内容：
 
 ```markdown
-## MCP Enhancement
+## MCP 增强
 
-This Skill supports MCP runtime enhancement, automatically detecting and enabling advanced features.
+本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
 
-### Dependent MCP Services
+### 依赖的 MCP 服务
 
-| Service | Purpose | Timeout |
-|---------|---------|---------|
-| `mcp__ckb__getStatus` | Detect CKB index availability | 2s |
-| `mcp__ckb__getHotspots` | Get hotspot files | 2s |
+| 服务 | 用途 | 超时 |
+|------|------|------|
+| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
+| `mcp__ckb__getHotspots` | 获取热点文件 | 2s |
 
-### Detection Flow
+### 检测流程
 
-1. Call `mcp__ckb__getStatus` (2s timeout)
-2. If successful -> Enable enhanced mode
-3. If timeout or failure -> Degrade to basic mode
+1. 调用 `mcp__ckb__getStatus`（2s 超时）
+2. 若返回成功 → 启用增强模式
+3. 若超时或失败 → 降级到基础模式
 
-### Enhanced Mode vs Basic Mode
+### 增强模式 vs 基础模式
 
-| Feature | Enhanced Mode | Basic Mode |
-|---------|---------------|------------|
-| Hotspot detection | CKB real-time analysis | Git history statistics |
-| Impact analysis | Symbol-level references | File-level grep |
-| Call graph | Precise call chain | Unavailable |
+| 功能 | 增强模式 | 基础模式 |
+|------|----------|----------|
+| 热点检测 | CKB 实时分析 | Git 历史统计 |
+| 影响分析 | 符号级引用 | 文件级 grep |
+| 调用图 | 精确调用链 | 不可用 |
 
-### Degradation Notice
+### 降级提示
 
-When MCP is unavailable, output the following notice:
+当 MCP 不可用时，输出以下提示：
 
 ```
-Warning: CKB unavailable (timeout or not configured), using basic mode.
-To enable enhanced features, run /devbooks:index to generate index.
+⚠️ CKB 不可用（超时或未配置），使用基础模式执行。
+如需启用增强功能，请运行 /devbooks:index 生成索引。
 ```
 ```
 
 ---
 
-## Classification by Skill
+## 按 Skill 分类
 
-### Skills Without MCP Dependency
+### 无 MCP 依赖的 Skills
 
-The following Skills do not depend on MCP and do not need MCP enhancement section:
+以下 Skills 不依赖 MCP，无需 MCP 增强章节：
 
-- devbooks-design-doc (pure document generation)
-- devbooks-implementation-plan (pure plan generation)
-- devbooks-proposal-author (pure document generation)
-- devbooks-proposal-challenger (pure review)
-- devbooks-proposal-judge (pure judgment)
-- devbooks-proposal-debate-workflow (workflow orchestration)
-- devbooks-design-backport (document backport)
-- devbooks-spec-gardener (file organization)
-- devbooks-test-reviewer (test review)
+- devbooks-design-doc（纯文档生成）
+- devbooks-implementation-plan（纯计划生成）
+- devbooks-proposal-author（纯文档生成）
+- devbooks-proposal-challenger（纯评审）
+- devbooks-proposal-judge（纯裁决）
+- devbooks-proposal-debate-workflow（流程编排）
+- devbooks-design-backport（文档回写）
+- devbooks-spec-gardener（文件整理）
+- devbooks-test-reviewer（测试评审）
 
-For these Skills, the MCP enhancement section should state:
+对于这些 Skills，MCP 增强章节应写：
 
 ```markdown
-## MCP Enhancement
+## MCP 增强
 
-This Skill does not depend on MCP services, no runtime detection needed.
+本 Skill 不依赖 MCP 服务，无需运行时检测。
 ```
 
-### Skills With MCP Dependency
+### 有 MCP 依赖的 Skills
 
-The following Skills depend on MCP and need complete MCP enhancement section:
+以下 Skills 依赖 MCP，需要完整 MCP 增强章节：
 
-| Skill | MCP Dependency | Enhanced Feature |
-|-------|----------------|------------------|
-| devbooks-coder | mcp__ckb__getHotspots | Hotspot file warning |
-| devbooks-code-review | mcp__ckb__getHotspots | Hotspot file highlighting |
-| devbooks-impact-analysis | mcp__ckb__analyzeImpact, findReferences | Precise impact analysis |
-| devbooks-brownfield-bootstrap | mcp__ckb__* | COD model generation |
-| devbooks-index-bootstrap | mcp__ckb__getStatus | Index status detection |
-| devbooks-federation | mcp__ckb__*, mcp__github__* | Cross-repository analysis |
-| devbooks-router | mcp__ckb__getStatus | Index availability detection |
-| devbooks-c4-map | mcp__ckb__getArchitecture | Module dependency graph |
-| devbooks-spec-contract | mcp__ckb__findReferences | Reference detection |
-| devbooks-entropy-monitor | mcp__ckb__getHotspots | Hotspot trend analysis |
-| devbooks-delivery-workflow | mcp__ckb__getStatus | Index detection |
-| devbooks-test-owner | mcp__ckb__analyzeImpact | Test coverage analysis |
+| Skill | MCP 依赖 | 增强功能 |
+|-------|----------|----------|
+| devbooks-coder | mcp__ckb__getHotspots | 热点文件预警 |
+| devbooks-code-review | mcp__ckb__getHotspots | 热点文件高亮 |
+| devbooks-impact-analysis | mcp__ckb__analyzeImpact, findReferences | 精确影响分析 |
+| devbooks-brownfield-bootstrap | mcp__ckb__* | COD 模型生成 |
+| devbooks-index-bootstrap | mcp__ckb__getStatus | 索引状态检测 |
+| devbooks-federation | mcp__ckb__*, mcp__github__* | 跨仓库分析 |
+| devbooks-router | mcp__ckb__getStatus | 索引可用性检测 |
+| devbooks-c4-map | mcp__ckb__getArchitecture | 模块依赖图 |
+| devbooks-spec-contract | mcp__ckb__findReferences | 引用检测 |
+| devbooks-entropy-monitor | mcp__ckb__getHotspots | 热点趋势分析 |
+| devbooks-delivery-workflow | mcp__ckb__getStatus | 索引检测 |
+| devbooks-test-owner | mcp__ckb__analyzeImpact | 测试覆盖分析 |
 
 ---
 
-## Detection Code Example
+## 检测代码示例
 
-### Bash Detection Script
+### Bash 检测脚本
 
 ```bash
 #!/bin/bash
-# mcp-detect.sh - MCP availability detection
+# mcp-detect.sh - MCP 可用性检测
 
 TIMEOUT=2
 
-# Detect CKB
+# 检测 CKB
 check_ckb() {
-  # Simulate MCP call (actually executed by Claude Code)
-  # If no response within 2s, return degraded status
-  echo "Warning: CKB detection needs to be executed in Claude Code environment"
+  # 模拟 MCP 调用（实际由 Claude Code 执行）
+  # 若 2s 内无响应，返回降级状态
+  echo "⚠️ CKB 检测需要在 Claude Code 环境中执行"
 }
 
-# Output detection result
+# 输出检测结果
 detect_mcp() {
   local ckb_status="unknown"
 
-  # Check if index.scip file exists (file-level detection)
+  # 检查 index.scip 文件是否存在（文件级检测）
   if [ -f "index.scip" ]; then
     ckb_status="available (file-based)"
   else
     ckb_status="unavailable"
   fi
 
-  echo "MCP Detection Result:"
-  echo "- CKB Index: $ckb_status"
+  echo "MCP 检测结果："
+  echo "- CKB 索引：$ckb_status"
 }
 
 detect_mcp
@@ -136,9 +136,9 @@ detect_mcp
 
 ---
 
-## Notes
+## 注意事项
 
-1. **Do not add non-existent MCP tools in SKILL.md frontmatter**
-2. **Timeout detection should be done at the start of Skill execution, do not detect multiple times**
-3. **After degradation, do not repeat notices, only output once on first detection**
-4. **Enhanced features are optional, basic features must be fully functional**
+1. **不要在 SKILL.md frontmatter 中添加不存在的 MCP 工具**
+2. **超时检测应在 Skill 执行开始时进行，不要多次检测**
+3. **降级后不要重复提示，只在首次检测时输出一次**
+4. **增强功能是可选的，基础功能必须完整可用**

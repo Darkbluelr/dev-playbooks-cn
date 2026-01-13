@@ -1,96 +1,96 @@
-# Project Context
+# 项目上下文 (Project Context)
 
-> This document describes the project's technology stack, conventions, and domain context.
-> For constitutional rules, please refer to `constitution.md`.
+> 本文档描述项目的技术栈、约定和领域上下文。
+> 宪法性规则请参阅 `constitution.md`。
 
 ---
 
-## Purpose
+## 目的
 
-<!-- Describe your project purpose here -->
+<!-- 在此描述你的项目目的 -->
 
-## Technology Stack
+## 技术栈
 
-- **Primary Language**: <!-- e.g., TypeScript, Python, Go -->
-- **Framework**: <!-- e.g., React, Django, Gin -->
-- **Database**: <!-- e.g., PostgreSQL, MongoDB -->
-- **Configuration Format**: YAML / JSON
-- **Documentation Format**: Markdown
-- **Version Control**: Git
+- **主语言**：<!-- 如 TypeScript, Python, Go -->
+- **框架**：<!-- 如 React, Django, Gin -->
+- **数据库**：<!-- 如 PostgreSQL, MongoDB -->
+- **配置格式**：YAML / JSON
+- **文档格式**：Markdown
+- **版本控制**：Git
 
-## Project Conventions
+## 项目约定
 
-### Code Style
+### 代码风格
 
-<!-- Describe your code style requirements -->
+<!-- 描述你的代码风格要求 -->
 
-### Architecture Patterns
+### 架构模式
 
-- **Configuration Discovery**: All Skills discover configuration through `config-discovery.sh`
-- **Constitution First**: Load `constitution.md` before executing any operation
-- **Three-Layer Sync**: Draft -> Staged -> Truth
+- **配置发现**：所有 Skills 通过 `config-discovery.sh` 发现配置
+- **宪法优先**：执行任何操作前加载 `constitution.md`
+- **三层同步**：Draft → Staged → Truth
 
-### Testing Strategy
+### 测试策略
 
-- **Unit Tests**: <!-- e.g., Jest, pytest, go test -->
-- **Coverage Target**: 80%
-- **Red-Green Cycle**: Test Owner produces Red baseline first, Coder makes it Green
+- **单元测试**：<!-- 如 Jest, pytest, go test -->
+- **覆盖率目标**：80%
+- **Red-Green 循环**：Test Owner 先产出 Red 基线，Coder 让其 Green
 
-### Git Workflow
+### Git 工作流
 
-- **Main Branch**: `main` / `master`
-- **Change Branch**: `change/<change-id>`
-- **Commit Format**: `<type>: <subject>`
+- **主分支**：`main` / `master`
+- **变更分支**：`change/<change-id>`
+- **提交格式**：`<type>: <subject>`
   - type: feat, fix, refactor, docs, test, chore
 
-## Domain Context
+## 领域上下文
 
-### Core Concepts
+### 核心概念
 
-| Term | Definition |
+| 术语 | 定义 |
 |------|------|
-| Truth Root | Root directory of the truth source, stores final versions of specs and designs |
-| Change Root | Root directory for change packages, stores all artifacts for each change |
-| Spec Delta | Spec increments, describing modifications to specs from changes |
-| AC-ID | Acceptance Criteria Identifier, format `AC-XXX` |
-| GIP | Global Inviolable Principle |
+| Truth Root | 真理源根目录，存放规格和设计的最终版本 |
+| Change Root | 变更包根目录，存放每次变更的所有产物 |
+| Spec Delta | 规格增量，描述变更对规格的修改 |
+| AC-ID | 验收标准标识符，格式 `AC-XXX` |
+| GIP | 全局不可违背原则（Global Inviolable Principle） |
 
-### Role Definitions
+### 角色定义
 
-| Role | Responsibility | Constraints |
+| 角色 | 职责 | 约束 |
 |------|------|------|
-| Design Owner | Produce What/Constraints + AC-xxx | Prohibited from writing implementation steps |
-| Spec Owner | Produce spec delta | - |
-| Planner | Derive tasks from design | Must not reference tests/ |
-| Test Owner | Derive tests from design/specs | Must not reference tasks/ |
-| Coder | Implement according to tasks | Prohibited from modifying tests/ |
-| Reviewer | Code review | Cannot modify tests, cannot modify design |
+| Design Owner | 产出 What/Constraints + AC-xxx | 禁止写实现步骤 |
+| Spec Owner | 产出规格 delta | - |
+| Planner | 从设计推导 tasks | 不得参考 tests/ |
+| Test Owner | 从设计/规格推导测试 | 不得参考 tasks/ |
+| Coder | 按 tasks 实现 | 禁止修改 tests/ |
+| Reviewer | 代码审查 | 不改 tests，不改设计 |
 
-## Important Constraints
+## 重要约束
 
-1. **Role Isolation**: Test Owner and Coder must work in independent conversations
-2. **Tests Are Immutable**: Coder is prohibited from modifying tests/
-3. **Design First**: Code must trace back to AC-xxx
-4. **Single Truth Source**: specs/ is the only authority
+1. **角色隔离**：Test Owner 与 Coder 必须独立对话
+2. **测试不可篡改**：Coder 禁止修改 tests/
+3. **设计优先**：代码必须追溯到 AC-xxx
+4. **真理源唯一**：specs/ 是唯一权威
 
-## External Dependencies
+## 外部依赖
 
-<!-- List project external dependencies -->
+<!-- 列出项目的外部依赖 -->
 
 ---
 
-## Directory Root Mapping
+## 目录根映射
 
-| Path | Purpose |
+| 路径 | 用途 |
 |------|------|
-| `dev-playbooks/` | DevBooks management directory (centralized) |
-| `dev-playbooks/constitution.md` | Project Constitution |
-| `dev-playbooks/project.md` | This file |
-| `dev-playbooks/specs/` | Truth source |
-| `dev-playbooks/changes/` | Change packages |
-| `dev-playbooks/scripts/` | Project-level scripts (optional override) |
+| `dev-playbooks/` | DevBooks 管理目录（集中式） |
+| `dev-playbooks/constitution.md` | 项目宪法 |
+| `dev-playbooks/project.md` | 本文件 |
+| `dev-playbooks/specs/` | 真理源 |
+| `dev-playbooks/changes/` | 变更包 |
+| `dev-playbooks/scripts/` | 项目级脚本（可选覆盖） |
 
 ---
 
-**Document Version**: v1.0.0
-**Last Updated**: {{DATE}}
+**文档版本**：v1.0.0
+**最后更新**：{{DATE}}

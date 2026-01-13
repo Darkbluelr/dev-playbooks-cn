@@ -5,38 +5,38 @@ backward-compat: true
 
 # /devbooks:quick
 
-**Backward Compatible Command**: Quick mode (small changes).
+**向后兼容命令**：快速模式（小变更）。
 
-## Purpose
+## 用途
 
-This command is a backward compatible command, maintaining consistency with the original `/devbooks:quick` invocation.
+此命令是向后兼容命令，保持与原有 `/devbooks:quick` 调用方式一致。
 
-Suitable for small changes, skipping some workflow steps.
+适用于小型变更，跳过部分流程。
 
-## New Version Alternative
+## 新版本替代方案
 
-Recommended to use Router for complete routing suggestions:
+建议使用 Router 获取完整路由建议：
 
 ```
 /devbooks:router
 ```
 
-Router will automatically recommend the shortest path based on the change scope.
+Router 会根据变更规模自动推荐最短路径。
 
-## Quick Mode Constraints
+## 快速模式约束
 
-- Only for single file or minimal file changes
-- No external API changes
-- No architectural boundary changes
-- No data model changes
+- 仅适用于单文件或少量文件变更
+- 不涉及对外 API 变更
+- 不涉及架构边界变更
+- 不涉及数据模型变更
 
-## Boundary Check
+## 边界检查
 
-If changes exceed quick mode boundaries, it will automatically suggest switching to the full workflow.
+如果变更超出快速模式边界，会自动建议切换到完整流程。
 
-## Migration Guide
+## 迁移说明
 
 ```
-Old Command           New Command
-/devbooks:quick  →  /devbooks:router (will auto-recommend quick path)
+旧命令           新命令
+/devbooks:quick  →  /devbooks:router（会自动推荐快速路径）
 ```

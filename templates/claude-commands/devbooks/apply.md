@@ -5,34 +5,34 @@ backward-compat: true
 
 # /devbooks:apply
 
-**Backward Compatible Command**: Execute Apply phase (Test Owner or Coder).
+**向后兼容命令**：执行 Apply 阶段（Test Owner 或 Coder）。
 
-## Purpose
+## 用途
 
-This command is a backward compatible command, maintaining consistency with the original `/devbooks:apply` invocation.
+此命令是向后兼容命令，保持与原有 `/devbooks:apply` 调用方式一致。
 
-## New Version Alternative
+## 新版本替代方案
 
-Recommended direct commands:
+建议使用以下直达命令：
 
-| Role | New Command | Description |
+| 角色 | 新命令 | 说明 |
 |------|--------|------|
-| Test Owner | `/devbooks:test` | Test owner, produces verification.md |
-| Coder | `/devbooks:code` | Implementation owner, implements per tasks.md |
+| Test Owner | `/devbooks:test` | 测试负责人，产出 verification.md |
+| Coder | `/devbooks:code` | 实现负责人，按 tasks.md 实现 |
 
-## Parameters
+## 参数
 
-- `--role test-owner`: Execute as Test Owner role
-- `--role coder`: Execute as Coder role
+- `--role test-owner`：以 Test Owner 角色执行
+- `--role coder`：以 Coder 角色执行
 
-## Role Isolation
+## 角色隔离
 
-Test Owner and Coder must be executed in separate sessions.
+Test Owner 和 Coder 必须在独立会话中执行。
 
-## Migration Guide
+## 迁移说明
 
 ```
-Old Command                    New Command
+旧命令                    新命令
 /devbooks:apply --role test-owner  →  /devbooks:test
 /devbooks:apply --role coder       →  /devbooks:code
 ```

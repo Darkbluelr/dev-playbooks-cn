@@ -4,16 +4,16 @@ skill: devbooks-coder
 
 # /devbooks:code
 
-Triggers Skill: `devbooks-coder`
+触发 Skill：`devbooks-coder`
 
-## Purpose
+## 用途
 
-As Coder role, strictly implement features per tasks.md and run gates. Forbidden to modify tests/. Uses tests/static checks as the only completion criteria.
+以 Coder 角色严格按 tasks.md 实现功能并跑闸门，禁止修改 tests/，以测试/静态检查为唯一完成判据。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Implementing code features per plan
-- Fixing test failures to make gates all green
-- Checkpoint resume (auto-identifies completed tasks)
+- 按计划实现代码功能
+- 修复测试失败让闸门全绿
+- 断点续做（自动识别已完成任务）
 
-Please invoke `devbooks-coder` to execute the corresponding task.
+请点名使用 `devbooks-coder` 执行相应任务。

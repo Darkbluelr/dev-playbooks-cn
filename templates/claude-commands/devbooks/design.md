@@ -4,16 +4,16 @@ skill: devbooks-design-doc
 
 # /devbooks:design
 
-Triggers Skill: `devbooks-design-doc`
+触发 Skill：`devbooks-design-doc`
 
-## Purpose
+## 用途
 
-Produce design document (design.md) for change package, writing only What/Constraints and AC-xxx, not implementation steps.
+产出变更包的设计文档（design.md），只写 What/Constraints 与 AC-xxx，不写实现步骤。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Detailed design needed after proposal approval
-- Define acceptance criteria and constraints
-- Clarify C4 Delta and architecture impact
+- 提案通过后需要详细设计
+- 定义验收标准和约束条件
+- 明确 C4 Delta 和架构影响
 
-Please invoke `devbooks-design-doc` to execute the corresponding task.
+请点名使用 `devbooks-design-doc` 执行相应任务。

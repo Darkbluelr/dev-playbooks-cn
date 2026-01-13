@@ -1,79 +1,79 @@
-# Project Profile
+# 项目画像 (Project Profile)
 
-> This document describes the project's technical profile for AI assistants to quickly understand project context.
+> 本文档描述项目的技术画像，用于 AI 助手快速理解项目上下文。
 
 ---
 
-## Technology Stack
+## 技术栈
 
-| Category | Technology | Version |
+| 类别 | 技术 | 版本 |
 |------|------|------|
-| Language | <!-- TypeScript/Python/Go --> | <!-- version --> |
-| Framework | <!-- React/Django/Gin --> | <!-- version --> |
-| Database | <!-- PostgreSQL/MongoDB --> | <!-- version --> |
-| Test Framework | <!-- Jest/pytest/go test --> | <!-- version --> |
-| Build Tool | <!-- webpack/vite/make --> | <!-- version --> |
+| 语言 | <!-- TypeScript/Python/Go --> | <!-- 版本 --> |
+| 框架 | <!-- React/Django/Gin --> | <!-- 版本 --> |
+| 数据库 | <!-- PostgreSQL/MongoDB --> | <!-- 版本 --> |
+| 测试框架 | <!-- Jest/pytest/go test --> | <!-- 版本 --> |
+| 构建工具 | <!-- webpack/vite/make --> | <!-- 版本 --> |
 
 ---
 
-## Common Commands
+## 常用命令
 
-| Command | Purpose |
+| 命令 | 用途 |
 |------|------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build production version |
-| `npm run test` | Run tests |
-| `npm run lint` | Run code linting |
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 构建生产版本 |
+| `npm run test` | 运行测试 |
+| `npm run lint` | 运行代码检查 |
 
 ---
 
-## Project Conventions
+## 项目约定
 
-### Naming Conventions
+### 命名约定
 
-- **File names**: kebab-case (e.g., `user-service.ts`)
-- **Component names**: PascalCase (e.g., `UserProfile`)
-- **Function names**: camelCase (e.g., `getUserById`)
-- **Constant names**: UPPER_SNAKE_CASE (e.g., `MAX_RETRY_COUNT`)
+- **文件名**：kebab-case（如 `user-service.ts`）
+- **组件名**：PascalCase（如 `UserProfile`）
+- **函数名**：camelCase（如 `getUserById`）
+- **常量名**：UPPER_SNAKE_CASE（如 `MAX_RETRY_COUNT`）
 
-### Directory Structure Conventions
+### 目录结构约定
 
 ```
 src/
-├── components/     # UI components
-├── services/       # Business logic
-├── models/         # Data models
-├── utils/          # Utility functions
-└── tests/          # Test files
+├── components/     # UI 组件
+├── services/       # 业务逻辑
+├── models/         # 数据模型
+├── utils/          # 工具函数
+└── tests/          # 测试文件
 ```
 
 ---
 
-## Quality Gates
+## 质量闸门
 
-| Gate | Threshold | Command |
+| 闸门 | 阈值 | 命令 |
 |------|------|------|
-| Unit Test Coverage | >= 80% | `npm run test:coverage` |
-| Type Check | 0 errors | `npm run typecheck` |
-| Lint Check | 0 errors | `npm run lint` |
-| Build | Success | `npm run build` |
+| 单元测试覆盖率 | >= 80% | `npm run test:coverage` |
+| 类型检查 | 0 错误 | `npm run typecheck` |
+| Lint 检查 | 0 错误 | `npm run lint` |
+| 构建 | 成功 | `npm run build` |
 
 ---
 
-## External Services
+## 外部服务
 
-| Service | Purpose | Environment Variable |
+| 服务 | 用途 | 环境变量 |
 |------|------|----------|
-| <!-- e.g., PostgreSQL --> | <!-- Data storage --> | `DATABASE_URL` |
-| <!-- e.g., Redis --> | <!-- Cache --> | `REDIS_URL` |
+| <!-- 如 PostgreSQL --> | <!-- 数据存储 --> | `DATABASE_URL` |
+| <!-- 如 Redis --> | <!-- 缓存 --> | `REDIS_URL` |
 
 ---
 
-## Special Constraints
+## 特殊约束
 
-<!-- Project-specific constraints or rules -->
+<!-- 项目特有的约束或规则 -->
 
 ---
 
-**Profile Version**: v1.0.0
-**Last Updated**: {{DATE}}
+**画像版本**：v1.0.0
+**最后更新**：{{DATE}}

@@ -4,16 +4,16 @@ skill: devbooks-proposal-debate-workflow
 
 # /devbooks:debate
 
-Triggers Skill: `devbooks-proposal-debate-workflow`
+触发 Skill：`devbooks-proposal-debate-workflow`
 
-## Purpose
+## 用途
 
-Execute "Proposal-Challenge-Judge" triangular debate workflow in proposal phase, enforce three-role isolation and write back to Decision Log.
+在 proposal 阶段执行"提案-质疑-裁决"三角对辩流程，强制三角色隔离并写回 Decision Log。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Need to execute complete proposal review workflow
-- Automatically coordinate Author, Challenger, Judge roles
-- Ensure decision process is recorded and traceable
+- 需要完整执行提案审核流程
+- 自动协调 Author、Challenger、Judge 三个角色
+- 确保决策过程有记录可追溯
 
-Please invoke `devbooks-proposal-debate-workflow` to execute the corresponding task.
+请点名使用 `devbooks-proposal-debate-workflow` 执行相应任务。

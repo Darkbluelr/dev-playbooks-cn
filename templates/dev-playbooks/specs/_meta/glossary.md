@@ -1,47 +1,47 @@
-# Glossary
+# 术语表 (Glossary)
 
-> This document defines domain terms and technical terms used in the project.
-> AI assistants should follow these term constraints when generating code and documentation.
+> 本文档定义项目中使用的领域术语和技术术语。
+> AI 助手在生成代码和文档时应遵循这些术语约束。
 
 ---
 
-## Domain Terms
+## 领域术语
 
-| Term | Definition | English | Prohibited Words |
+| 术语 | 定义 | 英文 | 禁用词 |
 |------|------|------|--------|
-| <!-- e.g.: User --> | <!-- User of the system --> | User | <!-- Customer, Member --> |
+| <!-- 如：用户 --> | <!-- 系统的使用者 --> | User | <!-- 客户、会员 --> |
 
 ---
 
-## Technical Terms
+## 技术术语
 
-| Term | Definition | Context |
+| 术语 | 定义 | 所属上下文 |
 |------|------|-----------|
-| Truth Root | Root directory of the truth source, stores final versions of specs and designs | DevBooks |
-| Change Root | Root directory for change packages, stores all artifacts for each change | DevBooks |
-| Spec Delta | Spec increments, describing modifications to specs from changes | DevBooks |
-| AC-ID | Acceptance Criteria Identifier, format `AC-XXX` | DevBooks |
-| GIP | Global Inviolable Principle | DevBooks |
+| Truth Root | 真理源根目录，存放规格和设计的最终版本 | DevBooks |
+| Change Root | 变更包根目录，存放每次变更的所有产物 | DevBooks |
+| Spec Delta | 规格增量，描述变更对规格的修改 | DevBooks |
+| AC-ID | 验收标准标识符，格式 `AC-XXX` | DevBooks |
+| GIP | 全局不可违背原则（Global Inviolable Principle） | DevBooks |
 
 ---
 
-## Abbreviations
+## 缩写表
 
-| Abbreviation | Full Name | Description |
+| 缩写 | 全称 | 说明 |
 |------|------|------|
-| AC | Acceptance Criteria | Acceptance Criteria |
-| GIP | Global Inviolable Principle | Global Inviolable Principle |
-| DoD | Definition of Done | Definition of Done |
+| AC | Acceptance Criteria | 验收标准 |
+| GIP | Global Inviolable Principle | 全局不可违背原则 |
+| DoD | Definition of Done | 完成定义 |
 
 ---
 
-## Term Usage Rules
+## 术语使用规则
 
-1. **Consistency**: Use the same term for the same concept in code, documentation, and comments
-2. **Unambiguous**: Avoid using words with multiple meanings
-3. **Traceable**: New terms must be defined in this document before use
+1. **一致性**：同一概念在代码、文档、注释中使用相同术语
+2. **无歧义**：避免使用有多重含义的词
+3. **可追溯**：新术语必须在此文档中定义后才能使用
 
 ---
 
-**Glossary Version**: v1.0.0
-**Last Updated**: {{DATE}}
+**术语表版本**：v1.0.0
+**最后更新**：{{DATE}}

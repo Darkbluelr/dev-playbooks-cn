@@ -4,16 +4,16 @@ skill: devbooks-entropy-monitor
 
 # /devbooks:entropy
 
-Triggers Skill: `devbooks-entropy-monitor`
+触发 Skill：`devbooks-entropy-monitor`
 
-## Purpose
+## 用途
 
-Periodically collect system entropy metrics (structural entropy/change entropy/test entropy/dependency entropy), generate quantitative reports, and suggest refactoring when metrics exceed thresholds.
+定期采集系统熵度量（结构熵/变更熵/测试熵/依赖熵），生成量化报告，当指标超阈值时建议重构。
 
-## Typical Use Cases
+## 典型使用场景
 
-- Monitor code complexity trends
-- Identify areas needing refactoring
-- Quantify technical debt level
+- 监控代码复杂度趋势
+- 识别需要重构的区域
+- 量化技术债务程度
 
-Please invoke `devbooks-entropy-monitor` to execute the corresponding task.
+请点名使用 `devbooks-entropy-monitor` 执行相应任务。

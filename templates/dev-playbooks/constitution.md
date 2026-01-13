@@ -1,116 +1,116 @@
-# Project Constitution
+# 项目宪法 (Project Constitution)
 
-> This document defines the project's inviolable principles (Global Inviolable Principles).
-> All AI assistants and developers must adhere to these principles before executing any operation.
-
----
-
-## Part Zero: Mandatory Directives
-
-**Before executing any Skill or operation, you must:**
-
-1. Read and understand this constitution document
-2. Confirm the operation does not violate any GIP principles
-3. Stop immediately and report if there is a conflict
+> 本文档定义项目的不可违背原则（Global Inviolable Principles）。
+> 所有 AI 助手和开发者在执行任何操作前必须遵守这些原则。
 
 ---
 
-## Global Inviolable Principles (GIP)
+## Part Zero: 强制指令
 
-### GIP-01: Role Isolation Principle
+**在执行任何 Skill 或操作之前，必须：**
 
-**Rule**: Test Owner and Coder must execute in independent conversations/independent instances.
-
-**Rationale**:
-- Prevent cognitive contamination between tests and implementation
-- Ensure the integrity of the Red-Green cycle
-- Avoid the anti-pattern of "writing tests and modifying tests yourself"
-
-**Violation Consequence**: Change package cannot be archived.
+1. 阅读并理解本宪法文档
+2. 确认操作不违反任何 GIP 原则
+3. 如有冲突，立即停止并报告
 
 ---
 
-### GIP-02: Tests Are Immutable Principle
+## 全局不可违背原则 (Global Inviolable Principles)
 
-**Rule**: The Coder role is prohibited from modifying any files under the `tests/**` directory.
+### GIP-01: 角色隔离原则
 
-**Rationale**:
-- Tests are the executable form of specifications
-- Modifying tests is equivalent to modifying specs, requiring design-level decisions
-- Ensure independence of acceptance criteria
+**规则**：Test Owner 与 Coder 必须在独立对话/独立实例中执行。
 
-**Exception**: If tests need modification, must hand back to Test Owner.
+**理由**：
+- 防止测试与实现之间的认知污染
+- 确保 Red-Green 循环的完整性
+- 避免"自己写测试自己改测试"的反模式
 
----
-
-### GIP-03: Design First Principle
-
-**Rule**: Code implementation must trace back to AC-xxx in design documents.
-
-**Rationale**:
-- Ensure all code changes have a clear business purpose
-- Support full traceability: Design -> Tasks -> Tests -> Code
-- Prevent "ghost features" and unauthorized changes
-
-**Verification Method**: `ac-trace-check.sh` checks coverage.
+**违规后果**：变更包不可归档。
 
 ---
 
-### GIP-04: Single Truth Source Principle
+### GIP-02: 测试不可篡改原则
 
-**Rule**: `specs/` is the only source of truth for system behavior.
+**规则**：Coder 角色禁止修改 `tests/**` 目录下的任何文件。
 
-**Rationale**:
-- Avoid inconsistencies caused by specs scattered in multiple places
-- Ensure all roles reference the same source
-- Support incremental synchronization and conflict detection
+**理由**：
+- 测试是规格的可执行形式
+- 修改测试等于修改规格，需要设计层面决策
+- 保证验收标准的独立性
 
-**Operational Constraints**:
-- Spec deltas in change packages must go through stage -> promote process
-- Direct modification of `specs/` directory is prohibited
+**例外**：如需修改测试，必须交还 Test Owner 处理。
 
 ---
 
-## Escape Hatches
+### GIP-03: 设计优先原则
 
-> The following situations may temporarily bypass the above principles, but must be documented and traceable.
+**规则**：代码实现必须追溯到设计文档中的 AC-xxx。
 
-### EH-01: Emergency Fix
+**理由**：
+- 确保所有代码变更有明确的业务目的
+- 支持全程追溯：设计 → 任务 → 测试 → 代码
+- 防止"幽灵功能"和无授权变更
 
-**Applicable Scenario**: Production environment has serious failures requiring emergency fixes.
-
-**Process**:
-1. Document emergency fix reason in `evidence/`
-2. Mark with `[EMERGENCY]` prefix
-3. Complete the full change package afterwards
-
-### EH-02: Prototype Validation
-
-**Applicable Scenario**: Technical approach is uncertain, needs quick validation.
-
-**Constraints**:
-- Code must be placed in `prototype/` directory
-- Prohibited from directly merging into production code
-- Promote through formal process after validation is complete
-
-### EH-03: Manual Adjudication
-
-**Applicable Scenario**: Rule conflicts or edge cases require human judgment.
-
-**Process**:
-1. Document decision points in `proposal.md`
-2. Signed confirmation by project owner
-3. Update Decision Log
+**验证方式**：`ac-trace-check.sh` 检查覆盖率。
 
 ---
 
-## Constitution Amendment Process
+### GIP-04: 真理源唯一原则
 
-1. Any modifications to this constitution must go through a formal change proposal
-2. Change proposals need to go through Challenger questioning and Judge adjudication
-3. Constitution changes have P0 priority, requiring confirmation from all core members
+**规则**：`specs/` 是系统行为的唯一真理源。
+
+**理由**：
+- 避免规格分散在多处导致不一致
+- 确保所有角色参考同一来源
+- 支持增量同步和冲突检测
+
+**操作约束**：
+- 变更包中的 spec delta 必须经过 stage → promote 流程
+- 禁止直接修改 `specs/` 目录
 
 ---
 
-**Constitution Version**: v1.0.0
-**Last Updated**: {{DATE}}
+## 逃生舱口 (Escape Hatches)
+
+> 以下情况可临时绕过上述原则，但必须记录和追溯。
+
+### EH-01: 紧急修复
+
+**适用场景**：生产环境严重故障需要紧急修复。
+
+**流程**：
+1. 在 `evidence/` 中记录紧急修复原因
+2. 标记 `[EMERGENCY]` 前缀
+3. 事后补充完整的变更包
+
+### EH-02: 原型验证
+
+**适用场景**：技术方案不确定，需要快速验证。
+
+**约束**：
+- 代码必须放在 `prototype/` 目录
+- 禁止直接合入生产代码
+- 验证完成后通过正式流程提升
+
+### EH-03: 人工裁决
+
+**适用场景**：规则冲突或边缘情况需要人工判断。
+
+**流程**：
+1. 在 `proposal.md` 中记录决策点
+2. 由项目负责人签字确认
+3. 更新 Decision Log
+
+---
+
+## 宪法变更流程
+
+1. 任何对本宪法的修改必须通过正式的变更提案
+2. 变更提案需要经过 Challenger 质疑和 Judge 裁决
+3. 宪法变更的优先级为 P0，需要所有核心成员确认
+
+---
+
+**宪法版本**：v1.0.0
+**最后更新**：{{DATE}}

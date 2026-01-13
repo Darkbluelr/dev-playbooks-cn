@@ -144,7 +144,7 @@ contains_placeholder() {
   local file="$1"
   # Pattern includes intentional Chinese quotes for detecting placeholders
   # shellcheck disable=SC2140
-  if rg -n '<change-id>|<truth-root>|<change-root>|<one-line-goal>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<fill "none"|TODO\b' "$file" >/dev/null; then
+  if rg -n '<change-id>|<truth-root>|<change-root>|<one-line-goal>|<one-sentence goal>|<one-sentence-goal>|<capability>|<you>|YYYY-MM-DD|<session/agent>|<fill "none"|TODO\b' "$file" >/dev/null; then
     return 0
   fi
   return 1
@@ -242,7 +242,7 @@ check_proposal() {
     fi
   done
 
-  if ! rg -n "^- Value Signal and Observation:" "$proposal_file" >/dev/null; then
+  if ! rg -n "^- (Value Signal and Observation|价值信号与观测口径)[:：]" "$proposal_file" >/dev/null; then
     if [[ "$mode" == "strict" ]]; then
       err "proposal missing '- Value Signal and Observation:' (strict): ${proposal_file}"
     else
@@ -250,23 +250,22 @@ check_proposal() {
     fi
   fi
 
-  if ! rg -n "^- Value Stream Bottleneck Hypothesis" "$proposal_file" >/dev/null; then
+  if ! rg -n "^- (Value Stream Bottleneck Hypothesis|价值流瓶颈假设)[:：]?" "$proposal_file" >/dev/null; then
     if [[ "$mode" == "strict" ]]; then
       err "proposal missing '- Value Stream Bottleneck Hypothesis...' (strict): ${proposal_file}"
     else
       warn "proposal missing '- Value Stream Bottleneck Hypothesis...' (recommended): ${proposal_file}"
     fi
   fi
-
   local decision_line
-  decision_line=$(rg -n "^- Decision Status:" "$proposal_file" -m 1 || true)
+  decision_line=$(rg -n "^- (Decision Status|Decision|决策状态|决策)[:：] *(Pending|Approved|Revise|Rejected)\b" "$proposal_file" -m 1 || true)
   if [[ -z "$decision_line" ]]; then
-    err "proposal missing '- Decision Status:' line: ${proposal_file}"
+    err "proposal missing decision line (e.g., '- Decision Status: Approved' or '- 决策状态： Approved'): ${proposal_file}"
     return 0
   fi
 
   local value
-  value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- Decision Status: *//')"
+  value="$(echo "$decision_line" | sed -E 's/^[0-9]+:- (Decision Status|Decision|决策状态|决策)[:：] *//')"
 
   case "$value" in
     Pending|Approved|Revise|Rejected) ;;
@@ -355,12 +354,12 @@ check_design() {
 check_tasks() {
   require_file "$tasks_file" || return 0
 
-  if ! rg -n "Main Plan Area" "$tasks_file" >/dev/null; then
-    err "tasks missing 'Main Plan Area': ${tasks_file}"
+  if ! rg -n "Main Plan Area|主线计划区" "$tasks_file" >/dev/null; then
+    err "tasks missing Main Plan Area/主线计划区: ${tasks_file}"
   fi
 
-  if ! rg -n "Context Switch Breakpoint Area" "$tasks_file" >/dev/null; then
-    err "tasks missing 'Context Switch Breakpoint Area': ${tasks_file}"
+  if ! rg -n "Context Switch Breakpoint Area|断点区" "$tasks_file" >/dev/null; then
+    err "tasks missing Context Switch Breakpoint Area/断点区: ${tasks_file}"
   fi
 
   if ! rg -n "^- \\[[ xX]\\]" "$tasks_file" >/dev/null; then
@@ -411,7 +410,7 @@ check_verification() {
     return 0
   fi
 
-  for h in "A\\) Test Plan Directive Table" "B\\) Traceability Matrix" "C\\) Execution Anchors" "D\\) MANUAL-\\* Checklist"; do
+  for h in "A\) (Test Plan Directive Table|测试计划指令表)" "B\) (Traceability Matrix|追溯矩阵)" "C\) (Execution Anchors|执行锚点)" "D\) (MANUAL-\* Checklist|MANUAL-\* 清单)"; do
     if ! rg -n "${h}" "$verification_file" >/dev/null; then
       err "verification missing section '${h}': ${verification_file}"
     fi
@@ -423,11 +422,11 @@ check_verification() {
 
   if [[ "$mode" == "strict" ]]; then
     # G) section is recommended but not blocking
-    if ! rg -n "^## G\\) Value Stream and Metrics|^G\\) Value Stream and Metrics" "$verification_file" >/dev/null; then
+    if ! rg -n "^(## )?G\) (Value Stream and Metrics|价值流与度量)" "$verification_file" >/dev/null; then
       warn "verification missing 'G) Value Stream and Metrics' section (recommended for strict): ${verification_file}"
     else
       # Only check Target Value Signal if G) section exists
-      if ! rg -n "^- Target Value Signal:" "$verification_file" >/dev/null; then
+      if ! rg -n "^- (Target Value Signal|目标价值信号)[:：]" "$verification_file" >/dev/null; then
         warn "verification missing '- Target Value Signal:' line (recommended): ${verification_file}"
       fi
     fi
