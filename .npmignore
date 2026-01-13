@@ -1,5 +1,8 @@
 # 不包含在 npm 包中的文件
 
+# macOS
+.DS_Store
+
 # 仓库内部 DevBooks playbooks（不要发布）
 dev-playbooks/
 
@@ -20,10 +23,6 @@ tests/
 .git/
 .gitignore
 
-# 开发文件
-*.md
-!README.md
-
 # MCP 相关
 mcp/
 
@@ -39,9 +38,8 @@ scripts/install-skills.sh
 # 开发提案
 DEVBOOKS-EVOLUTION-PROPOSAL.md
 
-# AI CLI 特定文件（DevBooks 应该是 AI 无关的）
+# AI CLI 特定文件（项目仓库内的指令文件不发布）
 CLAUDE.md
 AGENTS.md
 templates/CLAUDE.md
 templates/AGENTS.md
-templates/claude-commands/

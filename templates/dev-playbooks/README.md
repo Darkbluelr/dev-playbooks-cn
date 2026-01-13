@@ -4,7 +4,7 @@
 
 > Turn large changes into a controlled, traceable, verifiable loop: Skills + quality gates + role isolation.
 
-[![npm](https://img.shields.io/npm/v/dev-playbooks)](https://www.npmjs.com/package/dev-playbooks)
+[![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE)
 
 ---
@@ -77,11 +77,18 @@ AI coding assistants are powerful, but often **unpredictable**:
 
 ### Supported AI tools
 
-| Tool | Slash commands | Natural language |
-|------|-----------|----------|
-| **Claude Code** | `/devbooks:*` | Yes |
-| **Codex CLI** | `/devbooks:*` | Yes |
-| Other assistants | - | “Run DevBooks proposal skill…” |
+| Tool | Support Level | Slash Commands | Config File |
+|------|---------------|----------------|-------------|
+| **Claude Code** | Full Skills | `/devbooks:*` | `CLAUDE.md` |
+| **Codex CLI** | Full Skills | `/devbooks:*` | `AGENTS.md` |
+| **Qoder** | Full Skills | `/devbooks:*` | `AGENTS.md` |
+| **Cursor** | Rules | - | `.cursor/rules/` |
+| **Windsurf** | Rules | - | `.windsurf/rules/` |
+| **Gemini CLI** | Rules | - | `GEMINI.md` |
+| **Continue** | Rules | - | `.continue/rules/` |
+| **GitHub Copilot** | Instructions | - | `.github/copilot-instructions.md` |
+
+> **Tip**: For tools without Slash command support, use natural language, e.g., "Run DevBooks proposal skill..."
 
 ### Install & init
 
@@ -89,16 +96,16 @@ AI coding assistants are powerful, but often **unpredictable**:
 
 ```bash
 # global install
-npm install -g dev-playbooks
+npm install -g dev-playbooks-cn
 
 # init inside your project
-dev-playbooks init
+dev-playbooks-cn init
 ```
 
 **One-off usage:**
 
 ```bash
-npx dev-playbooks@latest init
+npx dev-playbooks-cn@latest init
 ```
 
 **From source (contributors):**
@@ -111,7 +118,8 @@ npx dev-playbooks@latest init
 
 After initialization:
 - Claude Code: `~/.claude/skills/devbooks-*`
-- Codex CLI: `$CODEX_HOME/skills/devbooks-*` (default `~/.codex/skills/devbooks-*`)
+- Codex CLI: `~/.codex/skills/devbooks-*`
+- Qoder: `~/.qoder/` (manual setup required)
 
 ### Quick integration
 
@@ -434,7 +442,7 @@ Decision: `Approved`, `Revise`, `Rejected`
 
 ```
 skills/                    # devbooks-* Skill sources (some ship scripts/)
-templates/                 # project init templates (used by `dev-playbooks init`)
+templates/                 # project init templates (used by `dev-playbooks-cn init`)
 templates/dev-playbooks/   # DevBooks protocol directory template (copied into your project as `dev-playbooks/`)
 scripts/                   # install & helper scripts
 docs/                      # documentation

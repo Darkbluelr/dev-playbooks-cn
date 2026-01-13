@@ -6,8 +6,8 @@
  * AI-agnostic spec-driven development workflow
  *
  * 用法：
- *   dev-playbooks init [path] [options]
- *   dev-playbooks update [path]
+ *   dev-playbooks-cn init [path] [options]
+ *   dev-playbooks-cn update [path]
  *
  * 选项：
  *   --tools <tools>    非交互式指定 AI 工具：all, none, 或逗号分隔的列表
@@ -25,7 +25,7 @@ import ora from 'ora';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CLI_COMMAND = 'dev-playbooks';
+const CLI_COMMAND = 'dev-playbooks-cn';
 
 // ============================================================================
 // Skills 支持级别定义
@@ -131,23 +131,27 @@ const AI_TOOLS = [
     instructionFile: '.github/copilot-instructions.md',
     available: true
   },
+
+  // === Continue（Rules/Prompts 系统）===
   {
     id: 'continue',
     name: 'Continue',
     description: 'Continue (VS Code / JetBrains)',
-    skillsSupport: SKILLS_SUPPORT.AGENTS,
+    skillsSupport: SKILLS_SUPPORT.RULES,
     slashDir: '.continue/prompts/devbooks',
+    rulesDir: '.continue/rules',
     instructionFile: null,
     available: true
   },
 
-  // === 基础指令 ===
+  // === Codex CLI（完整 Skills 支持）===
   {
     id: 'codex',
     name: 'Codex CLI',
     description: 'OpenAI Codex CLI',
-    skillsSupport: SKILLS_SUPPORT.BASIC,
+    skillsSupport: SKILLS_SUPPORT.FULL,
     slashDir: null,
+    skillsDir: path.join(os.homedir(), '.codex', 'skills'),
     globalSlashDir: path.join(os.homedir(), '.codex', 'prompts'),
     instructionFile: 'AGENTS.md',
     available: true
@@ -253,20 +257,16 @@ function printSkillsSupportInfo() {
   console.log(chalk.gray('─'.repeat(50)));
   console.log();
 
-  console.log(chalk.green('★ 完整 Skills') + chalk.gray(' - Claude Code, Qoder'));
+  console.log(chalk.green('★ 完整 Skills') + chalk.gray(' - Claude Code, Codex CLI, Qoder'));
   console.log(chalk.gray('   └ 独立的 Skills/Agents 系统，可按需调用，有独立上下文'));
   console.log();
 
-  console.log(chalk.blue('◆ Rules 系统') + chalk.gray(' - Cursor, Windsurf, Gemini, Antigravity, OpenCode'));
+  console.log(chalk.blue('◆ Rules 系统') + chalk.gray(' - Cursor, Windsurf, Gemini, Antigravity, OpenCode, Continue'));
   console.log(chalk.gray('   └ 规则自动应用于匹配的文件/场景，功能接近 Skills'));
   console.log();
 
-  console.log(chalk.yellow('● 自定义指令') + chalk.gray(' - GitHub Copilot, Continue'));
+  console.log(chalk.yellow('● 自定义指令') + chalk.gray(' - GitHub Copilot'));
   console.log(chalk.gray('   └ 项目级指令文件，AI 会参考但无法主动调用'));
-  console.log();
-
-  console.log(chalk.gray('○ 基础支持') + chalk.gray(' - Codex'));
-  console.log(chalk.gray('   └ 仅支持全局提示词，通过 AGENTS.md 模拟'));
   console.log();
   console.log(chalk.gray('─'.repeat(50)));
   console.log();
@@ -276,14 +276,30 @@ function printSkillsSupportInfo() {
 // 交互式选择（inquirer）
 // ============================================================================
 
-async function promptToolSelection() {
+async function promptToolSelection(projectDir) {
   printSkillsSupportInfo();
 
-  const choices = AI_TOOLS.filter(t => t.available).map(tool => ({
-    name: `${tool.name} ${chalk.gray(`(${tool.description})`)} ${getSkillsSupportLabel(tool.skillsSupport)}`,
-    value: tool.id,
-    checked: tool.id === 'claude' // 默认选中 Claude Code
-  }));
+  // 读取已保存的配置
+  const config = loadConfig(projectDir);
+  const savedTools = config.aiTools || [];
+  const hasSavedConfig = savedTools.length > 0;
+
+  const choices = AI_TOOLS.filter(t => t.available).map(tool => {
+    const isSelected = hasSavedConfig
+      ? savedTools.includes(tool.id)
+      : tool.id === 'claude'; // 首次运行默认选中 Claude Code
+
+    return {
+      name: `${tool.name} ${chalk.gray(`(${tool.description})`)} ${getSkillsSupportLabel(tool.skillsSupport)}`,
+      value: tool.id,
+      checked: isSelected
+    };
+  });
+
+  if (hasSavedConfig) {
+    console.log(chalk.blue('ℹ') + ` 检测到已保存的配置: ${savedTools.join(', ')}`);
+    console.log();
+  }
 
   const selectedTools = await checkbox({
     message: '选择要配置的 AI 工具（空格选择，回车确认）',
@@ -342,7 +358,7 @@ function installSlashCommands(toolIds, projectDir) {
 }
 
 // ============================================================================
-// 安装 Skills（仅 Claude Code 和 Qoder）
+// 安装 Skills（Claude Code, Codex CLI, Qoder）
 // ============================================================================
 
 function installSkills(toolIds, update = false) {
@@ -352,7 +368,8 @@ function installSkills(toolIds, update = false) {
     const tool = AI_TOOLS.find(t => t.id === toolId);
     if (!tool || tool.skillsSupport !== SKILLS_SUPPORT.FULL) continue;
 
-    if (toolId === 'claude' && tool.skillsDir) {
+    // Claude Code 和 Codex CLI 都支持相同格式的 Skills
+    if ((toolId === 'claude' || toolId === 'codex') && tool.skillsDir) {
       const skillsSrcDir = path.join(__dirname, '..', 'skills');
       const skillsDestDir = tool.skillsDir;
 
@@ -380,7 +397,7 @@ function installSkills(toolIds, update = false) {
         installedCount++;
       }
 
-      results.push({ tool: 'Claude Code', type: 'skills', count: installedCount, total: skillDirs.length });
+      results.push({ tool: tool.name, type: 'skills', count: installedCount, total: skillDirs.length });
     }
 
     // Qoder: 创建 agents 目录结构（但不复制 Skills，因为格式不同）
@@ -393,7 +410,7 @@ function installSkills(toolIds, update = false) {
 }
 
 // ============================================================================
-// 安装 Rules（Cursor, Windsurf, Gemini, Antigravity, OpenCode）
+// 安装 Rules（Cursor, Windsurf, Gemini, Antigravity, OpenCode, Continue）
 // ============================================================================
 
 function installRules(toolIds, projectDir) {
@@ -436,7 +453,11 @@ description: DevBooks 工作流规则 - 在处理功能开发、架构变更时�
     antigravity: `---
 description: DevBooks 工作流规则
 ---`,
-    opencode: ''
+    opencode: '',
+    continue: `---
+name: DevBooks 工作流规则
+description: DevBooks spec-driven development workflow
+---`
   };
 
   return `${frontmatter[toolId] || ''}
@@ -706,7 +727,7 @@ async function initCommand(projectDir, options) {
     }
     console.log(chalk.blue('ℹ') + ` 非交互式模式：${selectedTools.length > 0 ? selectedTools.join(', ') : '无'}`);
   } else {
-    selectedTools = await promptToolSelection();
+    selectedTools = await promptToolSelection(projectDir);
   }
 
   // 创建项目结构
@@ -916,11 +937,6 @@ function showHelp() {
   }
 
   console.log();
-  console.log(chalk.gray('  ○ 基础支持:'));
-  for (const tool of groupedTools[SKILLS_SUPPORT.BASIC]) {
-    console.log(`    ${tool.id.padEnd(15)} ${tool.name}`);
-  }
-
   console.log();
   console.log(chalk.cyan('示例:'));
   console.log(`  ${CLI_COMMAND} init                        # 交互式初始化`);
