@@ -7,6 +7,8 @@
 [![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+![DevBooks 工作流](docs/workflow-diagram.svg)
+
 ---
 
 ## 为什么选择 DevBooks？
@@ -46,29 +48,6 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ## 工作原理
 
-```
-                           DevBooks 工作流
-
-    PROPOSAL 阶段                  APPLY 阶段                     ARCHIVE 阶段
-    (禁止编码)                     (角色隔离强制)                  (质量闸门)
-
-    ┌─────────────────┐            ┌─────────────────┐            ┌─────────────────┐
-    │  /devbooks:     │            │   对话 A        │            │  /devbooks:     │
-    │   proposal      │            │  ┌───────────┐  │            │   gardener      │
-    │   impact        │────────────│  │Test Owner │  │────────────│   delivery      │
-    │   design        │            │  │(先跑 Red) │  │            │                 │
-    │   spec          │            │  └───────────┘  │            │  质量闸门:       │
-    │   plan          │            │                 │            │  ✓ Green 证据   │
-    └─────────────────┘            │   对话 B        │            │  ✓ 任务完成     │
-           │                       │  ┌───────────┐  │            │  ✓ 角色边界     │
-           ▼                       │  │  Coder    │  │            │  ✓ 无失败       │
-    ┌─────────────────┐            │  │(禁改测试!)│  │            └─────────────────┘
-    │ 三角对辩        │            │  └───────────┘  │
-    │ Author/Challenger│            └─────────────────┘
-    │ /Judge          │
-    └─────────────────┘
-```
-
 **核心约束**：Test Owner 与 Coder **必须在独立对话**中工作。这是硬性约束，不是建议。Coder 不能修改 `tests/**`，完成由测试/构建验证，而非 AI 自评。
 
 ---
@@ -77,19 +56,18 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ### 支持的 AI 工具
 
-| 工具 | Slash 命令 | 自然语言 | 配置文件 |
-|------|-----------|----------|----------|
-| **Claude Code** | `/devbooks:*` | 支持 | `CLAUDE.md` |
-| **Codex CLI** | `/devbooks:*` | 支持 | `AGENTS.md` |
-| **Cursor** | - | 支持 | `.cursorrules` |
-| **Windsurf** | - | 支持 | `.windsurfrules` |
-| **Continue.dev** | - | 支持 | `.continuerules` |
-| **GitHub Copilot** | - | 支持 | `.github/copilot-instructions.md` |
-| **Gemini Code Assist** | - | 支持 | - |
-| **Aider** | - | 支持 | `.aider.conf.yml` |
-| **Cline** | - | 支持 | `.clinerules` |
+| 工具 | 支持级别 | 配置文件 |
+|------|----------|----------|
+| **Claude Code** | 完整 Skills | `CLAUDE.md` |
+| **Codex CLI** | 完整 Skills | `AGENTS.md` |
+| **Qoder** | 完整 Skills | `AGENTS.md` |
+| **Cursor** | Rules 系统 | `.cursor/rules/` |
+| **Windsurf** | Rules 系统 | `.windsurf/rules/` |
+| **Gemini CLI** | Rules 系统 | `GEMINI.md` |
+| **Continue** | Rules 系统 | `.continue/rules/` |
+| **GitHub Copilot** | 自定义指令 | `.github/copilot-instructions.md` |
 
-> **提示**：对于不支持 Slash 命令的工具，使用自然语言指令，例如："运行 DevBooks proposal skill..."
+> **提示**：使用自然语言调用 Skills，例如："运行 devbooks-proposal-author skill..."
 
 ### 安装与初始化
 
@@ -119,7 +97,7 @@ npx dev-playbooks-cn@latest init
 
 初始化后：
 - Claude Code：`~/.claude/skills/devbooks-*`
-- Codex CLI：`$CODEX_HOME/skills/devbooks-*`（默认 `~/.codex/skills/devbooks-*`）
+- Codex CLI：`~/.codex/skills/devbooks-*`
 
 ### 快速集成
 
@@ -130,7 +108,7 @@ DevBooks 使用两个目录根：
 | `<truth-root>` | 当前规格（只读真理） | `dev-playbooks/specs/` |
 | `<change-root>` | 变更包（工作区） | `dev-playbooks/changes/` |
 
-详见 `docs/DevBooks集成模板（协议无关）.md` 或使用 `docs/DevBooks安装提示词.md` 让 AI 自动配置。
+详见 `docs/DevBooks配置指南.md`。
 
 ---
 
@@ -138,20 +116,20 @@ DevBooks 使用两个目录根：
 
 ### 使用 Router（推荐）
 
+告诉 AI 你的需求，让 Router 分析并输出执行计划：
+
 ```
-/devbooks:router <你的需求>
+请运行 devbooks-router skill，分析需求：<你的需求>
 ```
 
-Router 分析需求并输出执行计划，告诉你下一步用哪个命令。
-
-### 直达命令
+### Skills 直达
 
 熟悉流程后，直接调用 Skill：
 
 **1. Proposal 阶段（禁止编码）**
 
 ```
-/devbooks:proposal 添加 OAuth2 用户认证
+请运行 devbooks-proposal-author skill，创建提案：添加 OAuth2 用户认证
 ```
 
 产物：`proposal.md`（必需）、`design.md`、`tasks.md`
@@ -162,10 +140,10 @@ Router 分析需求并输出执行计划，告诉你下一步用哪个命令。
 
 ```
 # 对话 A - Test Owner
-/devbooks:test add-oauth2
+请运行 devbooks-test-owner skill，变更 ID：add-oauth2
 
 # 对话 B - Coder
-/devbooks:code add-oauth2
+请运行 devbooks-coder skill，变更 ID：add-oauth2
 ```
 
 - Test Owner：写 `verification.md` + 测试，先跑 **Red**
@@ -174,64 +152,64 @@ Router 分析需求并输出执行计划，告诉你下一步用哪个命令。
 **3. Review 阶段**
 
 ```
-/devbooks:review add-oauth2
+请运行 devbooks-code-review skill，变更 ID：add-oauth2
 ```
 
 **4. Archive 阶段**
 
 ```
-/devbooks:gardener add-oauth2
+请运行 devbooks-spec-gardener skill，变更 ID：add-oauth2
 ```
 
 ---
 
-## 命令参考
+## Skills 参考
 
 ### Proposal 阶段
 
-| 命令 | Skill | 说明 |
-|------|-------|------|
-| `/devbooks:router` | devbooks-router | 智能路由到合适的 Skill |
-| `/devbooks:proposal` | devbooks-proposal-author | 创建变更提案 |
-| `/devbooks:impact` | devbooks-impact-analysis | 跨模块影响分析 |
-| `/devbooks:challenger` | devbooks-proposal-challenger | 质疑和挑战提案 |
-| `/devbooks:judge` | devbooks-proposal-judge | 裁决提案 |
-| `/devbooks:debate` | devbooks-proposal-debate-workflow | 三角对辩（Author/Challenger/Judge） |
-| `/devbooks:design` | devbooks-design-doc | 创建设计文档 |
-| `/devbooks:spec` | devbooks-spec-contract | 定义规格与契约 |
-| `/devbooks:c4` | devbooks-c4-map | 生成 C4 架构地图 |
-| `/devbooks:plan` | devbooks-implementation-plan | 创建实现计划 |
+| Skill | 说明 |
+|-------|------|
+| `devbooks-router` | 智能路由到合适的 Skill |
+| `devbooks-proposal-author` | 创建变更提案 |
+| `devbooks-impact-analysis` | 跨模块影响分析 |
+| `devbooks-proposal-challenger` | 质疑和挑战提案 |
+| `devbooks-proposal-judge` | 裁决提案 |
+| `devbooks-proposal-debate-workflow` | 三角对辩（Author/Challenger/Judge） |
+| `devbooks-design-doc` | 创建设计文档 |
+| `devbooks-spec-contract` | 定义规格与契约 |
+| `devbooks-c4-map` | 生成 C4 架构地图 |
+| `devbooks-implementation-plan` | 创建实现计划 |
 
 ### Apply 阶段
 
-| 命令 | Skill | 说明 |
-|------|-------|------|
-| `/devbooks:test` | devbooks-test-owner | Test Owner 角色（必须独立对话） |
-| `/devbooks:code` | devbooks-coder | Coder 角色（必须独立对话） |
-| `/devbooks:backport` | devbooks-design-backport | 回写发现到设计文档 |
+| Skill | 说明 |
+|-------|------|
+| `devbooks-test-owner` | Test Owner 角色（必须独立对话） |
+| `devbooks-coder` | Coder 角色（必须独立对话） |
+| `devbooks-design-backport` | 回写发现到设计文档 |
 
 ### Review 阶段
 
-| 命令 | Skill | 说明 |
-|------|-------|------|
-| `/devbooks:review` | devbooks-code-review | 代码评审（可读性/一致性） |
-| `/devbooks:test-review` | devbooks-test-reviewer | 测试质量与覆盖率评审 |
+| Skill | 说明 |
+|-------|------|
+| `devbooks-code-review` | 代码评审（可读性/一致性） |
+| `devbooks-test-reviewer` | 测试质量与覆盖率评审 |
 
 ### Archive 阶段
 
-| 命令 | Skill | 说明 |
-|------|-------|------|
-| `/devbooks:gardener` | devbooks-spec-gardener | 规格维护与去重 |
-| `/devbooks:delivery` | devbooks-delivery-workflow | 完整交付闭环 |
+| Skill | 说明 |
+|-------|------|
+| `devbooks-spec-gardener` | 规格维护与去重 |
+| `devbooks-delivery-workflow` | 完整交付闭环 |
 
 ### 独立技能
 
-| 命令 | Skill | 说明 |
-|------|-------|------|
-| `/devbooks:entropy` | devbooks-entropy-monitor | 系统熵度量 |
-| `/devbooks:federation` | devbooks-federation | 跨仓库联邦分析 |
-| `/devbooks:bootstrap` | devbooks-brownfield-bootstrap | 存量项目初始化 |
-| `/devbooks:index` | devbooks-index-bootstrap | 生成 SCIP 索引 |
+| Skill | 说明 |
+|-------|------|
+| `devbooks-entropy-monitor` | 系统熵度量 |
+| `devbooks-federation` | 跨仓库联邦分析 |
+| `devbooks-brownfield-bootstrap` | 存量项目初始化 |
+| `devbooks-index-bootstrap` | 生成 SCIP 索引 |
 
 ---
 
@@ -317,7 +295,7 @@ DevBooks 提供质量闸门拦截"伪完成"：
 | P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
 | 角色边界检查 | apply --role | Coder 不能改 tests/，Test Owner 不能改 src/ |
 
-核心脚本（位于 `skills/devbooks-delivery-workflow/scripts/`）：
+核心脚本（位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`）：
 - `change-check.sh --mode proposal|apply|archive|strict`
 - `handoff-check.sh` - 角色交接验证
 - `audit-scope.sh` - 全量审计扫描
@@ -337,7 +315,7 @@ DevBooks 提供质量闸门拦截"伪完成"：
 
 原型模式防止实验代码污染主源码树。
 
-脚本位于 `skills/devbooks-delivery-workflow/scripts/`。
+脚本位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`。
 
 </details>
 
@@ -353,22 +331,17 @@ DevBooks 跟踪四维系统熵：
 | 测试熵 | 测试覆盖率和质量衰减 |
 | 依赖熵 | 外部依赖健康度 |
 
-用 `/devbooks:entropy` 生成报告，识别重构机会。
+用 `devbooks-entropy-monitor` 生成报告，识别重构机会。
 
-脚本（位于 `skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
+脚本（位于 `~/.claude/skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
 
 </details>
 
 <details>
 <summary><strong>存量项目初始化</strong></summary>
 
-当 `<truth-root>` 为空时：
+当 `<truth-root>` 为空时，使用 `devbooks-brownfield-bootstrap` 生成：
 
-```
-/devbooks:bootstrap
-```
-
-生成：
 - 项目画像和术语表
 - 从现有代码生成基线规格
 - 最小验证锚点
@@ -380,24 +353,18 @@ DevBooks 跟踪四维系统熵：
 <details>
 <summary><strong>跨仓库联邦</strong></summary>
 
-多仓库分析：
-
-```
-/devbooks:federation
-```
-
-分析跨仓库边界的契约和依赖，支持协调变更。
+多仓库分析用 `devbooks-federation`，分析跨仓库边界的契约和依赖，支持协调变更。
 
 </details>
 
 <details>
 <summary><strong>MCP 自动检测</strong></summary>
 
-DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把“范围/引用/调用链”分析做得更准。
+DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把"范围/引用/调用链"分析做得更准。
 
 ### 它有什么用？
 
-- **影响分析更精确**：从“文件级猜测”升级到“符号级引用 + 调用图”，降低漏改风险
+- **影响分析更精确**：从"文件级猜测"升级到"符号级引用 + 调用图"，降低漏改风险
 - **审查更有重点**：自动拉取热点文件，优先关注高风险区域（技术债/高变动）
 - **大仓库更省心**：减少手动 Grep 的噪音与反复确认
 
@@ -405,27 +372,23 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 
 | MCP 状态 | 行为 |
 |----------|------|
-| CKB 可用 | 增强模式：符号级影响分析/引用查找/调用图/热点（`mcp__ckb__analyzeImpact`、`mcp__ckb__findReferences`、`mcp__ckb__getCallGraph`、`mcp__ckb__getHotspots`） |
+| CKB 可用 | 增强模式：符号级影响分析/引用查找/调用图/热点 |
 | CKB 不可用 | 基础模式：Grep + Glob 文本搜索（功能完整，精度降低） |
 
 ### 自动检测
 
-- 需要 MCP 的 Skills 会先调用 `mcp__ckb__getStatus` 探测可用性（2s 超时）
+- 需要 MCP 的 Skills 会先探测可用性（2s 超时）
 - 超时/失败 → 静默降级到基础模式，不阻塞执行
-- 无需手动选择“基础/增强”模式
+- 无需手动选择"基础/增强"模式
 
-如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `/devbooks:index` 生成 `index.scip`。
+如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `devbooks-index-bootstrap` 生成 `index.scip`。
 
 </details>
 
 <details>
 <summary><strong>提案对辩工作流</strong></summary>
 
-严格提案审查用三角对辩：
-
-```
-/devbooks:debate
-```
+严格提案审查用三角对辩 `devbooks-proposal-debate-workflow`：
 
 三个角色：
 1. **Author**：创建并捍卫提案
@@ -438,26 +401,103 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 
 ---
 
-## 仓库结构
+## 从其他框架迁移
+
+DevBooks 提供迁移脚本帮助从其他规格驱动开发工具迁移。
+
+### 从 OpenSpec 迁移
+
+如果你当前使用 [OpenSpec](https://github.com/Fission-AI/OpenSpec)，有 `openspec/` 目录：
+
+```bash
+# 使用 CLI（推荐）
+dev-playbooks-cn migrate --from openspec
+
+# 先预览变更
+dev-playbooks-cn migrate --from openspec --dry-run
+
+# 迁移后保留原目录
+dev-playbooks-cn migrate --from openspec --keep-old
+```
+
+**迁移内容：**
+- `openspec/specs/` → `dev-playbooks/specs/`
+- `openspec/changes/` → `dev-playbooks/changes/`
+- `openspec/project.md` → `dev-playbooks/project.md`
+- 所有路径引用自动更新
+
+### 从 GitHub spec-kit 迁移
+
+如果你使用 [GitHub spec-kit](https://github.com/github/spec-kit)，有 `specs/` 和 `memory/` 目录：
+
+```bash
+# 使用 CLI（推荐）
+dev-playbooks-cn migrate --from speckit
+
+# 先预览变更
+dev-playbooks-cn migrate --from speckit --dry-run
+
+# 迁移后保留原目录
+dev-playbooks-cn migrate --from speckit --keep-old
+```
+
+**映射规则：**
+
+| Spec-Kit | DevBooks |
+|----------|----------|
+| `memory/constitution.md` | `dev-playbooks/specs/_meta/constitution.md` |
+| `specs/[feature]/spec.md` | `changes/[feature]/design.md` |
+| `specs/[feature]/plan.md` | `changes/[feature]/proposal.md` |
+| `specs/[feature]/tasks.md` | `changes/[feature]/tasks.md` |
+| `specs/[feature]/quickstart.md` | `changes/[feature]/verification.md` |
+| `specs/[feature]/contracts/` | `changes/[feature]/specs/` |
+
+### 迁移功能
+
+两个迁移脚本都支持：
+
+- **幂等执行**：可安全多次运行
+- **断点续传**：中断后可从断点恢复
+- **试运行模式**：预览变更再执行
+- **自动备份**：原文件备份到 `.devbooks/backup/`
+- **引用更新**：文档中的路径引用自动更新
+
+### 迁移后步骤
+
+迁移后：
+
+1. 运行 `dev-playbooks-cn init` 设置 DevBooks Skills
+2. 检查 `dev-playbooks/` 中的迁移文件
+3. 更新 `verification.md` 文件的 AC 映射
+4. 如需基线规格，运行 `devbooks-brownfield-bootstrap`
+
+---
+
+## 目录结构
 
 ```
-skills/                    # devbooks-* Skills 源码（部分 Skill 自带 scripts/）
-templates/                 # 项目初始化模板（`dev-playbooks-cn init` 使用）
-templates/dev-playbooks/   # DevBooks 协议目录模板（初始化后写入项目为 `dev-playbooks/`）
-scripts/                   # 安装与辅助脚本
-docs/                      # 支持文档
-bin/                       # CLI 入口
+dev-playbooks/
+├── README.md              # 本文档
+├── constitution.md        # 项目宪法（GIP 原则）
+├── project.md             # 项目上下文（技术栈/约定）
+├── specs/                 # 当前规格（只读真理）
+│   ├── _meta/             # 元数据（术语表、项目画像）
+│   └── architecture/      # 架构规格（fitness-rules）
+├── changes/               # 变更包（工作区）
+├── scripts/               # 辅助脚本
+└── docs/                  # 文档
+    ├── workflow-diagram.svg   # 工作流程图
+    ├── 推荐MCP.md             # MCP 配置建议
+    └── DevBooks配置指南.md    # 配置指南
 ```
 
 ---
 
 ## 文档
 
-- [Slash 命令使用指南](docs/Slash 命令使用指南.md)
-- [Skills 使用说明](skills/Skills使用说明.md)
+- [工作流程图](docs/workflow-diagram.svg)
 - [MCP 配置建议](docs/推荐MCP.md)
-- [集成模板（协议无关）](docs/DevBooks集成模板（协议无关）.md)
-- [安装提示词](docs/DevBooks安装提示词.md)
+- [配置指南](docs/DevBooks配置指南.md)
 
 ---
 
