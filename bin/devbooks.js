@@ -202,26 +202,6 @@ function copyDirSync(src, dest) {
   return count;
 }
 
-function copyCodexPromptsSync(srcDir, destDir) {
-  if (!fs.existsSync(srcDir)) return 0;
-  fs.mkdirSync(destDir, { recursive: true });
-
-  let count = 0;
-  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-    if (!entry.name.endsWith('.md')) continue;
-
-    const srcPath = path.join(srcDir, entry.name);
-    const destName = entry.name.startsWith('devbooks-') ? entry.name : `devbooks-${entry.name}`;
-    const destPath = path.join(destDir, destName);
-    fs.copyFileSync(srcPath, destPath);
-    count++;
-  }
-
-  return count;
-}
-
 function getSkillsSupportLabel(level) {
   switch (level) {
     case SKILLS_SUPPORT.FULL:
@@ -327,40 +307,6 @@ async function promptToolSelection(projectDir) {
   return selectedTools;
 }
 
-// ============================================================================
-// 安装 Slash 命令
-// ============================================================================
-
-function installSlashCommands(toolIds, projectDir) {
-  const slashSrcDir = path.join(__dirname, '..', 'templates', 'claude-commands', 'devbooks');
-
-  if (!fs.existsSync(slashSrcDir)) {
-    return { results: [], total: 0 };
-  }
-
-  const results = [];
-
-  for (const toolId of toolIds) {
-    const tool = AI_TOOLS.find(t => t.id === toolId);
-    if (!tool) continue;
-
-    let destDir;
-    if (tool.slashDir) {
-      destDir = path.join(projectDir, tool.slashDir);
-    } else if (tool.globalSlashDir) {
-      destDir = expandPath(tool.globalSlashDir);
-    } else {
-      continue;
-    }
-
-    const count = toolId === 'codex'
-      ? copyCodexPromptsSync(slashSrcDir, destDir)
-      : copyDirSync(slashSrcDir, destDir);
-    results.push({ tool: tool.name, count, path: destDir });
-  }
-
-  return { results, total: results.length };
-}
 
 // ============================================================================
 // 安装 Skills（Claude Code, Codex CLI, Qoder）
@@ -763,15 +709,6 @@ async function initCommand(projectDir, options) {
     return;
   }
 
-  // 安装 Slash 命令
-  const slashSpinner = ora('安装 Slash 命令...').start();
-  const slashResults = installSlashCommands(selectedTools, projectDir);
-  slashSpinner.succeed(`安装了 ${slashResults.results.length} 个工具的 Slash 命令`);
-
-  for (const result of slashResults.results) {
-    console.log(chalk.gray(`  └ ${result.tool}: ${result.count} 个命令`));
-  }
-
   // 安装 Skills（仅完整支持的工具）
   const fullSupportTools = selectedTools.filter(id => {
     const tool = AI_TOOLS.find(t => t.id === id);
@@ -837,10 +774,8 @@ async function initCommand(projectDir, options) {
   // 下一步提示
   console.log(chalk.bold('下一步：'));
   console.log(`  1. 编辑 ${chalk.cyan('dev-playbooks/project.md')} 添加项目信息`);
-  console.log(`  2. 使用 ${chalk.cyan('/devbooks:proposal')} 创建第一个变更提案`);
+  console.log(`  2. 使用 ${chalk.cyan('devbooks-proposal-author')} Skill 创建第一个变更提案`);
   console.log();
-  console.log(chalk.yellow('重要提示：'));
-  console.log('  Slash 命令在 IDE 启动时加载，请重启你的 AI 工具以使命令生效。');
 }
 
 // ============================================================================
@@ -873,12 +808,6 @@ async function updateCommand(projectDir) {
     return tool ? tool.name : id;
   });
   console.log(chalk.blue('ℹ') + ` 检测到已配置的工具: ${toolNames.join(', ')}`);
-
-  // 更新 Slash 命令
-  const slashResults = installSlashCommands(configuredTools, projectDir);
-  for (const result of slashResults.results) {
-    console.log(chalk.green('✓') + ` ${result.tool}: 更新了 ${result.count} 个 slash 命令`);
-  }
 
   // 更新 Skills
   const skillsResults = installSkills(configuredTools, true);
