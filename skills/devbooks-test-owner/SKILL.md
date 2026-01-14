@@ -32,6 +32,29 @@ tools:
 
 - 测试计划与追溯：`<change-root>/<change-id>/verification.md`
 - 测试代码：按仓库惯例（例如 `tests/**`）
+- Red 基线证据：`<change-root>/<change-id>/evidence/red-baseline/`
+
+---
+
+## 证据路径强制约定
+
+**Red 基线证据必须保存到变更包目录**：
+```
+<change-root>/<change-id>/evidence/red-baseline/
+```
+
+**禁止的路径**：
+- ❌ `./evidence/`（项目根目录）
+- ❌ `evidence/`（相对于当前工作目录）
+
+**正确的路径示例**：
+```bash
+# DevBooks 2.0 默认路径
+dev-playbooks/changes/<change-id>/evidence/red-baseline/test-$(date +%Y%m%d-%H%M%S).log
+
+# 使用脚本
+devbooks change-evidence <change-id> --label red-baseline -- npm test
+```
 
 ---
 
