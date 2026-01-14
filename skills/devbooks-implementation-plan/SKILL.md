@@ -1,7 +1,7 @@
 ---
 name: devbooks-implementation-plan
 description: devbooks-implementation-plan：从设计文档推导编码计划（tasks.md），输出可跟踪的主线计划/临时计划/断点区，并绑定验收锚点。用户说"写编码计划/Implementation Plan/tasks.md/任务拆解/并行拆分/里程碑/验收锚点"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

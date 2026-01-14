@@ -1,7 +1,7 @@
 ---
 name: devbooks-test-reviewer
 description: devbooks-test-reviewer：以 Test Reviewer 角色评审 tests/ 测试质量（覆盖、边界、可读性、可维护性），只输出评审意见，不修改代码。用户说“测试评审/评审测试质量/覆盖率/边界条件”等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

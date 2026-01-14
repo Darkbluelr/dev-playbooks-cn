@@ -613,6 +613,52 @@ function installSkills(toolIds, update = false) {
 }
 
 // ============================================================================
+// 安装 Claude Code 自定义子代理（解决内置子代理无法访问 Skills 的问题）
+// ============================================================================
+
+function installClaudeAgents(toolIds, projectDir, update = false) {
+  const results = [];
+
+  // 只有 Claude Code 需要安装自定义子代理
+  if (!toolIds.includes('claude')) return results;
+
+  const agentsSrcDir = path.join(__dirname, '..', 'templates', 'claude-agents');
+  const agentsDestDir = path.join(projectDir, '.claude', 'agents');
+
+  if (!fs.existsSync(agentsSrcDir)) return results;
+
+  const agentFiles = fs.readdirSync(agentsSrcDir)
+    .filter(name => name.endsWith('.md'));
+
+  if (agentFiles.length === 0) return results;
+
+  fs.mkdirSync(agentsDestDir, { recursive: true });
+
+  let installedCount = 0;
+  for (const agentFile of agentFiles) {
+    const srcPath = path.join(agentsSrcDir, agentFile);
+    const destPath = path.join(agentsDestDir, agentFile);
+
+    if (fs.existsSync(destPath) && !update) continue;
+
+    fs.copyFileSync(srcPath, destPath);
+    installedCount++;
+  }
+
+  if (installedCount > 0) {
+    results.push({
+      tool: 'Claude Code',
+      type: 'agents',
+      count: installedCount,
+      total: agentFiles.length,
+      path: agentsDestDir
+    });
+  }
+
+  return results;
+}
+
+// ============================================================================
 // 安装 Rules（Cursor, Windsurf, Gemini, Antigravity, OpenCode, Continue）
 // ============================================================================
 
@@ -1007,6 +1053,14 @@ async function initCommand(projectDir, options) {
         console.log(chalk.gray(`  └ ${result.tool}: ${result.note}`));
       }
     }
+
+    // 安装 Claude Code 自定义子代理（解决内置子代理无法访问 Skills 的问题）
+    const agentsResults = installClaudeAgents(fullSupportTools, projectDir);
+    for (const result of agentsResults) {
+      if (result.count > 0) {
+        console.log(chalk.gray(`  └ ${result.tool}: ${result.count} 个自定义子代理 → ${result.path}`));
+      }
+    }
   }
 
   // 安装 Rules（Rules 类似系统的工具）
@@ -1109,6 +1163,14 @@ async function updateCommand(projectDir) {
     }
     if (result.removed && result.removed > 0) {
       console.log(chalk.green('✓') + ` ${result.tool} ${result.type}: 清理了 ${result.removed} 个已删除的技能`);
+    }
+  }
+
+  // 更新 Claude Code 自定义子代理（项目目录）
+  const agentsResults = installClaudeAgents(configuredTools, projectDir, true);
+  for (const result of agentsResults) {
+    if (result.count > 0) {
+      console.log(chalk.green('✓') + ` ${result.tool}: 更新了 ${result.count} 个自定义子代理`);
     }
   }
 

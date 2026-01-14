@@ -1,7 +1,7 @@
 ---
 name: devbooks-code-review
 description: devbooks-code-review：以 Reviewer 角色做可读性/一致性/依赖健康/坏味道审查，只输出审查意见与可执行建议，不讨论业务正确性。用户说"帮我做代码评审/review 可维护性/坏味道/依赖风险/一致性建议"，或在 DevBooks apply 阶段以 reviewer 执行时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

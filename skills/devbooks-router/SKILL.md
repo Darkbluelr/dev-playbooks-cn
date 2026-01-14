@@ -1,7 +1,7 @@
 ---
 name: devbooks-router
 description: devbooks-router：DevBooks 工作流入口引导：帮助用户确定从哪个 skill 开始，检测项目当前状态，给出最短闭环路径。用户说"下一步怎么做/从哪开始/按 devbooks 跑闭环/项目状态"等时使用。注意：skill 完成后的路由由各 skill 自己负责，无需调用 router。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

@@ -1,7 +1,7 @@
 ---
 name: devbooks-proposal-judge
 description: devbooks-proposal-judge：对 proposal 阶段进行裁决（Judge），输出 Approved/Revise/Rejected 并写回 proposal.md 的 Decision Log。用户说"裁决提案/提案评审/Approved Revise Rejected/decision log"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

@@ -1,7 +1,7 @@
 ---
 name: devbooks-proposal-author
 description: devbooks-proposal-author：撰写变更提案 proposal.md（Why/What/Impact + Debate Packet），作为后续 Design/Spec/Plan 的入口。对设计性决策会呈现选项给用户选择。用户说"写提案/proposal/为什么要改/影响范围/坏味道重构提案"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

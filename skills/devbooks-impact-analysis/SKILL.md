@@ -1,7 +1,7 @@
 ---
 name: devbooks-impact-analysis
 description: devbooks-impact-analysis：跨模块/跨文件/对外契约变更前做影响分析，产出可直接写入 proposal.md 的 Impact 部分（Scope/Impacts/Risks/Minimal Diff/Open Questions）。用户说"做影响分析/改动面控制/引用查找/受影响模块/兼容性风险"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

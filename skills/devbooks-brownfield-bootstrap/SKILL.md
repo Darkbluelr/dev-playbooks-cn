@@ -1,7 +1,7 @@
 ---
 name: devbooks-brownfield-bootstrap
 description: devbooks-brownfield-bootstrap：存量项目初始化：在当前真理目录为空时生成项目画像、术语表、基线规格与最小验证锚点，避免"边补 specs 边改行为"。用户说"存量初始化/基线 specs/项目画像/建立 glossary/把老项目接入上下文协议"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

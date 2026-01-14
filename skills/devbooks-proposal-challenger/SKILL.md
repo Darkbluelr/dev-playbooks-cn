@@ -1,7 +1,7 @@
 ---
 name: devbooks-proposal-challenger
 description: devbooks-proposal-challenger：对 proposal.md 发起质疑（Challenger）+ 查漏补缺，指出风险/遗漏/不一致并给结论，发现缺失的验收标准和未覆盖场景。用户说"质疑提案/挑刺/风险评估/提案对辩 challenger/查漏补缺"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

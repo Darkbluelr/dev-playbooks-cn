@@ -1,7 +1,7 @@
 ---
 name: devbooks-spec-contract
 description: devbooks-spec-contract：定义对外行为规格与契约（Requirements/Scenarios/API/Schema/兼容策略/迁移），并建议或生成 contract tests。合并了原 spec-delta 和 contract-data 的功能。用户说"写规格/spec/契约/OpenAPI/Schema/兼容策略/contract tests"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

@@ -1,7 +1,7 @@
 ---
 name: devbooks-design-backport
 description: devbooks-design-backport：把实现过程中发现的新约束/冲突/缺口回写到 design.md（保持设计为黄金真理），并标注决策与影响。用户说"回写设计/补充设计文档/Design Backport/设计与实现不一致/需要澄清约束"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

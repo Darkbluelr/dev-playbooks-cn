@@ -1,7 +1,7 @@
 ---
 name: devbooks-entropy-monitor
 description: devbooks-entropy-monitor：定期采集系统熵度量（结构熵/变更熵/测试熵/依赖熵），生成量化报告，当指标超阈值时建议重构。用户说"熵度量/复杂度趋势/重构预警/代码健康/技术债务度量"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

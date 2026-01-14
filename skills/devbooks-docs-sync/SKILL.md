@@ -1,7 +1,7 @@
 ---
 name: devbooks-docs-sync
 description: devbooks-docs-sync：维护项目文档（README、API 文档等面向用户的文档）与代码的一致性。支持增量模式（针对 change）和全局模式（一致性检查）。用户说"更新文档/同步文档/文档对齐/README 更新/API 文档更新"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

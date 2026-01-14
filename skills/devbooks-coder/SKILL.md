@@ -1,7 +1,7 @@
 ---
 name: devbooks-coder
 description: devbooks-coder：以 Coder 角色严格按 tasks.md 实现功能并跑闸门，禁止修改 tests/，以测试/静态检查为唯一完成判据。用户说"按计划实现/修复测试失败/让闸门全绿/实现任务项/不改测试"，或在 DevBooks apply 阶段以 coder 执行时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

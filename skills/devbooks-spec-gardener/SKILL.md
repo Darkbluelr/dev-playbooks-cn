@@ -1,7 +1,7 @@
 ---
 name: devbooks-spec-gardener
 description: devbooks-spec-gardener：归档前修剪与维护 <truth-root>（去重合并/删除过时/目录整理/一致性修复），避免 specs 堆叠失控。用户说"规格园丁/specs 去重合并/归档前整理/清理过时规范"，或在 DevBooks archive/归档前收尾时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

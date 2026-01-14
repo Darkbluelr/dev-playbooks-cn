@@ -1,7 +1,7 @@
 ---
 name: devbooks-design-doc
 description: devbooks-design-doc：产出变更包的设计文档（design.md），只写 What/Constraints 与 AC-xxx，不写实现步骤。用户说"写设计文档/Design Doc/架构设计/约束/验收标准/AC/C4 Delta"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

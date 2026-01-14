@@ -1,7 +1,7 @@
 ---
 name: devbooks-test-owner
 description: devbooks-test-owner：以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现（Coder）独立对话、先跑出 Red 基线。用户说"写测试/验收测试/追溯矩阵/verification.md/Red-Green/contract tests/fitness tests"，或在 DevBooks apply 阶段以 test owner 执行时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read

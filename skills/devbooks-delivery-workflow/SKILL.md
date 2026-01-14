@@ -1,7 +1,7 @@
 ---
 name: devbooks-delivery-workflow
 description: devbooks-delivery-workflow：把一次变更跑成可追溯闭环（Design→Plan→Trace→Verify→Implement→Archive），明确 DoD、追溯矩阵与角色隔离（Test Owner 与 Coder 分离）。用户说"跑一遍闭环/交付验收/追溯矩阵/DoD/关账归档/验收工作流"等时使用。
-tools:
+allowed-tools:
   - Glob
   - Grep
   - Read
