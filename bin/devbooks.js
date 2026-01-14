@@ -305,6 +305,160 @@ function getCliVersion() {
   }
 }
 
+// ============================================================================
+// 自动更新 .gitignore 和 .npmignore
+// ============================================================================
+
+const IGNORE_MARKERS = {
+  start: '# DevBooks managed - DO NOT EDIT',
+  end: '# End DevBooks managed'
+};
+
+/**
+ * 获取需要添加到 .gitignore 的条目
+ * @param {string[]} toolIds - 选择的 AI 工具 ID
+ * @returns {string[]} - 需要忽略的条目
+ */
+function getGitIgnoreEntries(toolIds) {
+  const entries = [
+    '# DevBooks 本地配置（包含用户偏好，不应提交）',
+    '.devbooks/'
+  ];
+
+  // 根据选择的工具添加对应的 AI 工具目录
+  for (const toolId of toolIds) {
+    const tool = AI_TOOLS.find(t => t.id === toolId);
+    if (!tool) continue;
+
+    // 添加 slash 命令目录
+    if (tool.slashDir) {
+      const topDir = tool.slashDir.split('/')[0];
+      if (!entries.includes(topDir + '/')) {
+        entries.push(`${topDir}/`);
+      }
+    }
+
+    // 添加 rules 目录
+    if (tool.rulesDir) {
+      const topDir = tool.rulesDir.split('/')[0];
+      if (!entries.includes(topDir + '/')) {
+        entries.push(`${topDir}/`);
+      }
+    }
+
+    // 添加 agents 目录（如 .github/instructions 等）
+    if (tool.instructionsDir) {
+      const topDir = tool.instructionsDir.split('/')[0];
+      if (topDir !== '.github') { // .github 目录通常需要保留
+        if (!entries.includes(topDir + '/')) {
+          entries.push(`${topDir}/`);
+        }
+      }
+    }
+  }
+
+  return entries;
+}
+
+/**
+ * 获取需要添加到 .npmignore 的条目
+ * @returns {string[]} - 需要忽略的条目
+ */
+function getNpmIgnoreEntries() {
+  return [
+    '# DevBooks 开发文档（运行时不需要）',
+    'dev-playbooks/',
+    '.devbooks/',
+    '',
+    '# AI 工具配置目录',
+    '.claude/',
+    '.cursor/',
+    '.windsurf/',
+    '.gemini/',
+    '.agent/',
+    '.opencode/',
+    '.continue/',
+    '.qoder/',
+    '.github/instructions/',
+    '.github/copilot-instructions.md',
+    '',
+    '# DevBooks 指令文件',
+    'CLAUDE.md',
+    'AGENTS.md',
+    'GEMINI.md'
+  ];
+}
+
+/**
+ * 更新 ignore 文件，保留用户自定义内容
+ * @param {string} filePath - ignore 文件路径
+ * @param {string[]} entries - 需要添加的条目
+ * @returns {object} - { updated: boolean, action: 'created' | 'updated' | 'unchanged' }
+ */
+function updateIgnoreFile(filePath, entries) {
+  const managedBlock = [
+    IGNORE_MARKERS.start,
+    ...entries,
+    IGNORE_MARKERS.end
+  ].join('\n');
+
+  if (!fs.existsSync(filePath)) {
+    // 文件不存在，创建新文件
+    fs.writeFileSync(filePath, managedBlock + '\n');
+    return { updated: true, action: 'created' };
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const startIdx = content.indexOf(IGNORE_MARKERS.start);
+  const endIdx = content.indexOf(IGNORE_MARKERS.end);
+
+  if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+    // 已有托管块，更新它
+    const before = content.slice(0, startIdx);
+    const after = content.slice(endIdx + IGNORE_MARKERS.end.length);
+    const newContent = before + managedBlock + after;
+
+    if (newContent !== content) {
+      fs.writeFileSync(filePath, newContent);
+      return { updated: true, action: 'updated' };
+    }
+    return { updated: false, action: 'unchanged' };
+  }
+
+  // 没有托管块，追加到文件末尾
+  const newContent = content.trimEnd() + '\n\n' + managedBlock + '\n';
+  fs.writeFileSync(filePath, newContent);
+  return { updated: true, action: 'updated' };
+}
+
+/**
+ * 设置项目的 ignore 文件
+ * @param {string[]} toolIds - 选择的 AI 工具 ID
+ * @param {string} projectDir - 项目目录
+ * @returns {object[]} - 结果数组
+ */
+function setupIgnoreFiles(toolIds, projectDir) {
+  const results = [];
+
+  // 更新 .gitignore
+  const gitIgnorePath = path.join(projectDir, '.gitignore');
+  const gitIgnoreEntries = getGitIgnoreEntries(toolIds);
+  const gitResult = updateIgnoreFile(gitIgnorePath, gitIgnoreEntries);
+  if (gitResult.updated) {
+    results.push({ file: '.gitignore', action: gitResult.action });
+  }
+
+  // 更新 .npmignore
+  const npmIgnorePath = path.join(projectDir, '.npmignore');
+  const npmIgnoreEntries = getNpmIgnoreEntries();
+  const npmResult = updateIgnoreFile(npmIgnorePath, npmIgnoreEntries);
+  if (npmResult.updated) {
+    results.push({ file: '.npmignore', action: npmResult.action });
+  }
+
+  return results;
+}
+
 function showVersion() {
   console.log(`${CLI_COMMAND} v${getCliVersion()}`);
 }
@@ -878,6 +1032,18 @@ async function initCommand(projectDir, options) {
 
   for (const result of instructionResults) {
     console.log(chalk.gray(`  └ ${result.tool}: ${path.relative(projectDir, result.path)}`));
+  }
+
+  // 设置 ignore 文件
+  const ignoreSpinner = ora('配置 ignore 文件...').start();
+  const ignoreResults = setupIgnoreFiles(selectedTools, projectDir);
+  if (ignoreResults.length > 0) {
+    ignoreSpinner.succeed('ignore 文件已配置');
+    for (const result of ignoreResults) {
+      console.log(chalk.gray(`  └ ${result.file}: ${result.action === 'created' ? '已创建' : '已更新'}`));
+    }
+  } else {
+    ignoreSpinner.succeed('ignore 文件无需更新');
   }
 
   // 完成

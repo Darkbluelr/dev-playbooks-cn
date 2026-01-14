@@ -211,23 +211,40 @@ LSC（大规模同质化修改）建议：
 
 ### C) Review（评审阶段）
 
-触发信号：用户说“review/坏味道/可维护性/依赖风险/一致性”等。
+触发信号：用户说"review/坏味道/可维护性/依赖风险/一致性"等。
 
 默认路由：
 - `devbooks-code-review`（输出可执行建议；不改业务结论、不改 tests）
+- `devbooks-test-reviewer`（评审测试质量、覆盖率、边界条件）
 
-### D) Archive（归档阶段）
+### D) Docs Sync（文档同步）
+
+触发信号：用户说"更新文档/同步文档/README 更新/API 文档"等。
+
+默认路由：
+- `devbooks-docs-sync`（维护用户文档与代码一致性）
+  - 增量模式：在变更包上下文中，只更新本次 change 相关的文档
+  - 全局模式：带 --global 参数，扫描全部文档并生成差异报告
+
+**触发条件**（非每次 change 都需要）：
+- 新增/修改/删除公共 API
+- 变更用户可见行为
+- 修改配置项
+- 变更 CLI 命令
+
+### E) Archive（归档阶段）
 
 触发信号：用户说"归档/合并 specs/关账/收尾"等。
 
 默认路由：
 - 若本次产生了 spec delta：`devbooks-spec-gardener`（先修剪 `<truth-root>/**` 再归档合并）
 - 若需要回写设计决策：`devbooks-design-backport`（按需）
+- 若影响用户文档：`devbooks-docs-sync`（确保文档与代码一致）
 
 归档前的确定性检查（推荐）：
 - `change-check.sh <change-id> --mode strict ...`（要求：proposal 已 Approved、tasks 全勾选、trace matrix 无 TODO、结构守门决策已填写）
 
-### E) Prototype（原型模式）
+### F) Prototype（原型模式）
 
 > 来源：《人月神话》第11章"未雨绸缪" — "第一个开发的系统并不合用...为舍弃而计划"
 

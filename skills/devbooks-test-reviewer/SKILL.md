@@ -129,9 +129,35 @@ tools:
 1. [建议1]
 2. [建议2]
 
+## 评审结论
+
+**结论**：[APPROVED / REVISE REQUIRED]
+
+**判定依据**：
+- Critical 问题数：N
+- Major 问题数：N
+- AC 覆盖率：N/M
+
 ---
 *此报告由 devbooks-test-reviewer 生成*
 ```
+
+---
+
+## 评审结论判定标准
+
+评审完成后，**必须**给出明确的结论：
+
+| 结论 | 条件 | 含义 |
+|------|------|------|
+| ✅ **APPROVED** | Critical=0 且 Major≤2 且 AC覆盖率≥90% | 测试质量达标，可继续下一步 |
+| ⚠️ **APPROVED WITH COMMENTS** | Critical=0 且 Major≤5 且 AC覆盖率≥80% | 可继续但建议后续改进 |
+| 🔄 **REVISE REQUIRED** | Critical>0 或 Major>5 或 AC覆盖率<80% | 需 Test Owner 修改后重新评审 |
+
+**禁止行为**：
+- 禁止只输出问题列表而不给出结论
+- 禁止在有 Critical 问题时给出 APPROVED
+- 禁止在 AC 覆盖率不足时给出 APPROVED
 
 ---
 
