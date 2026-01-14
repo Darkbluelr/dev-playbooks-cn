@@ -75,6 +75,46 @@ tools:
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 proposal-author 后，下一步取决于具体情况：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 跨模块影响不明确 | `devbooks-impact-analysis` | 先明确影响范围 |
+| 高风险/有争议 | `devbooks-proposal-challenger` | 先质疑再继续 |
+| 影响明确，准备设计 | `devbooks-design-doc` | 创建设计文档 |
+
+**关键**：绝不在 proposal-author 后直接推荐 `devbooks-test-owner` 或 `devbooks-coder`。工作流顺序是：
+```
+proposal-author → [impact-analysis] → design-doc → [spec-contract] → implementation-plan → test-owner → coder
+```
+
+### 输出模板
+
+完成 proposal-author 后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-design-doc`**（最常见）
+或
+**下一步：`devbooks-impact-analysis`**（如果跨模块影响不明确）
+或
+**下一步：`devbooks-proposal-challenger`**（如果高风险，可选）
+
+原因：提案已完成。下一步是[明确影响 / 创建设计文档]。
+
+### 如何调用
+```
+运行 devbooks-<skill-name> skill 处理变更 <change-id>
+```
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。

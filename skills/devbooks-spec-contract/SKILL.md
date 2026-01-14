@@ -154,6 +154,40 @@ tools:
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 spec-contract 后，**必须**的下一步是：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 始终 | `devbooks-implementation-plan` | 必须先创建 tasks.md 再进入实施阶段 |
+
+**关键**：绝不在 spec-contract 后直接推荐 `devbooks-test-owner` 或 `devbooks-coder`。工作流顺序是：
+```
+spec-contract → implementation-plan → test-owner → coder
+```
+
+### 输出模板
+
+完成 spec-contract 后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-implementation-plan`**
+
+原因：规格和契约已定义。下一步是创建实现计划（tasks.md），将工作分解为可追踪的任务，并绑定验证锚点。
+
+### 如何调用
+```
+运行 devbooks-implementation-plan skill 处理变更 <change-id>
+```
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
@@ -187,5 +221,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，使用 Grep 文本搜索检测契约引用。
-结果可能不够精确，建议运行 devbooks-index-bootstrap skill 生成索引。
+结果可能不够精确，建议手动生成 SCIP 索引。
 ```

@@ -139,17 +139,14 @@ change_root: dev-playbooks/changes/ # 变更包目录根
 
 | 工作流 | Skill | 说明 |
 |--------|-------|------|
-| Proposal Debate | `devbooks-proposal-debate-workflow` | 三角辩论 |
 | Delivery | `devbooks-delivery-workflow` | 变更闭环 |
 | Brownfield Bootstrap | `devbooks-brownfield-bootstrap` | 存量项目初始化 |
 
-### 度量与索引
+### 度量
 
 | 功能 | Skill | 说明 |
 |------|-------|------|
 | Entropy Monitor | `devbooks-entropy-monitor` | 系统熵度量 |
-| Index Bootstrap | `devbooks-index-bootstrap` | 生成 SCIP 索引 |
-| Federation | `devbooks-federation` | 跨仓库分析 |
 
 ---
 
@@ -178,16 +175,6 @@ ai_tools:
 
 - `devbooks-guardrail.yml`：PR 上检查复杂度/热点/分层违规
 - `devbooks-cod-update.yml`：push 后更新 COD 模型
-
-### 跨仓库联邦
-
-多仓库项目可配置 `.devbooks/federation.yaml`：
-
-```bash
-cp skills/devbooks-federation/templates/federation.yaml .devbooks/federation.yaml
-```
-
-详见 `skills/devbooks-federation/SKILL.md`
 
 ---
 

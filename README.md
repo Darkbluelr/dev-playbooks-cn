@@ -27,22 +27,7 @@ AI 编码助手很强大，但往往**不可预测**：
 - **基于证据的完成**：完成由测试/构建/证据定义，而非 AI 自我评估
 - **强制角色隔离**：Test Owner 与 Coder 必须在独立对话中工作
 - **多重质量闸门**：Green 证据检查、任务完成率、角色边界检查
-- **21 个 Skills**：覆盖提案、设计、对辩、评审、熵度量、联邦分析等
-
----
-
-## DevBooks 对比一览
-
-| 维度 | DevBooks | OpenSpec | spec-kit | 无规格 |
-|------|----------|----------|----------|--------|
-| 规格驱动工作流 | 是 | 是 | 是 | 否 |
-| 变更产物的可追溯性 | 变更包集中存档（proposal/design/spec/tasks/verification/evidence） | 主要以变更目录/文件组织为主 | 以文档+任务编排为主 | 无 |
-| 角色与职责边界 | **强制隔离**（Test Owner / Coder） | 约定为主（不强制） | 约定为主（不强制） | 无 |
-| 完成判据（DoD） | **证据驱动 + 闸门**（测试/构建/审计） | 人工定义/人工检查 | 人工定义/人工检查 | 常依赖主观判断 |
-| 代码质量保障 | 守门 + 指标（熵度量/热点）+ Review 角色 | 依赖外部工具/人工 review | 依赖外部工具/人工 review | 不稳定 |
-| 影响面分析 | CKB 图基能力（可降级 Grep） | 文本搜索/人工推导 | 文本搜索/人工推导 | 容易漏改 |
-| 存量项目起步 | 自动生成基线规格/术语表/最小验证锚点 | 手动补齐 | 有限 | - |
-| 自动化覆盖面 | 21 个 Skills（提案→实现→归档闭环） | 3 个核心命令 | 工具包（偏 0→1） | - |
+- **18 个 Skills**：覆盖提案、设计、评审、熵度量等完整工作流
 
 ---
 
@@ -174,7 +159,6 @@ DevBooks 使用两个目录根：
 | `devbooks-impact-analysis` | 跨模块影响分析 |
 | `devbooks-proposal-challenger` | 质疑和挑战提案 |
 | `devbooks-proposal-judge` | 裁决提案 |
-| `devbooks-proposal-debate-workflow` | 三角对辩（Author/Challenger/Judge） |
 | `devbooks-design-doc` | 创建设计文档 |
 | `devbooks-spec-contract` | 定义规格与契约 |
 | `devbooks-implementation-plan` | 创建实现计划 |
@@ -206,9 +190,7 @@ DevBooks 使用两个目录根：
 | Skill | 说明 |
 |-------|------|
 | `devbooks-entropy-monitor` | 系统熵度量 |
-| `devbooks-federation` | 跨仓库联邦分析 |
 | `devbooks-brownfield-bootstrap` | 存量项目初始化 |
-| `devbooks-index-bootstrap` | 生成 SCIP 索引 |
 
 ---
 
@@ -216,54 +198,55 @@ DevBooks 使用两个目录根：
 
 ### vs. OpenSpec
 
-[OpenSpec](https://github.com/Fission-AI/OpenSpec) 是轻量级规格驱动框架，用三个核心命令（proposal/apply/archive）对齐人与 AI，按功能文件夹分组变更。
+[OpenSpec](https://github.com/Fission-AI/OpenSpec) 是轻量级规格驱动框架，用三个核心命令（proposal/apply/archive）对齐人与 AI。
 
-**DevBooks 新增：**
-- **角色隔离**：Test Owner 与 Coder 硬边界（必须独立对话）
-- **质量闸门**：5+ 验证闸门拦截伪完成
-- **21 个 Skills**：覆盖提案、对辩、评审、熵度量、联邦分析
-- **基于证据的完成**：测试/构建定义"完成"，而非 AI 自评
+**OpenSpec 的局限**：
+- 缺乏角色隔离，AI 可能自我验证"已完成"
+- 无质量闸门，伪完成难以拦截
+- 只有 3 个命令，复杂变更覆盖不足
 
-**选择 OpenSpec**：简单规格驱动变更，需要轻量工作流。
-
-**选择 DevBooks**：大型变更、需要角色分离和质量验证。
+**DevBooks 解决方案**：
+- **强制角色隔离**：Test Owner 与 Coder 必须独立对话，杜绝自我验证
+- **5+ 质量闸门**：Green 证据检查、任务完成率、角色边界检查
+- **18 个 Skills**：覆盖提案→实现→归档完整闭环
 
 ### vs. spec-kit
 
-[GitHub spec-kit](https://github.com/github/spec-kit) 提供规格驱动开发工具包，有 constitution 文件、多步骤细化和结构化规划。
+[GitHub spec-kit](https://github.com/github/spec-kit) 提供规格驱动开发工具包，有 constitution 文件和结构化规划。
 
-**DevBooks 新增：**
-- **存量优先**：自动为现有代码库生成基线规格
-- **角色隔离**：测试编写与实现强制分离
-- **质量闸门**：运行时验证，不只是工作流引导
-- **原型模式**：安全实验不污染主 src/
+**spec-kit 的局限**：
+- 偏向 0→1 绿地项目，存量项目支持有限
+- 无强制角色隔离，测试与实现可能混淆
+- 依赖人工检查，缺乏运行时验证
 
-**选择 spec-kit**：0→1 绿地项目，使用支持的 AI 工具。
-
-**选择 DevBooks**：存量项目或需要强制质量闸门。
+**DevBooks 解决方案**：
+- **存量优先**：`devbooks-brownfield-bootstrap` 自动生成基线规格
+- **强制角色隔离**：测试编写与实现物理分离
+- **运行时闸门**：自动验证，不依赖人工检查
 
 ### vs. Kiro.dev
 
-[Kiro](https://kiro.dev/) 是 AWS 的代理式 IDE，用三阶段工作流（EARS 格式需求、设计、任务），但规格与实现产物分开存储。
+[Kiro](https://kiro.dev/) 是 AWS 的代理式 IDE，用三阶段工作流（需求、设计、任务）。
 
-**DevBooks 差异：**
-- **变更包**：每个变更包含 proposal/design/spec/plan/verification/evidence，整个生命周期可在一个位置追溯
-- **角色隔离**：Test Owner 与 Coder 强制分离
-- **质量闸门**：通过闸门验证，不只是任务完成
+**Kiro 的局限**：
+- 规格与实现产物分开存储，追溯困难
+- 无强制角色隔离
+- 依赖特定 IDE 环境
 
-**选择 Kiro**：想要集成 IDE 体验和 AWS 生态。
-
-**选择 DevBooks**：想要变更包捆绑所有产物并强制角色边界。
+**DevBooks 解决方案**：
+- **变更包**：proposal/design/spec/plan/verification/evidence 集中存储，完整追溯
+- **强制角色隔离**：Test Owner 与 Coder 硬边界
+- **工具无关**：支持 Claude Code、Codex CLI、Cursor 等多种工具
 
 ### vs. 无规格
 
 没有规格时，AI 从模糊提示生成代码，导致不可预测的输出、范围蔓延和"幻觉式完成"。
 
 **DevBooks 带来：**
-- 实现前商定规格
-- 验证真实完成的质量闸门
-- 防止自我验证的角色隔离
-- 每个变更的证据链
+- 实现前商定规格，范围清晰可控
+- 质量闸门验证真实完成
+- 角色隔离防止自我验证
+- 每个变更的完整证据链
 
 ---
 
@@ -349,12 +332,6 @@ DevBooks 跟踪四维系统熵：
 
 </details>
 
-<details>
-<summary><strong>跨仓库联邦</strong></summary>
-
-多仓库分析用 `devbooks-federation`，分析跨仓库边界的契约和依赖，支持协调变更。
-
-</details>
 
 <details>
 <summary><strong>MCP 自动检测</strong></summary>
@@ -380,19 +357,21 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 - 超时/失败 → 静默降级到基础模式，不阻塞执行
 - 无需手动选择"基础/增强"模式
 
-如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `devbooks-index-bootstrap` 生成 `index.scip`。
+如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并手动生成 `index.scip`。
 
 </details>
 
 <details>
-<summary><strong>提案对辩工作流</strong></summary>
+<summary><strong>提案审查流程</strong></summary>
 
-严格提案审查用三角对辩 `devbooks-proposal-debate-workflow`：
+严格提案审查使用独立对话的 Challenger 和 Judge：
 
-三个角色：
-1. **Author**：创建并捍卫提案
-2. **Challenger**：质疑假设、发现缺口、识别风险
-3. **Judge**：做最终决定、记录理由
+三个角色（必须独立对话）：
+1. **Author**：创建并捍卫提案（使用 `devbooks-proposal-author`）
+2. **Challenger**：质疑假设、发现缺口、识别风险（使用 `devbooks-proposal-challenger`）
+3. **Judge**：做最终决定、记录理由（使用 `devbooks-proposal-judge`）
+
+**重要**：三个角色必须在**独立对话**中工作，以避免角色混淆和自我验证。
 
 决定结果：`Approved`、`Revise`、`Rejected`
 

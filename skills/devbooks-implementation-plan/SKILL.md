@@ -75,6 +75,48 @@ tools:
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 implementation-plan 后，**必须**的下一步是：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 始终 | `devbooks-test-owner` | Test Owner 必须先产出 Red 基线 |
+
+**关键**：
+- Test Owner **必须在单独的会话/实例中工作**
+- 绝不在 implementation-plan 后直接推荐 `devbooks-coder`
+- 工作流顺序是：
+```
+implementation-plan → test-owner (会话A) → coder (会话B)
+```
+
+### 输出模板
+
+完成 implementation-plan 后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-test-owner`**（必须在单独的会话中）
+
+原因：实现计划已完成。下一步是让 Test Owner 创建验证测试并产出 Red 基线。Test Owner 和 Coder 必须在不同会话中工作以确保角色隔离。
+
+### 如何调用（在新会话中）
+```
+运行 devbooks-test-owner skill 处理变更 <change-id>
+```
+
+**重要**：Test Owner 产出 Red 基线后，在另一个单独的会话中启动 Coder：
+```
+运行 devbooks-coder skill 处理变更 <change-id>
+```
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。

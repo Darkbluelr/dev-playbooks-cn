@@ -174,7 +174,6 @@ DevBooks 使用两个目录根：
 | `devbooks-impact-analysis` | 跨模块影响分析 |
 | `devbooks-proposal-challenger` | 质疑和挑战提案 |
 | `devbooks-proposal-judge` | 裁决提案 |
-| `devbooks-proposal-debate-workflow` | 三角对辩（Author/Challenger/Judge） |
 | `devbooks-design-doc` | 创建设计文档 |
 | `devbooks-spec-contract` | 定义规格与契约 |
 | `devbooks-implementation-plan` | 创建实现计划 |
@@ -206,9 +205,7 @@ DevBooks 使用两个目录根：
 | Skill | 说明 |
 |-------|------|
 | `devbooks-entropy-monitor` | 系统熵度量 |
-| `devbooks-federation` | 跨仓库联邦分析 |
 | `devbooks-brownfield-bootstrap` | 存量项目初始化 |
-| `devbooks-index-bootstrap` | 生成 SCIP 索引 |
 
 ---
 
@@ -350,13 +347,6 @@ DevBooks 跟踪四维系统熵：
 </details>
 
 <details>
-<summary><strong>跨仓库联邦</strong></summary>
-
-多仓库分析用 `devbooks-federation`，分析跨仓库边界的契约和依赖，支持协调变更。
-
-</details>
-
-<details>
 <summary><strong>MCP 自动检测</strong></summary>
 
 DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把"范围/引用/调用链"分析做得更准。
@@ -380,16 +370,16 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 - 超时/失败 → 静默降级到基础模式，不阻塞执行
 - 无需手动选择"基础/增强"模式
 
-如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并运行 `devbooks-index-bootstrap` 生成 `index.scip`。
+如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并手动生成 `index.scip`。
 
 </details>
 
 <details>
-<summary><strong>提案对辩工作流</strong></summary>
+<summary><strong>提案审查流程</strong></summary>
 
-严格提案审查用三角对辩 `devbooks-proposal-debate-workflow`：
+严格提案审查使用独立对话的 Challenger 和 Judge：
 
-三个角色：
+三个角色（必须独立对话）：
 1. **Author**：创建并捍卫提案
 2. **Challenger**：质疑假设、发现缺口、识别风险
 3. **Judge**：做最终决定、记录理由

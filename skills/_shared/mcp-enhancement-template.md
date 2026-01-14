@@ -48,7 +48,7 @@
 
 ```
 ⚠️ CKB 不可用（超时或未配置），使用基础模式执行。
-如需启用增强功能，请运行 devbooks-index-bootstrap skill 生成索引。
+如需启用增强功能，请手动生成 SCIP 索引。
 ```
 ```
 
@@ -65,7 +65,6 @@
 - devbooks-proposal-author（纯文档生成）
 - devbooks-proposal-challenger（纯评审）
 - devbooks-proposal-judge（纯裁决）
-- devbooks-proposal-debate-workflow（流程编排）
 - devbooks-design-backport（文档回写）
 - devbooks-spec-gardener（文件整理）
 - devbooks-test-reviewer（测试评审）
@@ -88,8 +87,6 @@
 | devbooks-code-review | mcp__ckb__getHotspots | 热点文件高亮 |
 | devbooks-impact-analysis | mcp__ckb__analyzeImpact, findReferences | 精确影响分析 |
 | devbooks-brownfield-bootstrap | mcp__ckb__* | COD 模型生成 |
-| devbooks-index-bootstrap | mcp__ckb__getStatus | 索引状态检测 |
-| devbooks-federation | mcp__ckb__*, mcp__github__* | 跨仓库分析 |
 | devbooks-router | mcp__ckb__getStatus | 索引可用性检测 |
 | devbooks-spec-contract | mcp__ckb__findReferences | 引用检测 |
 | devbooks-entropy-monitor | mcp__ckb__getHotspots | 热点趋势分析 |

@@ -115,26 +115,6 @@
 
 ---
 
-## `devbooks-proposal-debate-workflow`（Proposal Debate Workflow）
-
-- 作用：把“提案-质疑-裁决”跑成一套三角对辩流程（Author/Challenger/Judge 角色隔离），并确保 Decision Log 状态明确。
-- 使用场景：
-  - 你想强制三角色对抗来提高提案质量
-  - 团队里经常“风险没说清就开工”
-- 使用话术：
-  ```text
-  你现在是 Proposal Debate Orchestrator。请点名使用 `devbooks-proposal-debate-workflow`。
-  先读：`dev-playbooks/project.md`
-  约束：Author/Challenger/Judge 必须独立对话/独立实例；如果我无法提供独立对话，你就停止并说明原因。
-  目标：最终 `dev-playbooks/changes/<change-id>/proposal.md` 的 Decision Log 状态必须为 Approved/Revise/Rejected（禁止 Pending）。
-  请你按工作流逐步告诉我：每一个独立对话里我要复制粘贴的指令是什么，以及每一步需要我把什么结果贴回当前对话。
-
-  我的需求是：
-  <一句话需求 + 背景 + 约束>
-  ```
-
----
-
 ## `devbooks-design-doc`（Design Owner / Design Doc）
 
 - 作用：产出 `design.md`，只写 What/Constraints + AC-xxx（禁止写实现步骤），作为测试与计划的黄金真理。
@@ -364,61 +344,16 @@
 
 ---
 
-## `devbooks-index-bootstrap`（Index Bootstrapper）【新】
+## `devbooks-test-reviewer`（Test Reviewer）【新】
 
-- 作用：自动检测项目语言栈并生成 SCIP 索引，激活图基代码理解能力（调用图、影响分析、符号引用等）。
-- **触发条件**：
-  - 用户说"初始化索引/建立代码图谱/激活图分析"
-  - `mcp__ckb__getStatus` 返回 SCIP 后端 `healthy: false`
-  - 进入新项目且 `index.scip` 不存在
+- 作用：以 Test Reviewer 角色评审 tests/ 测试质量（覆盖、边界、可读性、可维护性），只输出评审意见，不修改代码。
 - 使用场景：
-  - 想使用 `devbooks-impact-analysis` 的图基分析模式
-  - 想在 `devbooks-coder`/`devbooks-code-review` 中获得热点感知
-  - CKB MCP 工具报错"SCIP 后端不可用"
+  - Test Owner 完成测试后，需要独立评审测试质量
+  - 想发现测试覆盖盲区、边界条件遗漏、测试可维护性问题
 - 使用话术：
   ```text
-  请点名使用 `devbooks-index-bootstrap`。
-  目标：检测项目语言栈，生成 SCIP 索引，激活图基代码理解能力。
-  项目根目录：$(pwd)
-  ```
-- 手动生成索引（无需 Skill）：
-  ```bash
-  # TypeScript/JavaScript
-  npm install -g @anthropic-ai/scip-typescript
-  scip-typescript index --output index.scip
-
-  # Python
-  pip install scip-python
-  scip-python index . --output index.scip
-
-  # Go
-  go install github.com/sourcegraph/scip-go@latest
-  scip-go --output index.scip
-  ```
-
----
-
-## `devbooks-federation`（Federation Analyst）【新】
-
-- 作用：跨仓库联邦分析与契约同步。检测契约变更、分析跨仓库影响、通知下游消费者。
-- **触发条件**：
-  - 用户说"跨仓库影响/联邦分析/契约同步/上下游依赖/多仓库"
-  - 变更涉及 `federation.yaml` 中定义的契约文件
-- 使用场景：
-  - 多仓库项目，需要分析变更对下游的影响
-  - 对外 API/契约变更，需要通知消费者
-  - 想建立跨仓库的影响追溯
-- 前置条件：
-  - 项目根目录存在 `.devbooks/federation.yaml`（从 `skills/devbooks-federation/templates/federation.yaml` 复制）
-- 使用话术：
-  ```text
-  请点名使用 `devbooks-federation`。
-  目标：分析本次变更的跨仓库影响，检测契约变更，生成影响报告。
-  项目根目录：$(pwd)
-  变更文件：<变更的文件列表>
-  ```
-- 脚本支持：
-  ```bash
-  # 检查联邦契约变更
-  bash ~/.claude/skills/devbooks-federation/scripts/federation-check.sh --project-root "$(pwd)"
+  你现在是 Test Reviewer。请点名使用 `devbooks-test-reviewer`。
+  请只做测试质量评审（覆盖率/边界条件/可读性/可维护性），不修改代码。
+  输入：`tests/**` + `dev-playbooks/changes/<change-id>/verification.md`（如有）
+  输出：覆盖盲区 / 边界条件遗漏 / 可维护性风险 / 改进建议。
   ```

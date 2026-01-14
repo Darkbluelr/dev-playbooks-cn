@@ -34,9 +34,8 @@ tools:
 1. 调用 `mcp__ckb__getStatus` 检查 SCIP 后端
 2. 如果 `backends.scip.healthy = false`：
    - 提示用户：「检测到代码图索引未激活，影响分析/调用图等图基能力不可用」
-   - 询问是否现在生成索引（约 1-5 分钟）
-   - 若用户同意，执行 `devbooks-index-bootstrap` 流程
-   - 若用户拒绝，继续路由但标注「图基能力降级」
+   - 提供手动生成索引的命令（见下方脚本）
+   - 继续路由但标注「图基能力降级」
 
 3. 如果 `backends.scip.healthy = true`：
    - 静默通过，继续路由
@@ -109,8 +108,8 @@ impact_profile:
 |-------------|-----|---------------|
 | `external_api: true` | - | `devbooks-spec-contract` |
 | `architecture_boundary: true` | - | `devbooks-design-doc`（确保 Architecture Impact 章节完整） |
-| `cross_repo: true` | - | `devbooks-federation` |
-| `risk_level: high` | - | `devbooks-proposal-debate-workflow` |
+| `cross_repo: true` | - | 手动分析跨仓库影响 |
+| `risk_level: high` | - | `devbooks-proposal-challenger` + `devbooks-proposal-judge` |
 | `affected_modules` 数量 > 5 | - | `devbooks-impact-analysis`（深度分析） |
 
 ### 执行计划输出格式
@@ -179,7 +178,7 @@ skill 列表：
 
 按需追加（满足条件才加）：
 - **跨模块/影响不清晰**：`devbooks-impact-analysis`（建议写回 proposal Impact）
-- **风险/争议/取舍明显**：`devbooks-proposal-debate-workflow`（Author/Challenger/Judge，对辩后写回 Decision Log）
+- **风险/争议/取舍明显**：`devbooks-proposal-challenger` + `devbooks-proposal-judge`（独立对话，对辩后写回 Decision Log）
 - **对外行为/契约/数据不变量变化**：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + `design.md` Contract 章节
   - 若需要"确定性创建 spec delta 文件/避免路径写错"：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
 - **模块边界/依赖方向/架构形态变化**：确保 `devbooks-design-doc` 输出完整的 Architecture Impact 章节 → 归档时由 `devbooks-spec-gardener` 合并到 `(<truth-root>/architecture/c4.md)`
@@ -326,7 +325,7 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 1. 调用 `mcp__ckb__getStatus`（2s 超时）
 2. 若 CKB 可用 → 在路由建议中标注"图基能力已激活"
-3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议运行 devbooks-index-bootstrap skill
+3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议手动生成 SCIP 索引
 
 ### 增强模式 vs 基础模式
 
@@ -342,5 +341,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 索引未激活，图基能力（影响分析、调用图等）将降级。
-建议运行 devbooks-index-bootstrap skill 生成索引以启用完整功能。
+建议手动生成 SCIP 索引以启用完整功能。
 ```

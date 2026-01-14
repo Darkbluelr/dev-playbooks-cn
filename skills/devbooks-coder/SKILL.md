@@ -245,6 +245,48 @@ fi
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 coder（所有任务完成，闸门变绿）后，下一步是：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 所有任务已完成 | `devbooks-code-review` | 评审可读性/一致性 |
+| 需要修改测试 | 交回 `devbooks-test-owner` | Coder 不能修改测试 |
+
+**关键**：
+- Coder **不能修改** `tests/**`
+- 如发现测试问题，交回 Test Owner（单独会话）
+- 工作流顺序是：
+```
+coder → code-review → spec-gardener (如有 spec deltas) → 归档
+```
+
+### 输出模板
+
+完成 coder（所有闸门变绿）后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-code-review`**
+
+原因：所有任务已完成，闸门已变绿。下一步是代码评审，检查可读性、一致性和可维护性。
+
+### 如何调用
+```
+运行 devbooks-code-review skill 处理变更 <change-id>
+```
+
+### 评审后
+- 如有 spec deltas：`devbooks-spec-gardener` 合并到真理
+- 如无 spec deltas：归档完成
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
@@ -278,6 +320,6 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 不可用，跳过热点检测。
-如需启用热点预警，请运行 devbooks-index-bootstrap skill 生成索引。
+如需启用热点预警，请手动生成 SCIP 索引。
 ```
 

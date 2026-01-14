@@ -136,6 +136,39 @@ override dispose() {
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 code-review 后，下一步取决于具体情况：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 有 spec deltas | `devbooks-spec-gardener` | 归档前合并规格到真理 |
+| 无 spec deltas | 归档完成 | 无需其他 skill |
+| 发现重大问题 | 交回 `devbooks-coder` | 归档前修复问题 |
+
+### 输出模板
+
+完成 code-review 后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-spec-gardener`**（如果有 spec deltas）
+或
+**归档完成**（如果无 spec deltas）
+
+原因：代码评审已完成。下一步是[合并 spec deltas 到真理 / 完成归档]。
+
+### 如何调用（如果有 spec deltas）
+```
+运行 devbooks-spec-gardener skill 处理变更 <change-id>
+```
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。

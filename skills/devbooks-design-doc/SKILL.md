@@ -188,6 +188,43 @@ tools:
 
 ---
 
+## 下一步推荐
+
+**参考**：`skills/_shared/workflow-next-steps.md`
+
+完成 design-doc 后，下一步取决于变更范围：
+
+| 条件 | 下一个 Skill | 原因 |
+|------|--------------|------|
+| 有外部行为/契约变更 | `devbooks-spec-contract` | 必须先定义契约再做计划 |
+| 无外部契约变更 | `devbooks-implementation-plan` | 直接进入任务计划 |
+
+**关键**：绝不在 design-doc 后直接推荐 `devbooks-test-owner` 或 `devbooks-coder`。工作流顺序是：
+```
+design-doc → [spec-contract] → implementation-plan → test-owner → coder
+```
+
+### 输出模板
+
+完成 design-doc 后，输出：
+
+```markdown
+## 推荐的下一步
+
+**下一步：`devbooks-spec-contract`**（如果有外部行为/契约变更）
+或
+**下一步：`devbooks-implementation-plan`**（如果无外部契约变更）
+
+原因：设计已完成。下一步是[定义外部契约 / 创建实现计划]。
+
+### 如何调用
+```
+运行 devbooks-<skill-name> skill 处理变更 <change-id>
+```
+```
+
+---
+
 ## MCP 增强
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。

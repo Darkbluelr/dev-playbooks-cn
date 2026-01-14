@@ -213,5 +213,5 @@ MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
 
 ```
 ⚠️ CKB 索引不可用，架构检查将使用基础模式。
-建议运行 devbooks-index-bootstrap skill 生成索引以启用精确检查。
+建议手动生成 SCIP 索引以启用精确检查。
 ```
