@@ -293,42 +293,101 @@ devbooks change-evidence <change-id> --label red-baseline -- npm test
 
 ---
 
-## 下一步推荐
+## 偏离检测与落盘协议
 
-**参考**：`skills/_shared/workflow-next-steps.md`
+**参考**：`skills/_shared/references/偏离检测与路由协议.md`
 
-完成 test-owner（产出 Red 基线）后，下一步是：
+### 实时落盘要求
 
-| 条件 | 下一个 Skill | 原因 |
-|------|--------------|------|
-| Red 基线已产出 | `devbooks-coder` | Coder 实现以让闸门变绿 |
+在编写测试过程中，**必须立即**将以下情况写入 `deviation-log.md`：
 
-**关键**：
-- Coder **必须在单独的会话/实例中工作**
-- Test Owner 和 Coder 不能共享同一会话上下文
-- 工作流顺序是：
-```
-test-owner (会话A) → coder (会话B) → code-review
-```
+| 情况 | 类型 | 示例 |
+|------|------|------|
+| 发现 design.md 未覆盖的边界情况 | DESIGN_GAP | 并发写入场景 |
+| 发现需要额外的约束 | CONSTRAINT_CHANGE | 需要添加参数校验 |
+| 发现接口需要调整 | API_CHANGE | 需要增加返回字段 |
+| 发现配置项需要变更 | CONSTRAINT_CHANGE | 需要新的配置参数 |
 
-### 输出模板
-
-完成 test-owner（Red 基线）后，输出：
+### deviation-log.md 格式
 
 ```markdown
-## 推荐的下一步
+# 偏离日志
 
-**下一步：`devbooks-coder`**（必须在单独的会话中）
+## 待回写记录
 
-原因：Red 基线已产出。下一步是让 Coder 按 tasks.md 实现，使所有闸门变绿。Coder 必须在单独会话中工作以确保角色隔离。
-
-### 如何调用（在单独的会话中）
-```
-运行 devbooks-coder skill 处理变更 <change-id>
+| 时间 | 类型 | 描述 | 涉及文件 | 已回写 |
+|------|------|------|----------|:------:|
+| 2024-01-15 09:30 | DESIGN_GAP | 发现并发场景未覆盖 | tests/concurrent.test.ts | ❌ |
 ```
 
-**重要**：Coder 不能修改 `tests/**`。如需修改测试，请交回 Test Owner。
+### Compact 保护
+
+**重要**：deviation-log.md 是持久化文件，不受 compact 影响。即使对话被压缩，偏离信息仍然保留。
+
+---
+
+## 完成状态与下一步路由
+
+### 完成状态分类（MECE）
+
+| 状态码 | 状态 | 判定条件 | 下一步 |
+|:------:|------|----------|--------|
+| ✅ | COMPLETED | Red 基线产出，无偏离 | `devbooks-coder`（单独会话） |
+| ⚠️ | COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
+| ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
+| 💥 | FAILED | 测试框架问题等 | 修复后重试 |
+
+### 状态判定流程
+
 ```
+1. 检查 deviation-log.md 是否有 "| ❌" 记录
+   → 有：COMPLETED_WITH_DEVIATION
+
+2. 检查 Red 基线是否产出
+   - verification.md 存在且有追溯矩阵
+   - evidence/red-baseline/ 存在
+   → 否：BLOCKED 或 FAILED
+
+3. 以上都通过
+   → COMPLETED
+```
+
+### 路由输出模板（必须使用）
+
+完成 test-owner 后，**必须**输出以下格式：
+
+```markdown
+## 完成状态
+
+**状态**：✅ COMPLETED / ⚠️ COMPLETED_WITH_DEVIATION / ❌ BLOCKED / 💥 FAILED
+
+**Red 基线**：已产出 / 未完成
+
+**偏离记录**：有 N 条待回写 / 无
+
+## 下一步
+
+**推荐**：`devbooks-xxx skill`（单独会话）
+
+**原因**：[具体原因]
+
+### 如何调用
+运行 devbooks-xxx skill 处理变更 <change-id>
+```
+
+### 具体路由规则
+
+| 我的状态 | 下一步 | 原因 |
+|----------|--------|------|
+| COMPLETED | `devbooks-coder`（单独会话） | Red 基线已产出，Coder 实现以变绿 |
+| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再交给 Coder |
+| BLOCKED | 等待用户 | 记录断点区 |
+| FAILED | 修复后重试 | 分析失败原因 |
+
+**关键约束**：
+- **角色隔离**：Coder 必须在**单独的会话/实例**中工作
+- Test Owner 和 Coder 不能共享同一会话上下文
+- 如有偏离，必须先 design-backport 再交给 Coder
 
 ---
 

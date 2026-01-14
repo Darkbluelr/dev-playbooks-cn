@@ -245,45 +245,104 @@ fi
 
 ---
 
-## 下一步推荐
+## 偏离检测与落盘协议
 
-**参考**：`skills/_shared/workflow-next-steps.md`
+**参考**：`skills/_shared/references/偏离检测与路由协议.md`
 
-完成 coder（所有任务完成，闸门变绿）后，下一步是：
+### 实时落盘要求
 
-| 条件 | 下一个 Skill | 原因 |
-|------|--------------|------|
-| 所有任务已完成 | `devbooks-code-review` | 评审可读性/一致性 |
-| 需要修改测试 | 交回 `devbooks-test-owner` | Coder 不能修改测试 |
+在实现过程中，**必须立即**将以下情况写入 `deviation-log.md`：
 
-**关键**：
-- Coder **不能修改** `tests/**`
-- 如发现测试问题，交回 Test Owner（单独会话）
-- 工作流顺序是：
-```
-coder → code-review → spec-gardener (如有 spec deltas) → 归档
-```
+| 情况 | 类型 | 示例 |
+|------|------|------|
+| 添加了 tasks.md 中没有的功能 | NEW_FEATURE | 新增 warmup() 方法 |
+| 修改了 design.md 中的约束 | CONSTRAINT_CHANGE | 超时改为 60s |
+| 发现设计未覆盖的边界情况 | DESIGN_GAP | 并发场景 |
+| 公共接口与设计不一致 | API_CHANGE | 参数增加 |
 
-### 输出模板
-
-完成 coder（所有闸门变绿）后，输出：
+### deviation-log.md 格式
 
 ```markdown
-## 推荐的下一步
+# 偏离日志
 
-**下一步：`devbooks-code-review`**
+## 待回写记录
 
-原因：所有任务已完成，闸门已变绿。下一步是代码评审，检查可读性、一致性和可维护性。
+| 时间 | 类型 | 描述 | 涉及文件 | 已回写 |
+|------|------|------|----------|:------:|
+| 2024-01-15 10:30 | NEW_FEATURE | 添加缓存预热功能 | src/cache.ts | ❌ |
+```
+
+### Compact 保护
+
+**重要**：deviation-log.md 是持久化文件，不受 compact 影响。即使对话被压缩，偏离信息仍然保留。
+
+---
+
+## 完成状态与下一步路由
+
+### 完成状态分类（MECE）
+
+| 状态码 | 状态 | 判定条件 | 下一步 |
+|:------:|------|----------|--------|
+| ✅ | COMPLETED | 所有任务完成，无偏离 | `devbooks-code-review` |
+| ⚠️ | COMPLETED_WITH_DEVIATION | 任务完成，deviation-log 有未回写记录 | `devbooks-design-backport` |
+| 🔄 | HANDOFF | 发现测试问题需要修改 | `devbooks-test-owner` |
+| ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
+| 💥 | FAILED | 闸门未通过 | 修复后重试 |
+
+### 状态判定流程
+
+```
+1. 检查 deviation-log.md 是否有 "| ❌" 记录
+   → 有：COMPLETED_WITH_DEVIATION
+
+2. 检查是否需要修改 tests/
+   → 是：HANDOFF to test-owner
+
+3. 检查 tasks.md 是否全部完成
+   → 否：BLOCKED 或 FAILED
+
+4. 以上都通过
+   → COMPLETED
+```
+
+### 路由输出模板（必须使用）
+
+完成 coder 后，**必须**输出以下格式：
+
+```markdown
+## 完成状态
+
+**状态**：✅ COMPLETED / ⚠️ COMPLETED_WITH_DEVIATION / 🔄 HANDOFF / ❌ BLOCKED / 💥 FAILED
+
+**任务进度**：X/Y 已完成
+
+**偏离记录**：有 N 条待回写 / 无
+
+## 下一步
+
+**推荐**：`devbooks-xxx skill`
+
+**原因**：[具体原因]
 
 ### 如何调用
-```
-运行 devbooks-code-review skill 处理变更 <change-id>
+运行 devbooks-xxx skill 处理变更 <change-id>
 ```
 
-### 评审后
-- 如有 spec deltas：`devbooks-spec-gardener` 合并到真理
-- 如无 spec deltas：归档完成
-```
+### 具体路由规则
+
+| 我的状态 | 下一步 | 原因 |
+|----------|--------|------|
+| COMPLETED | `devbooks-code-review` | 评审可读性/一致性 |
+| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再评审 |
+| HANDOFF (测试问题) | `devbooks-test-owner` | Coder 不能修改测试 |
+| BLOCKED | 等待用户 | 记录断点区 |
+| FAILED | 修复后重试 | 分析失败原因 |
+
+**关键约束**：
+- Coder **永远不能修改** `tests/**`
+- 如发现测试问题，必须 HANDOFF 给 Test Owner（单独会话）
+- 如有偏离，必须先 design-backport 再继续
 
 ---
 

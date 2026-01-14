@@ -1,6 +1,6 @@
 ---
 name: devbooks-router
-description: devbooks-router：DevBooks 工作流路由与下一步建议：根据用户请求（提案/设计/规格/计划/测试/实现/评审/归档，或 DevBooks proposal/apply/archive）选择应使用的 devbooks-* Skills，并给出产物落点与最短闭环。用户说"下一步怎么做/路由到合适 skill/按 devbooks 跑闭环"等时使用。
+description: devbooks-router：DevBooks 工作流入口引导：帮助用户确定从哪个 skill 开始，检测项目当前状态，给出最短闭环路径。用户说"下一步怎么做/从哪开始/按 devbooks 跑闭环/项目状态"等时使用。注意：skill 完成后的路由由各 skill 自己负责，无需调用 router。
 tools:
   - Glob
   - Grep
@@ -9,7 +9,22 @@ tools:
   - mcp__ckb__getStatus
 ---
 
-# DevBooks：工作流路由（Router）
+# DevBooks：工作流入口引导（Router）
+
+## 定位说明
+
+> **重要**：Router 的职责是**入口引导**，而非每步路由。
+
+| 场景 | 是否使用 Router |
+|------|:---------------:|
+| "我该从哪开始？" | ✅ 使用 |
+| "项目当前状态？" | ✅ 使用 |
+| "coder 完成后下一步？" | ❌ 不使用（coder 自己输出） |
+| "这个 skill 完成后呢？" | ❌ 不使用（各 skill 自己输出） |
+
+**原则**：每个 skill 完成时会输出自己的下一步推荐，遵循 `_shared/references/偏离检测与路由协议.md`。
+
+---
 
 ## 前置：配置发现（协议无关）
 
