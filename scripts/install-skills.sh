@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/install-skills.sh [--claude-only|--codex-only] [--with-codex-prompts] [--dry-run]
+  ./scripts/install-skills.sh [--claude-only|--codex-only] [--with-codex-prompts] [--dry-run] [--no-prune]
 
 Installs DevBooks skills (skills/devbooks-*) to:
   - Claude Code: ~/.claude/skills/
@@ -12,6 +12,9 @@ Installs DevBooks skills (skills/devbooks-*) to:
 
 Optionally installs Codex prompt entrypoints (templates/claude-commands/devbooks/*.md) to:
   - Codex CLI:   $CODEX_HOME/prompts (default: ~/.codex/prompts/)
+
+By default, removes devbooks-* skills in the target directory that no longer exist in this repo.
+Use --no-prune to keep removed skills.
 EOF
 }
 
@@ -19,6 +22,7 @@ install_claude=true
 install_codex=true
 install_codex_prompts=false
 dry_run=false
+prune_removed=true
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -27,6 +31,7 @@ while [[ $# -gt 0 ]]; do
     --codex-only) install_claude=false ;;
     --with-codex-prompts) install_codex_prompts=true ;;
     --dry-run) dry_run=true ;;
+    --no-prune) prune_removed=false ;;
     *) echo "error: unknown arg: $1" >&2; usage; exit 2 ;;
   esac
   shift
@@ -50,6 +55,24 @@ if [[ ${#skill_dirs[@]} -eq 0 ]]; then
   echo "error: no devbooks-* skill dirs found in $src_root" >&2
   exit 1
 fi
+
+skill_names=()
+for d in "${skill_dirs[@]}"; do
+  skill_names+=("$(basename "$d")")
+done
+
+skill_name_exists() {
+  local target="$1"
+  local name
+
+  for name in "${skill_names[@]}"; do
+    if [[ "$name" == "$target" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
 
 copy_dir() {
   local src="$1"
@@ -75,6 +98,28 @@ copy_file() {
   fi
 
   cp "$src" "$dest"
+}
+
+prune_removed_skills() {
+  local dest_root="$1"
+
+  [[ -d "$dest_root" ]] || return 0
+
+  local path
+  for path in "$dest_root"/devbooks-*; do
+    [[ -d "$path" ]] || continue
+
+    local name
+    name="$(basename "$path")"
+
+    if ! skill_name_exists "$name"; then
+      if [[ "$dry_run" == true ]]; then
+        echo "[dry-run] remove: $path"
+      else
+        rm -rf "$path"
+      fi
+    fi
+  done
 }
 
 install_into() {
@@ -107,6 +152,10 @@ install_into() {
       find "$dest/scripts" -type f -name "*.sh" -exec chmod +x {} \;
     fi
   done
+
+  if [[ "$prune_removed" == true ]]; then
+    prune_removed_skills "$dest_root"
+  fi
 }
 
 install_prompts_into() {

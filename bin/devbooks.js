@@ -247,6 +247,23 @@ function copyDirSync(src, dest) {
   return count;
 }
 
+function pruneRemovedSkills(skillsDestDir, allowedSkillNames) {
+  if (!fs.existsSync(skillsDestDir)) return 0;
+  let removedCount = 0;
+  const entries = fs.readdirSync(skillsDestDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (!entry.name.startsWith('devbooks-')) continue;
+    if (allowedSkillNames.has(entry.name)) continue;
+
+    fs.rmSync(path.join(skillsDestDir, entry.name), { recursive: true, force: true });
+    removedCount++;
+  }
+
+  return removedCount;
+}
+
 function getSkillsSupportLabel(level) {
   switch (level) {
     case SKILLS_SUPPORT.FULL:
@@ -391,6 +408,7 @@ function installSkills(toolIds, update = false) {
         .filter(name => fs.statSync(path.join(skillsSrcDir, name)).isDirectory());
 
       if (skillDirs.length === 0) continue;
+      const skillNames = new Set(skillDirs);
 
       fs.mkdirSync(skillsDestDir, { recursive: true });
 
@@ -420,7 +438,15 @@ function installSkills(toolIds, update = false) {
         installedCount++;
       }
 
-      results.push({ tool: tool.name, type: 'skills', count: installedCount, total: skillDirs.length });
+      const removedCount = update ? pruneRemovedSkills(skillsDestDir, skillNames) : 0;
+
+      results.push({
+        tool: tool.name,
+        type: 'skills',
+        count: installedCount,
+        total: skillDirs.length,
+        removed: removedCount
+      });
     }
 
     // Qoder: 创建 agents 目录结构（但不复制 Skills，因为格式不同）
@@ -914,6 +940,9 @@ async function updateCommand(projectDir) {
   for (const result of skillsResults) {
     if (result.count > 0) {
       console.log(chalk.green('✓') + ` ${result.tool} ${result.type}: 更新了 ${result.count}/${result.total} 个`);
+    }
+    if (result.removed && result.removed > 0) {
+      console.log(chalk.green('✓') + ` ${result.tool} ${result.type}: 清理了 ${result.removed} 个已删除的技能`);
     }
   }
 
