@@ -179,6 +179,50 @@ function expandPath(p) {
   return p;
 }
 
+/**
+ * 更新文件中 DEVBOOKS:START/END 标记之间的内容
+ * 保留标记外的用户自定义内容
+ */
+function updateManagedContent(filePath, newManagedContent) {
+  if (!fs.existsSync(filePath)) {
+    return false;
+  }
+
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const startMarker = DEVBOOKS_MARKERS.start;
+  const endMarker = DEVBOOKS_MARKERS.end;
+
+  const startIdx = content.indexOf(startMarker);
+  const endIdx = content.indexOf(endMarker);
+
+  if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
+    // 没有找到有效的标记，无法更新
+    return false;
+  }
+
+  // 提取新内容中标记之间的部分
+  const newStartIdx = newManagedContent.indexOf(startMarker);
+  const newEndIdx = newManagedContent.indexOf(endMarker);
+
+  if (newStartIdx === -1 || newEndIdx === -1) {
+    return false;
+  }
+
+  const newManagedBlock = newManagedContent.slice(newStartIdx, newEndIdx + endMarker.length);
+
+  // 替换旧内容中标记之间的部分
+  const before = content.slice(0, startIdx);
+  const after = content.slice(endIdx + endMarker.length);
+  const updatedContent = before + newManagedBlock + after;
+
+  if (updatedContent !== content) {
+    fs.writeFileSync(filePath, updatedContent);
+    return true;
+  }
+
+  return false;
+}
+
 function copyDirSync(src, dest) {
   if (!fs.existsSync(src)) return 0;
   fs.mkdirSync(dest, { recursive: true });
@@ -376,7 +420,7 @@ function installSkills(toolIds, update = false) {
 // 安装 Rules（Cursor, Windsurf, Gemini, Antigravity, OpenCode, Continue）
 // ============================================================================
 
-function installRules(toolIds, projectDir) {
+function installRules(toolIds, projectDir, update = false) {
   const results = [];
 
   for (const toolId of toolIds) {
@@ -394,7 +438,13 @@ function installRules(toolIds, projectDir) {
 
       if (!fs.existsSync(rulePath)) {
         fs.writeFileSync(rulePath, ruleContent);
-        results.push({ tool: tool.name, type: 'rules', path: rulePath });
+        results.push({ tool: tool.name, type: 'rules', path: rulePath, action: 'created' });
+      } else if (update) {
+        // 更新已存在的文件中 DEVBOOKS:START/END 之间的内容
+        const updated = updateManagedContent(rulePath, ruleContent);
+        if (updated) {
+          results.push({ tool: tool.name, type: 'rules', path: rulePath, action: 'updated' });
+        }
       }
     }
   }
@@ -456,7 +506,7 @@ ${DEVBOOKS_MARKERS.end}
 // 安装自定义指令文件
 // ============================================================================
 
-function installInstructionFiles(toolIds, projectDir) {
+function installInstructionFiles(toolIds, projectDir, update = false) {
   const results = [];
 
   for (const toolId of toolIds) {
@@ -469,25 +519,43 @@ function installInstructionFiles(toolIds, projectDir) {
       fs.mkdirSync(instructionsDir, { recursive: true });
 
       const copilotInstructionPath = path.join(projectDir, '.github', 'copilot-instructions.md');
+      const copilotContent = generateCopilotInstructions();
       if (!fs.existsSync(copilotInstructionPath)) {
-        fs.writeFileSync(copilotInstructionPath, generateCopilotInstructions());
-        results.push({ tool: 'GitHub Copilot', type: 'instructions', path: copilotInstructionPath });
+        fs.writeFileSync(copilotInstructionPath, copilotContent);
+        results.push({ tool: 'GitHub Copilot', type: 'instructions', path: copilotInstructionPath, action: 'created' });
+      } else if (update) {
+        const updated = updateManagedContent(copilotInstructionPath, copilotContent);
+        if (updated) {
+          results.push({ tool: 'GitHub Copilot', type: 'instructions', path: copilotInstructionPath, action: 'updated' });
+        }
       }
 
       // 创建 devbooks.instructions.md
       const devbooksInstructionPath = path.join(instructionsDir, 'devbooks.instructions.md');
+      const devbooksContent = generateCopilotDevbooksInstructions();
       if (!fs.existsSync(devbooksInstructionPath)) {
-        fs.writeFileSync(devbooksInstructionPath, generateCopilotDevbooksInstructions());
-        results.push({ tool: 'GitHub Copilot', type: 'instructions', path: devbooksInstructionPath });
+        fs.writeFileSync(devbooksInstructionPath, devbooksContent);
+        results.push({ tool: 'GitHub Copilot', type: 'instructions', path: devbooksInstructionPath, action: 'created' });
+      } else if (update) {
+        const updated = updateManagedContent(devbooksInstructionPath, devbooksContent);
+        if (updated) {
+          results.push({ tool: 'GitHub Copilot', type: 'instructions', path: devbooksInstructionPath, action: 'updated' });
+        }
       }
     }
 
     // 创建 AGENTS.md / CLAUDE.md / GEMINI.md
     if (tool.instructionFile && !tool.instructionFile.includes('/')) {
       const instructionPath = path.join(projectDir, tool.instructionFile);
+      const instructionContent = generateAgentsContent(tool.instructionFile);
       if (!fs.existsSync(instructionPath)) {
-        fs.writeFileSync(instructionPath, generateAgentsContent(tool.instructionFile));
-        results.push({ tool: tool.name, type: 'instruction', path: instructionPath });
+        fs.writeFileSync(instructionPath, instructionContent);
+        results.push({ tool: tool.name, type: 'instruction', path: instructionPath, action: 'created' });
+      } else if (update) {
+        const updated = updateManagedContent(instructionPath, instructionContent);
+        if (updated) {
+          results.push({ tool: tool.name, type: 'instruction', path: instructionPath, action: 'updated' });
+        }
       }
     }
   }
@@ -825,7 +893,7 @@ async function updateCommand(projectDir) {
   });
   console.log(chalk.blue('ℹ') + ` 检测到已配置的工具: ${toolNames.join(', ')}`);
 
-  // 更新 Skills
+  // 更新 Skills（全局目录）
   const skillsResults = installSkills(configuredTools, true);
   for (const result of skillsResults) {
     if (result.count > 0) {
@@ -833,16 +901,26 @@ async function updateCommand(projectDir) {
     }
   }
 
-  // 更新 Rules
+  // 更新 Rules（项目目录）
   const rulesTools = configuredTools.filter(id => {
     const tool = AI_TOOLS.find(t => t.id === id);
     return tool && tool.skillsSupport === SKILLS_SUPPORT.RULES;
   });
 
   if (rulesTools.length > 0) {
-    const rulesResults = installRules(rulesTools, projectDir);
+    const rulesResults = installRules(rulesTools, projectDir, true);
     for (const result of rulesResults) {
-      console.log(chalk.green('✓') + ` ${result.tool}: 更新了规则文件`);
+      if (result.action === 'updated') {
+        console.log(chalk.green('✓') + ` ${result.tool}: 更新了规则文件`);
+      }
+    }
+  }
+
+  // 更新指令文件（项目目录）
+  const instructionResults = installInstructionFiles(configuredTools, projectDir, true);
+  for (const result of instructionResults) {
+    if (result.action === 'updated') {
+      console.log(chalk.green('✓') + ` ${result.tool}: 更新了指令文件 ${path.relative(projectDir, result.path)}`);
     }
   }
 
