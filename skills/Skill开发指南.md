@@ -20,7 +20,7 @@
 |------------|------------|------|
 | **验证/检查类** | 必须幂等（不修改文件） | `change-check.sh`、`guardrail-check.sh`、`devbooks-code-review` |
 | **生成类** | 必须明确"覆盖/增量"行为 | `change-scaffold.sh`、`devbooks-design-doc`、`devbooks-proposal-author` |
-| **修改类** | 必须可安全重跑 | `devbooks-spec-gardener`、`devbooks-design-backport` |
+| **修改类** | 必须可安全重跑 | `devbooks-archiver`、`devbooks-design-backport` |
 
 **验证/检查类 Skill 必须遵守**：
 - [ ] 不修改任何文件（只读操作）
@@ -95,7 +95,7 @@ echo "ok: verification passed"
 
 ### 1.5 真理源分离原则
 
-- **只读真理源**：Skill 只能读取 `<truth-root>/`，不能直接修改（除了 `spec-gardener` 等归档类 Skill）
+- **只读真理源**：Skill 只能读取 `<truth-root>/`，不能直接修改（除了 `archiver` 等归档类 Skill）
 - **写入工作区**：Skill 的写入目标是 `<change-root>/<change-id>/`
 - **归档即合并**：归档操作将工作区内容合并回真理源
 

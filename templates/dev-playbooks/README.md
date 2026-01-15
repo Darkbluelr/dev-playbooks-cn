@@ -160,7 +160,7 @@ DevBooks 使用两个目录根：
 **4. Archive 阶段**
 
 ```
-请运行 devbooks-spec-gardener skill，变更 ID：add-oauth2
+请运行 devbooks-archiver skill，变更 ID：add-oauth2
 ```
 
 ---
@@ -199,7 +199,7 @@ DevBooks 使用两个目录根：
 
 | Skill | 说明 |
 |-------|------|
-| `devbooks-spec-gardener` | 规格维护与去重 |
+| `devbooks-archiver` | 规格维护与去重 |
 | `devbooks-delivery-workflow` | 完整交付闭环 |
 
 ### 独立技能

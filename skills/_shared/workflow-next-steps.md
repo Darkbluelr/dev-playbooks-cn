@@ -25,7 +25,7 @@
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │                     归档阶段 (ARCHIVE)                           │
-│                     spec-gardener                                │
+│                         archiver                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -45,11 +45,11 @@
 | `devbooks-implementation-plan` | `devbooks-test-owner` | 始终（必须单独会话） |
 | `devbooks-test-owner` | `devbooks-coder` | Red 基线后（必须单独会话） |
 | `devbooks-coder` | `devbooks-code-review` | 所有任务完成后 |
-| `devbooks-code-review` | `devbooks-spec-gardener` | 如果有 spec deltas |
+| `devbooks-code-review` | `devbooks-archiver` | 如果有 spec deltas |
 | `devbooks-code-review` | 归档完成 | 如果无 spec deltas |
 | `devbooks-test-reviewer` | `devbooks-coder` | 如果发现测试问题，交回 |
 | `devbooks-design-backport` | `devbooks-implementation-plan` | 设计更新后重跑计划 |
-| `devbooks-spec-gardener` | 归档完成 | 始终 |
+| `devbooks-archiver` | 归档完成 | 始终 |
 
 ## 关键约束
 

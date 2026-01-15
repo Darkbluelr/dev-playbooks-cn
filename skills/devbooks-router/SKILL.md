@@ -195,7 +195,7 @@ skill 列表：
 - **风险/争议/取舍明显**：`devbooks-proposal-challenger` + `devbooks-proposal-judge`（独立对话，对辩后写回 Decision Log）
 - **对外行为/契约/数据不变量变化**：`devbooks-spec-contract` → `(<change-root>/<change-id>/specs/**)` + `design.md` Contract 章节
   - 若需要"确定性创建 spec delta 文件/避免路径写错"：`change-spec-delta-scaffold.sh <change-id> <capability> ...`
-- **模块边界/依赖方向/架构形态变化**：确保 `devbooks-design-doc` 输出完整的 Architecture Impact 章节 → 归档时由 `devbooks-spec-gardener` 合并到 `(<truth-root>/architecture/c4.md)`
+- **模块边界/依赖方向/架构形态变化**：确保 `devbooks-design-doc` 输出完整的 Architecture Impact 章节 → 归档时由 `devbooks-archiver` 合并到 `(<truth-root>/architecture/c4.md)`
 
 硬约束提醒：
 - proposal 阶段禁止写实现代码；实现发生在 apply 阶段并以测试/闸门为完成判据。
@@ -251,7 +251,7 @@ LSC（大规模同质化修改）建议：
 触发信号：用户说"归档/合并 specs/关账/收尾"等。
 
 默认路由：
-- 若本次产生了 spec delta：`devbooks-spec-gardener`（先修剪 `<truth-root>/**` 再归档合并）
+- 若本次产生了 spec delta：`devbooks-archiver`（先修剪 `<truth-root>/**` 再归档合并）
 - 若需要回写设计决策：`devbooks-design-backport`（按需）
 - 若影响用户文档：`devbooks-docs-sync`（确保文档与代码一致）
 
@@ -302,7 +302,7 @@ LSC（大规模同质化修改）建议：
 
 ## DevBooks Skill 适配
 
-DevBooks 使用 `devbooks-proposal-author skill`、`devbooks-test-owner/coder skill`、`devbooks-spec-gardener skill` 作为入口。
+DevBooks 使用 `devbooks-proposal-author skill`、`devbooks-test-owner/coder skill`、`devbooks-archiver skill` 作为入口。
 按上述 A/B/C/D 路由即可，产物路径以项目指路牌里 `<truth-root>/<change-root>` 的映射为准。
 
 ---

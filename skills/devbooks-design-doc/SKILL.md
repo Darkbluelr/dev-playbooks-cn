@@ -100,7 +100,7 @@ proposal → [Design Doc] → spec-contract → implementation-plan → test-own
 
 设计文档中**必须**包含「架构影响」章节，声明本次变更对系统架构的影响。这是确保架构变更走验证闭环的关键机制。
 
-> **设计决策**：C4 架构变更不再由独立的 `devbooks-c4-map` skill 直接写入真理目录，而是作为 design.md 的一部分，在变更验收通过后由 `devbooks-spec-gardener` 合并到真理。
+> **设计决策**：C4 架构变更不再由独立的 `devbooks-c4-map` skill 直接写入真理目录，而是作为 design.md 的一部分，在变更验收通过后由 `devbooks-archiver` 合并到真理。
 
 ### 模板
 

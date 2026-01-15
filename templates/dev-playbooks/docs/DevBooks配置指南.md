@@ -132,7 +132,7 @@ change_root: dev-playbooks/changes/ # 变更包目录根
 | Test Owner | `devbooks-test-owner` | `verification.md` + `tests/` |
 | Coder | `devbooks-coder` | 按 tasks 实现（禁止改 tests） |
 | Reviewer | `devbooks-code-review` | 评审意见 |
-| Spec Gardener | `devbooks-spec-gardener` | 归档修剪 + C4 合并 |
+| Archiver | `devbooks-archiver` | 归档修剪 + C4 合并 |
 | Design Backport | `devbooks-design-backport` | 回写设计缺口 |
 
 ### 按工作流

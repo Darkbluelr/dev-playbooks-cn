@@ -66,7 +66,7 @@
 - devbooks-proposal-challenger（纯评审）
 - devbooks-proposal-judge（纯裁决）
 - devbooks-design-backport（文档回写）
-- devbooks-spec-gardener（文件整理）
+- devbooks-archiver（文件整理）
 - devbooks-test-reviewer（测试评审）
 
 对于这些 Skills，MCP 增强章节应写：

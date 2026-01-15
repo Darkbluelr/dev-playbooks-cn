@@ -245,7 +245,7 @@
 
 ---
 
-## `devbooks-spec-gardener`（Spec Gardener）
+## `devbooks-archiver`（Archiver）
 
 - 作用：归档前修剪与维护 `<truth-root>`（去重合并/删除过时/目录整理/一致性修复），避免 specs 堆叠失控。
 - 使用场景：
@@ -253,7 +253,7 @@
   - 发现 `<truth-root>` 里重复/重叠/过时条目
 - 使用话术：
   ```text
-  你现在是 Spec Gardener。请点名使用 `devbooks-spec-gardener`。
+  你现在是 Archiver。请点名使用 `devbooks-archiver`。
   输入：`dev-playbooks/changes/<change-id>/specs/**` + `dev-playbooks/specs/**` + `dev-playbooks/changes/<change-id>/design.md`（如有）
   只允许修改 `dev-playbooks/specs/**` 做合并/去重/归类/删除过时；不要修改 change 包内容。
   输出按顺序：变更操作清单（CREATE/UPDATE/MOVE/DELETE）→ 每个 CREATE/UPDATE 的完整文件内容 → 合并映射摘要 → Open Questions（<=3）。

@@ -13,12 +13,12 @@ allowed-tools:
 
 ## 工作流位置感知（Workflow Position Awareness）
 
-> **核心原则**：Design Backport 现在**主要由 Spec Gardener 在归档阶段自动调用**，用户通常不需要手动调用。
+> **核心原则**：Design Backport 现在**主要由 Archiver 在归档阶段自动调用**，用户通常不需要手动调用。
 
 ### 我在整体工作流中的位置
 
 ```
-proposal → design → test-owner → coder → test-owner(验证) → code-review → [Archive/Spec Gardener]
+proposal → design → test-owner → coder → test-owner(验证) → code-review → [Archive/Archiver]
                                     ↓                                              ↓
                              记录偏离到 deviation-log.md               自动调用 design-backport
 ```
@@ -32,7 +32,7 @@ coder 有偏离 → 用户手动调用 design-backport → 再归档
 
 **新流程**（自动处理）：
 ```
-coder 有偏离 → 归档时 spec-gardener 自动检测并回写 → 归档
+coder 有偏离 → 归档时 archiver 自动检测并回写 → 归档
 ```
 
 ### 何时仍需手动调用

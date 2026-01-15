@@ -172,7 +172,7 @@ override dispose() {
 
 | 条件 | 下一个 Skill | 原因 |
 |------|--------------|------|
-| 有 spec deltas | `devbooks-spec-gardener` | 归档前合并规格到真理 |
+| 有 spec deltas | `devbooks-archiver` | 归档前合并规格到真理 |
 | 无 spec deltas | 归档完成 | 无需其他 skill |
 | 发现重大问题 | 交回 `devbooks-coder` | 归档前修复问题 |
 
@@ -192,7 +192,7 @@ Review 通过后，Reviewer 必须执行：
 ```markdown
 ## 推荐的下一步
 
-**下一步：`devbooks-spec-gardener`**（如果有 spec deltas）
+**下一步：`devbooks-archiver`**（如果有 spec deltas）
 或
 **归档完成**（如果无 spec deltas）
 
@@ -200,7 +200,7 @@ Review 通过后，Reviewer 必须执行：
 
 ### 如何调用（如果有 spec deltas）
 ```
-运行 devbooks-spec-gardener skill 处理变更 <change-id>
+运行 devbooks-archiver skill 处理变更 <change-id>
 ```
 ```
 

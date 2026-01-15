@@ -74,7 +74,7 @@ allowed-tools:
 | 技术债热点 | `architecture/hotspots.md` | `mcp__ckb__getHotspots` |
 | 分层约束 | `architecture/layering-constraints.md` | 代码分析（可选） |
 
-> **设计决策**：C4 架构地图现在由 brownfield-bootstrap 在初始化时生成，后续架构变更通过 design.md 的 Architecture Impact 章节记录，由 spec-gardener 在归档时合并。
+> **设计决策**：C4 架构地图现在由 brownfield-bootstrap 在初始化时生成，后续架构变更通过 design.md 的 Architecture Impact 章节记录，由 archiver 在归档时合并。
 
 ### 4. 基线变更包
 

@@ -644,7 +644,7 @@ ${DEVBOOKS_MARKERS.start}
 - \`/devbooks-implementation-plan\`：编码计划（tasks.md）
 - \`/devbooks-test-owner\`：验收测试与追溯（独立对话）
 - \`/devbooks-coder\`：按 tasks 实现（禁止改 tests/）
-- \`/devbooks-spec-gardener\`：归档前规格修剪
+- \`/devbooks-archiver\`：归档前规格修剪
 
 ## 核心约束（必须遵守）
 
@@ -806,7 +806,7 @@ ${DEVBOOKS_MARKERS.start}
 | \`devbooks-proposal-author\` | 创建变更提案 |
 | \`devbooks-design-doc\` | 创建设计文档 |
 | \`devbooks-test-owner / devbooks-coder\` | 执行实现 |
-| \`devbooks-spec-gardener\` | 归档变更包 |
+| \`devbooks-archiver\` | 归档变更包 |
 
 ${DEVBOOKS_MARKERS.end}
 `;
