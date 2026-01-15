@@ -46,6 +46,7 @@ AI 编码助手很强大，但往往**不可预测**：
 | **Claude Code** | 完整 Skills | `CLAUDE.md` |
 | **Codex CLI** | 完整 Skills | `AGENTS.md` |
 | **Qoder** | 完整 Skills | `AGENTS.md` |
+| **OpenCode（oh-my-opencode）** | 完整 Skills | `AGENTS.md` |
 | **Cursor** | Rules 系统 | `.cursor/rules/` |
 | **Windsurf** | Rules 系统 | `.windsurf/rules/` |
 | **Gemini CLI** | Rules 系统 | `GEMINI.md` |
@@ -83,6 +84,7 @@ npx dev-playbooks-cn@latest init
 初始化后：
 - Claude Code：`~/.claude/skills/devbooks-*`
 - Codex CLI：`~/.codex/skills/devbooks-*`
+- OpenCode：`~/.config/opencode/skill/devbooks-*`
 
 ### 快速集成
 

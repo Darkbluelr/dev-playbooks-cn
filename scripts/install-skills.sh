@@ -4,11 +4,12 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/install-skills.sh [--claude-only|--codex-only] [--with-codex-prompts] [--dry-run] [--no-prune]
+  ./scripts/install-skills.sh [--claude-only|--codex-only|--opencode-only] [--with-opencode] [--with-codex-prompts] [--dry-run] [--no-prune]
 
 Installs DevBooks skills (skills/devbooks-*) to:
   - Claude Code: ~/.claude/skills/
   - Codex CLI:   $CODEX_HOME/skills (default: ~/.codex/skills/)
+  - OpenCode:    $XDG_CONFIG_HOME/opencode/skill (default: ~/.config/opencode/skill/)
 
 Optionally installs Codex prompt entrypoints (templates/claude-commands/devbooks/*.md) to:
   - Codex CLI:   $CODEX_HOME/prompts (default: ~/.codex/prompts/)
@@ -20,6 +21,7 @@ EOF
 
 install_claude=true
 install_codex=true
+install_opencode=false
 install_codex_prompts=false
 dry_run=false
 prune_removed=true
@@ -29,6 +31,8 @@ while [[ $# -gt 0 ]]; do
     -h|--help) usage; exit 0 ;;
     --claude-only) install_codex=false ;;
     --codex-only) install_claude=false ;;
+    --opencode-only) install_claude=false; install_codex=false; install_opencode=true ;;
+    --with-opencode) install_opencode=true ;;
     --with-codex-prompts) install_codex_prompts=true ;;
     --dry-run) dry_run=true ;;
     --no-prune) prune_removed=false ;;
@@ -207,6 +211,11 @@ if [[ "$install_codex" == true ]]; then
   if [[ "$install_codex_prompts" == true ]]; then
     install_prompts_into "${codex_home}/prompts"
   fi
+fi
+
+if [[ "$install_opencode" == true ]]; then
+  xdg_config_home="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  install_into "${xdg_config_home}/opencode/skill"
 fi
 
 if [[ "$dry_run" == true ]]; then
