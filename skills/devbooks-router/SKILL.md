@@ -6,7 +6,6 @@ allowed-tools:
   - Grep
   - Read
   - Bash
-  - mcp__ckb__getStatus
 ---
 
 # DevBooks：工作流入口引导（Router）

@@ -8,11 +8,6 @@ allowed-tools:
   - Write
   - Edit
   - Bash
-  - mcp__ckb__getStatus
-  - mcp__ckb__getArchitecture
-  - mcp__ckb__getHotspots
-  - mcp__ckb__listKeyConcepts
-  - mcp__ckb__getModuleOverview
 ---
 
 # DevBooks：存量项目初始化（Brownfield Bootstrap）
