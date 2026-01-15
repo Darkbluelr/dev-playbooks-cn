@@ -12,6 +12,40 @@ allowed-tools:
 
 # DevBooks：实现负责人（Coder）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Coder 在 Test Owner 阶段 1 之后执行，完成后交给 Test Owner 阶段 2 验证。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → test-owner(阶段1) → [Coder] → test-owner(阶段2) → code-review → archive
+                                            ↓
+                                    实现代码、让测试变绿
+```
+
+### Coder 的职责边界
+
+| 允许 | 禁止 |
+|------|------|
+| 修改 `src/**` 代码 | ❌ 修改 `tests/**` |
+| 勾选 `tasks.md` 任务项 | ❌ 修改 `verification.md` |
+| 记录偏离到 `deviation-log.md` | ❌ 勾选 AC 覆盖矩阵 |
+| 运行测试验证 | ❌ 设置 verification.md Status |
+
+### Coder 完成后的流程
+
+1. **任务完成**：tasks.md 全部 `[x]`
+2. **测试全绿**：运行 `npm test` 确认通过
+3. **交付 Test Owner**：通知 Test Owner 进入阶段 2 验证
+4. **等待验证结果**：
+   - Test Owner 确认全绿 → 进入 Code Review
+   - Test Owner 发现问题 → Coder 修复
+
+**关键提醒**：Coder 完成后，**不是直接进入 Code Review**，而是先让 Test Owner 验证并打勾。
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根
@@ -334,8 +368,8 @@ fi
 
 | 我的状态 | 下一步 | 原因 |
 |----------|--------|------|
-| COMPLETED | `devbooks-code-review` | 评审可读性/一致性 |
-| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再评审 |
+| COMPLETED | `devbooks-test-owner`（阶段 2 验证） | 任务完成，需要 Test Owner 验证并打勾 |
+| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再让 Test Owner 验证 |
 | HANDOFF (测试问题) | `devbooks-test-owner` | Coder 不能修改测试 |
 | BLOCKED | 等待用户 | 记录断点区 |
 | FAILED | 修复后重试 | 分析失败原因 |
@@ -344,6 +378,7 @@ fi
 - Coder **永远不能修改** `tests/**`
 - 如发现测试问题，必须 HANDOFF 给 Test Owner（单独会话）
 - 如有偏离，必须先 design-backport 再继续
+- **Coder 完成后必须先经过 Test Owner 阶段 2 验证，再进入 Code Review**
 
 ---
 

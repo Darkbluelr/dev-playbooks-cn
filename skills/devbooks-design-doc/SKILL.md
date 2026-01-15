@@ -11,6 +11,28 @@ allowed-tools:
 
 # DevBooks：设计文档（Design Doc）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Design Doc 在 Proposal 批准后执行，是实现阶段的起点。
+
+### 我在整体工作流中的位置
+
+```
+proposal → [Design Doc] → spec-contract → implementation-plan → test-owner → coder → ...
+                 ↓
+        定义 What/Constraints/AC
+```
+
+### Design Doc 的产出
+
+- **What**：做什么（不是怎么做）
+- **Constraints**：约束条件
+- **AC-xxx**：验收标准（可测试的）
+
+**关键**：Design Doc 不写实现步骤，那是 implementation-plan 的职责。
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根

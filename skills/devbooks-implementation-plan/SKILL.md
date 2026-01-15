@@ -11,6 +11,42 @@ allowed-tools:
 
 # DevBooks：编码计划（Implementation Plan）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Implementation Plan 在 Design Doc 之后执行，为 Test Owner 和 Coder 提供任务清单。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → [Implementation Plan] → test-owner(阶段1) → coder → ...
+                            ↓
+                    tasks.md（任务清单）
+```
+
+### Implementation Plan 的职责
+
+| 允许 | 禁止 |
+|------|------|
+| 从 design.md 推导任务 | ❌ 参考 tests/（避免实现偏见） |
+| 绑定验收锚点 (AC-xxx) | ❌ 写实现代码 |
+| 拆分并行任务 | ❌ 执行任务 |
+
+### 产出：tasks.md 结构
+
+```markdown
+## 主线计划区
+- [ ] MP1.1 任务描述 (AC-001)
+- [ ] MP1.2 任务描述 (AC-002)
+
+## 临时计划区
+（紧急任务）
+
+## 断点区
+（中断续做信息）
+```
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根

@@ -12,6 +12,46 @@ allowed-tools:
 
 # DevBooks：测试负责人（Test Owner）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Test Owner 在整体工作流中承担**双阶段职责**，确保与 Coder 的角色隔离。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → [Test Owner 阶段1] → coder → [Test Owner 阶段2] → code-review → archive
+                         ↓                           ↓
+                    Red 基线产出              Green 验证 + 打勾
+```
+
+### Test Owner 的双阶段职责
+
+| 阶段 | 触发时机 | 核心职责 | 产出 |
+|------|----------|----------|------|
+| **阶段 1：Red 基线** | design.md 完成后 | 编写测试、产出失败证据 | verification.md (Status=Ready)、Red 基线 |
+| **阶段 2：Green 验证** | Coder 完成后 | 验证测试通过、勾选 AC 覆盖矩阵 | AC 矩阵打勾、Status 保持 Ready（等 Reviewer 设 Done） |
+
+### 阶段 2 详细职责（关键！）
+
+当用户说"Coder 完成了，请验证"或类似请求时，Test Owner 进入**阶段 2**：
+
+1. **运行全部测试**：执行 `npm test` 或项目测试命令
+2. **验证 Green 状态**：确认所有测试通过
+3. **勾选 AC 覆盖矩阵**：在 verification.md 的 AC 覆盖矩阵中将 `[ ]` 改为 `[x]`
+4. **收集 Green 证据**：保存到 `evidence/green-final/`
+5. **输出验证报告**：总结测试结果和覆盖情况
+
+### AC 覆盖矩阵复选框权限（重要！）
+
+| 复选框位置 | 谁可以勾选 | 勾选时机 |
+|------------|-----------|----------|
+| AC 覆盖矩阵中的 `[ ]` | **Test Owner** | 阶段 2 验证 Green 状态后 |
+| Status 字段 `Done` | Reviewer | Code Review 通过后 |
+
+**禁止**：Coder 不能勾选 AC 覆盖矩阵，不能修改 verification.md。
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根
@@ -339,28 +379,53 @@ devbooks change-evidence <change-id> --label red-baseline -- npm test
 
 ## 完成状态与下一步路由
 
-### 完成状态分类（MECE）
+### 阶段感知（关键！）
+
+Test Owner 有两个阶段，完成状态因阶段而异：
+
+| 当前阶段 | 如何判断 | 完成后下一步 |
+|----------|----------|--------------|
+| **阶段 1** | verification.md 不存在或 Red 基线未产出 | → Coder |
+| **阶段 2** | 用户说"验证/打勾"且 Coder 已完成 | → Code Review |
+
+### 阶段 1 完成状态分类（MECE）
 
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
-| ✅ | COMPLETED | Red 基线产出，无偏离 | `devbooks-coder`（单独会话） |
-| ⚠️ | COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
+| ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | `devbooks-coder`（单独会话） |
+| ⚠️ | PHASE1_COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
 | ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
 | 💥 | FAILED | 测试框架问题等 | 修复后重试 |
 
-### 状态判定流程
+### 阶段 2 完成状态分类（MECE）
+
+| 状态码 | 状态 | 判定条件 | 下一步 |
+|:------:|------|----------|--------|
+| ✅ | PHASE2_VERIFIED | 测试全绿，AC 矩阵已打勾 | `devbooks-code-review` |
+| ❌ | PHASE2_FAILED | 测试未通过 | 通知 Coder 修复，或 HANDOFF |
+| 🔄 | PHASE2_HANDOFF | 发现测试本身有问题 | 修复测试后重新验证 |
+
+### 阶段判定流程
 
 ```
-1. 检查 deviation-log.md 是否有 "| ❌" 记录
-   → 有：COMPLETED_WITH_DEVIATION
+1. 检查当前处于哪个阶段：
+   - verification.md 不存在 → 阶段 1
+   - verification.md 存在但 AC 矩阵全是 [ ] → 阶段 1 或 阶段 2（看用户请求）
+   - 用户明确说"验证/打勾/Coder 完成了" → 阶段 2
 
-2. 检查 Red 基线是否产出
-   - verification.md 存在且有追溯矩阵
-   - evidence/red-baseline/ 存在
-   → 否：BLOCKED 或 FAILED
+2. 阶段 1 状态判定：
+   a. 检查 deviation-log.md 是否有 "| ❌" 记录
+      → 有：PHASE1_COMPLETED_WITH_DEVIATION
+   b. 检查 Red 基线是否产出
+      → 否：BLOCKED 或 FAILED
+   c. 以上都通过 → PHASE1_COMPLETED
 
-3. 以上都通过
-   → COMPLETED
+3. 阶段 2 状态判定：
+   a. 运行测试，检查是否全绿
+      → 否：PHASE2_FAILED
+   b. 检查测试本身是否有问题
+      → 是：PHASE2_HANDOFF
+   c. 全绿且无问题 → PHASE2_VERIFIED
 ```
 
 ### 路由输出模板（必须使用）
@@ -370,15 +435,21 @@ devbooks change-evidence <change-id> --label red-baseline -- npm test
 ```markdown
 ## 完成状态
 
-**状态**：✅ COMPLETED / ⚠️ COMPLETED_WITH_DEVIATION / ❌ BLOCKED / 💥 FAILED
+**阶段**：阶段 1（Red 基线）/ 阶段 2（Green 验证）
 
-**Red 基线**：已产出 / 未完成
+**状态**：✅ PHASE1_COMPLETED / ✅ PHASE2_VERIFIED / ⚠️ ... / ❌ ... / 💥 ...
+
+**Red 基线**：已产出 / 未完成（仅阶段 1）
+
+**Green 验证**：全绿 / 有失败（仅阶段 2）
+
+**AC 矩阵**：已打勾 N/M / 未打勾（仅阶段 2）
 
 **偏离记录**：有 N 条待回写 / 无
 
 ## 下一步
 
-**推荐**：`devbooks-xxx skill`（单独会话）
+**推荐**：`devbooks-xxx skill`
 
 **原因**：[具体原因]
 
@@ -390,8 +461,11 @@ devbooks change-evidence <change-id> --label red-baseline -- npm test
 
 | 我的状态 | 下一步 | 原因 |
 |----------|--------|------|
-| COMPLETED | `devbooks-coder`（单独会话） | Red 基线已产出，Coder 实现以变绿 |
-| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再交给 Coder |
+| PHASE1_COMPLETED | `devbooks-coder`（单独会话） | Red 基线已产出，Coder 实现以变绿 |
+| PHASE1_COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再交给 Coder |
+| PHASE2_VERIFIED | `devbooks-code-review` | 测试全绿，可以进入代码评审 |
+| PHASE2_FAILED | 通知 Coder | 测试未通过，需要 Coder 修复 |
+| PHASE2_HANDOFF | 修复测试 | 测试本身有问题，Test Owner 修复 |
 | BLOCKED | 等待用户 | 记录断点区 |
 | FAILED | 修复后重试 | 分析失败原因 |
 
@@ -399,6 +473,7 @@ devbooks change-evidence <change-id> --label red-baseline -- npm test
 - **角色隔离**：Coder 必须在**单独的会话/实例**中工作
 - Test Owner 和 Coder 不能共享同一会话上下文
 - 如有偏离，必须先 design-backport 再交给 Coder
+- **阶段 2 的 AC 矩阵打勾只能由 Test Owner 执行**
 
 ---
 

@@ -11,6 +11,40 @@ allowed-tools:
 
 # DevBooks：回写设计文档（Design Backport）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Design Backport 现在**主要由 Spec Gardener 在归档阶段自动调用**，用户通常不需要手动调用。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → test-owner → coder → test-owner(验证) → code-review → [Archive/Spec Gardener]
+                                    ↓                                              ↓
+                             记录偏离到 deviation-log.md               自动调用 design-backport
+```
+
+### 设计决策：自动回写
+
+**旧流程**（需手动判断）：
+```
+coder 有偏离 → 用户手动调用 design-backport → 再归档
+```
+
+**新流程**（自动处理）：
+```
+coder 有偏离 → 归档时 spec-gardener 自动检测并回写 → 归档
+```
+
+### 何时仍需手动调用
+
+| 场景 | 是否需要手动调用 |
+|------|------------------|
+| 正常流程（偏离记录在 deviation-log.md） | ❌ 归档时自动处理 |
+| 需要立即回写（不等归档） | ✅ 手动调用 |
+| 设计与实现严重冲突需要决策 | ✅ 手动调用并讨论 |
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根

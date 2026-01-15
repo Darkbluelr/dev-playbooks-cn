@@ -10,6 +10,34 @@ allowed-tools:
 
 # DevBooks：代码评审（Reviewer）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Code Review 在 Test Owner 阶段 2 验证之后执行，是归档前的最后一个评审步骤。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → test-owner(阶段1) → coder → test-owner(阶段2) → [Code Review] → archive
+                                                                          ↓
+                                                              可读性/一致性/依赖审查
+```
+
+### Code Review 的职责边界
+
+| 允许 | 禁止 |
+|------|------|
+| 审查代码可读性/一致性 | ❌ 修改代码文件 |
+| 设置 verification.md Status = Done | ❌ 讨论业务正确性（那是 Test Owner 的事） |
+| 提出改进建议 | ❌ 勾选 AC 覆盖矩阵（那是 Test Owner 的事） |
+
+### 前置条件
+
+- [ ] Test Owner 阶段 2 已完成（AC 矩阵已打勾）
+- [ ] 测试全绿
+- [ ] evidence/green-final/ 存在
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根

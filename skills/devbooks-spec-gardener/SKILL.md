@@ -11,6 +11,36 @@ allowed-tools:
 
 # DevBooks：规格园丁（Spec Gardener）
 
+## 工作流位置感知（Workflow Position Awareness）
+
+> **核心原则**：Spec Gardener 是归档阶段的终点，负责将变更包产物合并到真理，**并自动处理任何未完成的回写**。
+
+### 我在整体工作流中的位置
+
+```
+proposal → design → test-owner → coder → test-owner(验证) → code-review → [Spec Gardener/Archive]
+                                                                                    ↓
+                                                               自动回写 + 合并到真理 + 归档
+```
+
+### Spec Gardener 的职责
+
+1. **自动回写检测**：检查 deviation-log.md 是否有未回写记录
+2. **自动执行回写**：如有未回写记录，自动执行设计回写
+3. **合并到真理**：将 specs/contracts/architecture 合并到 truth-root
+4. **归档变更包**：设置 verification.md Status = Archived
+
+### 为什么在归档阶段自动回写？
+
+**设计决策**：用户只需线性调用 skills，不需要判断是否需要回写。
+
+| 场景 | 旧设计（需手动判断） | 新设计（自动处理） |
+|------|---------------------|-------------------|
+| Coder 有偏离 | 用户需调用 design-backport → 再归档 | Spec Gardener 自动检测并回写 |
+| Coder 无偏离 | 直接归档 | 直接归档 |
+
+---
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根
@@ -30,6 +60,51 @@ allowed-tools:
 ---
 
 ## 核心职责
+
+### 0. 自动回写检测与处理（归档前必做）
+
+> **设计决策**：归档阶段自动处理所有未回写的偏离，用户无需手动调用 design-backport。
+
+**检测流程**：
+
+```
+1. 读取 <change-root>/<change-id>/deviation-log.md
+2. 检查是否有 "| ❌" 未回写记录
+   → 有：执行自动回写（步骤 3-5）
+   → 无：跳过，直接进入合并阶段
+
+3. 对每条未回写记录，判断是否为 Design-level 内容：
+   - DESIGN_GAP, CONSTRAINT_CHANGE, API_CHANGE → 需要回写
+   - 纯实现细节（文件名/类名/临时步骤） → 不回写，标记为 IMPL_ONLY
+
+4. 执行设计回写：
+   - 读取 design.md
+   - 按 design-backport 协议的"可回写内容范围"更新
+   - 在 design.md 末尾添加变更记录
+
+5. 更新 deviation-log.md：
+   - 将已回写的记录标记为 ✅
+   - 记录回写时间和归档批次
+```
+
+**自动回写的内容范围**（继承自 design-backport）：
+
+| 可回写 | 不可回写 |
+|--------|----------|
+| 对外语义/用户可感知行为 | 具体文件路径、类名/函数名 |
+| 系统级不可变约束（Invariants） | PR 切分、任务执行顺序 |
+| 核心数据契约与演进策略 | 过细的算法伪代码 |
+| 跨阶段治理策略 | 脚本命令 |
+| 关键取舍与决策 | 表名/字段名 |
+
+**deviation-log.md 更新格式**：
+
+```markdown
+| 时间 | 类型 | 描述 | 涉及文件 | 已回写 | 回写批次 |
+|------|------|------|----------|:------:|----------|
+| 2024-01-15 10:30 | DESIGN_GAP | 并发场景 | tests/... | ✅ | archive-2024-01-16 |
+| 2024-01-15 11:00 | IMPL_ONLY | 重命名变量 | src/... | ⏭️ | (跳过) |
+```
 
 ### 1. 规格合并与维护
 
@@ -106,9 +181,33 @@ allowed-tools:
 
 | 模式 | 触发条件 | 行为 |
 |------|----------|------|
-| **归档模式** | 提供 change-id 且闸门通过 | 将变更包产物合并到 truth-root |
+| **归档模式** | 提供 change-id 且闸门通过 | **自动回写** → 合并到 truth-root → 设置 Status=Archived |
 | **维护模式** | 无 change-id | 执行去重、清理、整理操作 |
 | **检查模式** | 带 --dry-run 参数 | 只输出建议，不实际修改 |
+
+### 归档模式完整流程
+
+```
+1. 前置检查：
+   - [ ] 变更包存在
+   - [ ] verification.md Status = Ready 或 Done
+   - [ ] evidence/green-final/ 存在
+   - [ ] tasks.md 全部 [x]
+
+2. 自动回写（如有需要）：
+   - [ ] 检测 deviation-log.md
+   - [ ] 回写 design.md
+   - [ ] 更新 deviation-log.md 标记
+
+3. 合并到真理：
+   - [ ] 合并 specs/**
+   - [ ] 合并 contracts/**
+   - [ ] 合并 Architecture Impact 到 c4.md
+
+4. 归档：
+   - [ ] 设置 verification.md Status = Archived
+   - [ ] 输出归档报告
+```
 
 ### 检测输出示例
 
