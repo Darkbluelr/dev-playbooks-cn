@@ -59,7 +59,7 @@ proposal → design → [Test Owner 阶段1] → coder → [Test Owner 阶段2] 
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+2. `dev-playbooks/project.md`（如存在）→ Dev-Playbooks 协议，使用默认映射
 3. `project.md`（如存在）→ template 协议，使用默认映射
 4. 若仍无法确定 → **停止并询问用户**
 
@@ -205,7 +205,7 @@ Test Owner 必须产出结构化的 `verification.md`，同时作为测试计划
 
 **正确的路径示例**：
 ```bash
-# DevBooks 2.0 默认路径
+# Dev-Playbooks 默认路径
 dev-playbooks/changes/<change-id>/evidence/red-baseline/test-$(date +%Y%m%d-%H%M%S).log
 
 # 使用脚本

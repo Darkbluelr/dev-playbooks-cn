@@ -52,7 +52,7 @@ coder 有偏离 → 归档时 archiver 自动检测并回写 → 归档
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `dev-playbooks/project.md`（如存在）→ DevBooks 2.0 协议，使用默认映射
+2. `dev-playbooks/project.md`（如存在）→ Dev-Playbooks 协议，使用默认映射
 3. `project.md`（如存在）→ template 协议，使用默认映射
 4. 若仍无法确定 → **停止并询问用户**
 

@@ -143,13 +143,13 @@ output_config() {
 }
 
 # ============================================
-# 新格式输出（DevBooks 2.0）
+# 新格式输出（Dev-Playbooks）
 # ============================================
 
 output_config_v2() {
     local config_root="$1"
 
-    echo "# DevBooks 2.0 Configuration"
+    echo "# Dev-Playbooks Configuration"
     echo "devbooks_version=2.0"
     echo "config_root=${config_root}"
 

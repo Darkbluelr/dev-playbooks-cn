@@ -528,7 +528,7 @@ check_spec_deltas() {
 }
 
 # =============================================================================
-# Constitution Check (DevBooks 2.0)
+# Constitution Check (Dev-Playbooks)
 # Verify project constitution is present and valid
 # =============================================================================
 check_constitution() {
@@ -562,7 +562,7 @@ check_constitution() {
 }
 
 # =============================================================================
-# Fitness Check (DevBooks 2.0)
+# Fitness Check (Dev-Playbooks)
 # Verify architecture fitness rules
 # =============================================================================
 check_fitness() {
@@ -1038,9 +1038,9 @@ else
   check_verification
   check_no_tests_changed
   check_implicit_changes
-  # DevBooks 2.0: Constitution check
+  # Dev-Playbooks: Constitution check
   check_constitution               # Constitution validity check (strict mode)
-  # DevBooks 2.0: Fitness check
+  # Dev-Playbooks: Fitness check
   check_fitness                    # Architecture fitness check (apply/archive/strict)
   # New quality gates (harden-devbooks-quality-gates)
   check_evidence_closure       # AC-001: Green evidence required for archive
