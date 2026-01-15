@@ -263,7 +263,13 @@ cat <<'EOF' | render_template | write_file "${change_dir}/verification.md"
 ## Metadata
 
 - Change ID: `__CHANGE_ID__`
-- Status: Draft | Ready | Done | Archived
+- Status: Draft
+  > Status lifecycle: Draft → Ready → Done → Archived
+  > - Draft: Initial state
+  > - Ready: Test plan ready (set by Test Owner)
+  > - Done: All tests passed + Review approved (set by **Reviewer only**)
+  > - Archived: Archived (set by Spec Gardener)
+  > **Constraint: Coder is prohibited from modifying Status field**
 - References:
   - Proposal: `__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
   - Design: `__CHANGE_ROOT__/__CHANGE_ID__/design.md`

@@ -40,6 +40,17 @@ allowed-tools:
 
 Test Owner 必须产出结构化的 `verification.md`，同时作为测试计划和追溯文档。
 
+### Status 字段权限
+
+| 状态 | 含义 | 谁可以设置 |
+|------|------|-----------|
+| `Draft` | 初始状态 | 自动生成 |
+| `Ready` | 测试计划就绪 | **Test Owner** |
+| `Done` | Review 通过 | Reviewer（禁止 Test Owner/Coder） |
+| `Archived` | 已归档 | Spec Gardener |
+
+**约束**：Test Owner 完成测试计划后，应将 Status 设为 `Ready`。
+
 ```markdown
 # 验证计划：<change-id>
 

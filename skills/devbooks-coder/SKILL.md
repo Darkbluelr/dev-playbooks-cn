@@ -141,6 +141,7 @@ devbooks change-evidence <change-id> --label green-final -- npm test
 ### 角色边界约束
 - **禁止修改 `tests/**`**（需要改测试必须交还 Test Owner）
 - **禁止修改 `verification.md`**（由 Test Owner 维护）
+- **禁止修改 `verification.md` 的 Status 字段**（只有 Reviewer 可以设为 Done）
 - **禁止修改 `.devbooks/`、`build/`、工程配置文件**（除非 proposal.md 明确声明）
 
 ### 代码质量约束

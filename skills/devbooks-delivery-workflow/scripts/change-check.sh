@@ -410,6 +410,25 @@ check_verification() {
     return 0
   fi
 
+  # ==========================================================================
+  # AC-010: Verification Status Check
+  # Status field controls change package lifecycle: Draft → Ready → Done → Archived
+  # Only Reviewer can set Status to "Done" (Coder/Test Owner prohibited)
+  # ==========================================================================
+  if [[ "$mode" == "archive" || "$mode" == "strict" ]]; then
+    local status_line
+    status_line=$(rg -n "^- Status[:：] *(Draft|Ready|Done|Archived)\b" "$verification_file" -m 1 || true)
+    if [[ -z "$status_line" ]]; then
+      err "verification missing Status line (e.g., '- Status: Done'): ${verification_file}"
+    else
+      local status_value
+      status_value="$(echo "$status_line" | sed -E 's/^[0-9]+:- Status[:：] *//')"
+      if [[ "$status_value" != "Done" && "$status_value" != "Archived" ]]; then
+        err "verification Status must be 'Done' or 'Archived' for ${mode} (current: '${status_value}'). Only Reviewer can set Status to Done: ${verification_file}"
+      fi
+    fi
+  fi
+
   for h in "A\) (Test Plan Directive Table|测试计划指令表)" "B\) (Traceability Matrix|追溯矩阵)" "C\) (Execution Anchors|执行锚点)" "D\) (MANUAL-\* Checklist|MANUAL-\* 清单)"; do
     if ! rg -n "${h}" "$verification_file" >/dev/null; then
       err "verification missing section '${h}': ${verification_file}"

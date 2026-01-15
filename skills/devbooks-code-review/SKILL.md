@@ -148,6 +148,15 @@ override dispose() {
 | 无 spec deltas | 归档完成 | 无需其他 skill |
 | 发现重大问题 | 交回 `devbooks-coder` | 归档前修复问题 |
 
+### Reviewer 专属权限：设置 verification.md Status
+
+**只有 Reviewer 可以将 `verification.md` 的 Status 设为 `Done`**。
+
+Review 通过后，Reviewer 必须执行：
+1. 打开 `<change-root>/<change-id>/verification.md`
+2. 将 `- Status: Ready` 改为 `- Status: Done`
+3. 这是归档的前置条件（`change-check.sh --mode archive` 会检查）
+
 ### 输出模板
 
 完成 code-review 后，输出：
