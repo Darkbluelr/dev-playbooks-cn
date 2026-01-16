@@ -196,7 +196,6 @@ DevBooks 使用两个目录根：
 | Skill | 说明 |
 |-------|------|
 | `devbooks-archiver` | 规格维护与去重 |
-| `devbooks-delivery-workflow` | 完整交付闭环 |
 
 ### 独立技能
 
@@ -205,6 +204,14 @@ DevBooks 使用两个目录根：
 | `devbooks-entropy-monitor` | 系统熵度量 |
 | `devbooks-brownfield-bootstrap` | 存量项目初始化 |
 | `devbooks-convergence-audit` | 收敛性审计（反迷惑设计） |
+
+### 编排层（支持子 Agent 的工具专用）
+
+| Skill | 说明 |
+|-------|------|
+| `devbooks-delivery-workflow` | 完整闭环编排器，自动编排 Proposal→Design→Spec→Plan→Test→Code→Review→Archive 全流程 |
+
+> **注意**：`devbooks-delivery-workflow` 是编排层 Skill，专为支持子 Agent 的 AI 编程工具（如 Claude Code with Task tool）设计。它会调用子 Agent 执行各阶段 Skill，完成完整的变更闭环。
 
 ---
 

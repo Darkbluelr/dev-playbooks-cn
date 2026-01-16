@@ -7,7 +7,7 @@
  *
  * 用法：
  *   dev-playbooks-cn init [path] [options]
- *   dev-playbooks-cn update [path]
+ *   dev-playbooks-cn update [path]           # 更新 CLI 和已配置的工具
  *   dev-playbooks-cn migrate --from <framework> [options]
  *
  * 选项：
@@ -314,6 +314,70 @@ function getCliVersion() {
   } catch {
     return 'unknown';
   }
+}
+
+/**
+ * 检查 npm 上是否有新版本
+ * @returns {Promise<{hasUpdate: boolean, latestVersion: string|null, currentVersion: string}>}
+ */
+async function checkNpmUpdate() {
+  const currentVersion = getCliVersion();
+  try {
+    const { execSync } = await import('child_process');
+    const latestVersion = execSync(`npm view ${CLI_COMMAND} version`, {
+      encoding: 'utf-8',
+      timeout: 10000,
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).trim();
+
+    if (latestVersion && latestVersion !== currentVersion) {
+      // 简单版本比较（假设语义化版本）
+      const current = currentVersion.split('.').map(Number);
+      const latest = latestVersion.split('.').map(Number);
+      const hasUpdate = latest[0] > current[0] ||
+        (latest[0] === current[0] && latest[1] > current[1]) ||
+        (latest[0] === current[0] && latest[1] === current[1] && latest[2] > current[2]);
+      return { hasUpdate, latestVersion, currentVersion };
+    }
+    return { hasUpdate: false, latestVersion, currentVersion };
+  } catch {
+    // 网络错误或超时，静默忽略
+    return { hasUpdate: false, latestVersion: null, currentVersion };
+  }
+}
+
+/**
+ * 执行 npm 全局更新
+ * @returns {Promise<boolean>} 更新是否成功
+ */
+async function performNpmUpdate() {
+  return new Promise((resolve) => {
+    const spinner = ora(`正在更新 ${CLI_COMMAND}...`).start();
+    const child = spawn('npm', ['install', '-g', CLI_COMMAND], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: true
+    });
+
+    let stderr = '';
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        spinner.succeed(`${CLI_COMMAND} 已更新到最新版本`);
+        resolve(true);
+      } else {
+        spinner.fail(`更新失败: ${stderr || '未知错误'}`);
+        resolve(false);
+      }
+    });
+
+    child.on('error', (err) => {
+      spinner.fail(`更新失败: ${err.message}`);
+      resolve(false);
+    });
+  });
 }
 
 // ============================================================================
@@ -1301,7 +1365,32 @@ async function updateCommand(projectDir) {
   console.log(chalk.bold('DevBooks 更新'));
   console.log();
 
-  // 检查是否已初始化
+  // 1. 检查 CLI 自身是否有新版本
+  const spinner = ora('检查 CLI 更新...').start();
+  const { hasUpdate, latestVersion, currentVersion } = await checkNpmUpdate();
+
+  if (hasUpdate) {
+    spinner.info(`发现新版本: ${currentVersion} → ${latestVersion}`);
+    const shouldUpdate = await confirm({
+      message: `是否更新 ${CLI_COMMAND} 到 ${latestVersion}?`,
+      default: true
+    });
+
+    if (shouldUpdate) {
+      const success = await performNpmUpdate();
+      if (success) {
+        console.log(chalk.blue('ℹ') + ` 请重新运行 \`${CLI_COMMAND} update\` 以更新项目文件。`);
+        return;
+      }
+      // 更新失败，继续更新本地文件
+    }
+  } else {
+    spinner.succeed(`CLI 已是最新版本 (v${currentVersion})`);
+  }
+
+  console.log();
+
+  // 2. 检查是否已初始化（更新项目文件）
   const configPath = path.join(projectDir, '.devbooks', 'config.yaml');
   if (!fs.existsSync(configPath)) {
     console.log(chalk.red('✗') + ` 未找到 DevBooks 配置。请先运行 \`${CLI_COMMAND} init\`。`);
@@ -1468,7 +1557,7 @@ function showHelp() {
   console.log();
   console.log(chalk.cyan('用法:'));
   console.log(`  ${CLI_COMMAND} init [path] [options]              初始化 DevBooks`);
-  console.log(`  ${CLI_COMMAND} update [path]                      更新已配置的工具`);
+  console.log(`  ${CLI_COMMAND} update [path]                      更新 CLI 和已配置的工具`);
   console.log(`  ${CLI_COMMAND} migrate --from <framework> [opts]  从其他框架迁移`);
   console.log();
   console.log(chalk.cyan('选项:'));
@@ -1522,7 +1611,7 @@ function showHelp() {
   console.log(`  ${CLI_COMMAND} init my-project             # 在 my-project 目录初始化`);
   console.log(`  ${CLI_COMMAND} init --tools claude,cursor  # 非交互式（默认项目级安装）`);
   console.log(`  ${CLI_COMMAND} init --tools claude --scope global  # 非交互式（全局安装）`);
-  console.log(`  ${CLI_COMMAND} update                      # 更新已配置的工具`);
+  console.log(`  ${CLI_COMMAND} update                      # 更新 CLI 和 Skills`);
   console.log(`  ${CLI_COMMAND} migrate --from openspec     # 从 OpenSpec 迁移`);
   console.log(`  ${CLI_COMMAND} migrate --from speckit      # 从 spec-kit 迁移`);
   console.log(`  ${CLI_COMMAND} migrate --from openspec --dry-run  # 模拟迁移`);
