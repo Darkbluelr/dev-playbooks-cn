@@ -120,6 +120,32 @@ proposal → design → test-owner(P1) → coder → test-owner(P2) → code-rev
 | `<change-root>/<change-id>/specs/**` | `<truth-root>/specs/**` | 增量合并 |
 | `<change-root>/<change-id>/contracts/**` | `<truth-root>/contracts/**` | 版本化合并 |
 
+**Spec 元信息更新**（合并时必须执行）：
+
+在合并 spec 到 truth-root 时，必须更新以下元信息：
+
+```yaml
+# 在每个被合并/引用的 spec 文件头部更新
+---
+last_referenced_by: <change-id>           # 最后引用此 spec 的变更包
+last_verified: <归档日期>                  # 最后验证日期
+health: active                            # 健康状态：active | stale | deprecated
+---
+```
+
+**元信息更新规则**：
+
+| 场景 | 更新行为 |
+|------|----------|
+| 新增 Spec | 创建完整元信息头 |
+| 修改已有 Spec | 更新 `last_referenced_by` 和 `last_verified` |
+| Spec 被设计文档引用但未修改 | 仅更新 `last_referenced_by` |
+| 标记为废弃 | 设置 `health: deprecated` |
+
+**建立引用追溯链**：
+
+归档时，archiver 会自动扫描 design.md 中声明的 "受影响的 Spec"（Affected Specs），并更新这些 Spec 的 `last_referenced_by` 字段，即使它们没有被直接修改。这建立了从 Spec 到变更包的反向追溯链。
+
 ### 第 4 步：架构合并
 
 > **设计决策**：C4 架构变更通过 design.md 的 Architecture Impact 章节记录，由 Archiver 在归档时合并到真理。
