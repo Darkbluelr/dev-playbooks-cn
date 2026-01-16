@@ -81,6 +81,83 @@ if [[ -z "$change_id" || "$change_id" == "-"* || "$change_id" =~ [[:space:]] ]];
   exit 2
 fi
 
+# Validate change-id format: YYYYMMDD-HHMM-<verb-prefixed-description>
+# 格式：日期时间-动词开头的语义描述
+# 示例：20240116-1030-add-oauth2-support
+validate_change_id_format() {
+  local id="$1"
+
+  # Pattern: 8 digits (date) + hyphen + 4 digits (time) + hyphen + verb-prefixed-description
+  # 日期：YYYYMMDD，时间：HHMM
+  if [[ ! "$id" =~ ^[0-9]{8}-[0-9]{4}-.+ ]]; then
+    return 1
+  fi
+
+  # Extract datetime part for validation
+  local date_part="${id:0:8}"
+  local time_part="${id:9:4}"
+  local desc_part="${id:14}"
+
+  # Validate date (basic check: year 2020-2099, month 01-12, day 01-31)
+  local year="${date_part:0:4}"
+  local month="${date_part:4:2}"
+  local day="${date_part:6:2}"
+
+  # Remove leading zeros for numeric comparison
+  year=$((10#$year))
+  month=$((10#$month))
+  day=$((10#$day))
+
+  if [[ "$year" -lt 2020 || "$year" -gt 2099 ]]; then
+    return 1
+  fi
+  if [[ "$month" -lt 1 || "$month" -gt 12 ]]; then
+    return 1
+  fi
+  if [[ "$day" -lt 1 || "$day" -gt 31 ]]; then
+    return 1
+  fi
+
+  # Validate time (hour 00-23, minute 00-59)
+  local hour="${time_part:0:2}"
+  local minute="${time_part:2:2}"
+
+  hour=$((10#$hour))
+  minute=$((10#$minute))
+
+  if [[ "$hour" -lt 0 || "$hour" -gt 23 ]]; then
+    return 1
+  fi
+  if [[ "$minute" -lt 0 || "$minute" -gt 59 ]]; then
+    return 1
+  fi
+
+  # Validate description starts with a verb (common verbs)
+  # 常用动词：add, fix, update, refactor, remove, improve, migrate, implement, ...
+  local verb_pattern="^(add|fix|update|refactor|remove|improve|migrate|implement|enable|disable|change|create|delete|modify|optimize|resolve|setup|init|configure|introduce|extract|merge|split|move|rename|deprecate|upgrade|downgrade|revert|sync|integrate|unify|standardize|simplify|extend|reduce|enhance|support|handle|validate|test|document|cleanup|prepare|finalize|complete|release|publish|deploy|hotfix|patch|bump)-"
+
+  if [[ ! "$desc_part" =~ $verb_pattern ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+if ! validate_change_id_format "$change_id"; then
+  echo "error: change-id 格式无效: '$change_id'" >&2
+  echo "" >&2
+  echo "期望格式: YYYYMMDD-HHMM-<动词开头的语义描述>" >&2
+  echo "示例: 20240116-1030-add-oauth2-support" >&2
+  echo "" >&2
+  echo "规则:" >&2
+  echo "  - 日期: YYYYMMDD (如 20240116)" >&2
+  echo "  - 时间: HHMM (如 1030 表示 10:30)" >&2
+  echo "  - 描述: 必须以动词开头 (add/fix/update/refactor/...)" >&2
+  echo "" >&2
+  echo "常用动词: add, fix, update, refactor, remove, improve, migrate, implement" >&2
+  exit 2
+fi
+
 if [[ -z "$project_root" || -z "$change_root" || -z "$truth_root" ]]; then
   usage
   exit 2

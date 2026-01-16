@@ -1,6 +1,6 @@
 ---
 name: devbooks-delivery-workflow
-description: devbooks-delivery-workflow：把一次变更跑成可追溯闭环（Design→Plan→Trace→Verify→Implement→Archive），明确 DoD、追溯矩阵与角色隔离（Test Owner 与 Coder 分离）。用户说"跑一遍闭环/交付验收/追溯矩阵/DoD/关账归档/验收工作流"等时使用。
+description: devbooks-delivery-workflow：完整闭环编排器，在支持子 Agent 的 AI 编程工具中调用，自动编排 Proposal→Design→Spec→Plan→Test→Implement→Review→Archive 全流程。用户说"跑一遍闭环/完整交付/从头到尾跑完/自动化变更流程"等时使用。
 allowed-tools:
   - Glob
   - Grep
@@ -8,9 +8,12 @@ allowed-tools:
   - Write
   - Edit
   - Bash
+  - Task
 ---
 
-# DevBooks：交付验收工作流（闭环骨架）
+# DevBooks：交付验收工作流（完整闭环编排器）
+
+> **定位**：本 Skill 是**编排层**，不是日常手动使用的 Skill。它在支持子 Agent 的 AI 编程工具（如 Claude Code with Task tool）中调用，自动编排完整的变更闭环。
 
 ## 前置：配置发现（协议无关）
 
@@ -28,57 +31,85 @@ allowed-tools:
 - 禁止猜测目录根
 - 禁止跳过规则文档阅读
 
-## 变更包命名规范（必须遵守）
+## 核心职责：完整闭环编排
 
-变更包 ID（change-id）**必须**遵循以下命名规范：
+本 Skill 的核心能力是**编排子 Agent 完成完整变更闭环**。
 
-### 格式
+### 闭环流程（8 个阶段）
 
 ```
-<日期时间>-<动词开头的语义描述>
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  1. Propose │ ──▶ │  2. Design  │ ──▶ │  3. Spec    │ ──▶ │  4. Plan    │
+│  (提案)     │     │  (设计)     │     │  (规格)     │     │  (计划)     │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+       │                                                           │
+       ▼                                                           ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  8. Archive │ ◀── │  7. Review  │ ◀── │  6. Code    │ ◀── │  5. Test    │
+│  (归档)     │     │  (评审)     │     │  (实现)     │     │  (测试)     │
+└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-### 规则
+### 阶段详解与对应 Skill
 
-| 组成部分 | 规则 | 示例 |
-|----------|------|------|
-| 日期时间 | `YYYYMMDD-HHMM` 格式 | `20240116-1030` |
-| 分隔符 | 日期时间与语义之间用 `-` 分隔 | `-` |
-| 语义描述 | **必须以动词开头**，使用小写和连字符 | `add-oauth2`, `fix-login-bug` |
+| 阶段 | Skill | 产物 | 角色 |
+|------|-------|------|------|
+| 1. Propose | `devbooks-proposal-author` | proposal.md | Author |
+| 1.5 Challenge（可选） | `devbooks-proposal-challenger` | 质疑意见 | Challenger |
+| 1.6 Judge（可选） | `devbooks-proposal-judge` | 裁决结果 | Judge |
+| 2. Design | `devbooks-design-doc` | design.md | Designer |
+| 3. Spec | `devbooks-spec-contract` | specs/*.md | Spec Owner |
+| 4. Plan | `devbooks-implementation-plan` | tasks.md | Planner |
+| 5. Test | `devbooks-test-owner` | verification.md + tests/ | Test Owner |
+| 6. Code | `devbooks-coder` | src/ 实现 | Coder |
+| 7. Review | `devbooks-code-review` | 评审意见 | Reviewer |
+| 7.5 Test Review（可选） | `devbooks-test-reviewer` | 测试评审 | Test Reviewer |
+| 8. Archive | `devbooks-archiver` | 归档到真理源 | Archiver |
 
-### 合法示例
+### 编排逻辑
+
+```
+1. 接收用户需求
+2. 调用 proposal-author 创建提案（自动生成 change-id）
+3. [可选] 调用 proposal-challenger 质疑提案
+4. [可选] 调用 proposal-judge 裁决
+5. 调用 design-doc 创建设计文档
+6. [如有对外契约] 调用 spec-contract 定义规格
+7. 调用 implementation-plan 创建实现计划
+8. 调用 test-owner 编写测试（独立 Agent）
+9. 调用 coder 实现功能（独立 Agent）
+10. 调用 code-review 评审代码
+11. [可选] 调用 test-reviewer 评审测试
+12. 调用 archiver 归档到真理源
+```
+
+### 角色隔离约束
+
+**关键原则**：Test Owner 和 Coder 必须使用**独立的 Agent 实例/会话**。
+
+| 角色 | 隔离要求 | 原因 |
+|------|----------|------|
+| Test Owner | 独立 Agent | 防止 Coder 篡改测试 |
+| Coder | 独立 Agent | 防止 Coder 看到测试实现细节 |
+| Reviewer | 独立 Agent（推荐） | 保持评审客观性 |
+
+### 闸门检查点
+
+每个阶段完成后，调用 `change-check.sh` 验证：
 
 ```bash
-# ✅ 正确
-20240116-1030-add-oauth2-support
-20240116-1430-fix-user-auth-bug
-20240116-0900-refactor-payment-module
-20240115-2200-update-api-docs
+# 提案阶段检查
+change-check.sh <change-id> --mode proposal
 
-# ❌ 错误
-add-oauth2                    # 缺少日期时间
-20240116-oauth2               # 语义不是动词开头
-2024-01-16-add-oauth2         # 日期格式错误（不应有 -）
-oauth2-20240116               # 顺序错误
+# 实现阶段检查（Test Owner）
+change-check.sh <change-id> --mode apply --role test-owner
+
+# 实现阶段检查（Coder）
+change-check.sh <change-id> --mode apply --role coder
+
+# 归档前检查
+change-check.sh <change-id> --mode archive
 ```
-
-### 常用动词
-
-| 动词 | 用途 |
-|------|------|
-| `add` | 添加新功能 |
-| `fix` | 修复缺陷 |
-| `update` | 更新现有功能 |
-| `refactor` | 重构代码 |
-| `remove` | 删除功能 |
-| `improve` | 改进性能/体验 |
-| `migrate` | 迁移数据/系统 |
-
-### 为什么这样命名？
-
-1. **时间戳在前**：归档目录中自动按时间排序
-2. **动词开头**：清晰表达变更意图，方便代码审查
-3. **小写连字符**：避免跨平台文件名问题
 
 ## 参考骨架（按需读取）
 
