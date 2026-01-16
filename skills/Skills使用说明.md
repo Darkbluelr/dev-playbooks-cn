@@ -357,3 +357,35 @@
   输入：`tests/**` + `dev-playbooks/changes/<change-id>/verification.md`（如有）
   输出：覆盖盲区 / 边界条件遗漏 / 可维护性风险 / 改进建议。
   ```
+
+---
+
+## `devbooks-convergence-audit`（Convergence Auditor）【新】
+
+- 作用：以证据优先、声明存疑的原则评估 DevBooks 工作流收敛性，检测"西西弗斯反模式"和"假完成"。主动验证而非信任文档声明。
+- **反迷惑设计**：不相信文档中的任何断言（Status: Done、AC 打勾等），必须通过可验证证据确认。
+- 使用场景：
+  - 你想评估工作流的真实收敛性（而非文档声明）
+  - 你怀疑某个变更包是"假完成"或"过时证据"
+  - 你想检测西西弗斯困境（反复返工但无法收敛）
+- 使用话术：
+  ```text
+  你现在是 Convergence Auditor。请点名使用 `devbooks-convergence-audit`。
+  先读：`dev-playbooks/project.md`（如存在）
+  目标：对指定变更包进行收敛性审计。
+
+  请按反迷惑原则执行：
+  1) 读取 `dev-playbooks/changes/<change-id>/` 下的所有文档
+  2) 对每个"声明"（Status=Done、AC 打勾等）进行证据验证
+  3) 实际运行测试验证（如可能）
+  4) 输出：声明 vs 证据对比表 + 可信度评分 + 迷惑检测结果
+
+  变更包：<change-id>
+  truth-root：dev-playbooks/specs
+  change-root：dev-playbooks/changes
+  ```
+- 可信度评分说明：
+  - 90-100：✅ 可信收敛，继续当前流程
+  - 70-89：⚠️ 部分可信，需要补充验证
+  - 50-69：🟠 存疑，需要返工部分环节
+  - < 50：🔴 不可信（西西弗斯困境），需要全面审查

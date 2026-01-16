@@ -81,10 +81,21 @@ npx dev-playbooks-cn@latest init
 
 ### 安装落点
 
-初始化后：
-- Claude Code：`~/.claude/skills/devbooks-*`
-- Codex CLI：`~/.codex/skills/devbooks-*`
-- OpenCode：`~/.config/opencode/skill/devbooks-*`
+初始化时可选择 Skills 安装位置：
+
+| 安装范围 | 说明 | 路径示例 |
+|----------|------|----------|
+| **项目级**（默认） | 仅当前项目可用 | `.claude/skills/devbooks-*` |
+| **全局** | 所有项目共享 | `~/.claude/skills/devbooks-*` |
+
+```bash
+# 交互式选择
+dev-playbooks-cn init
+
+# 非交互式指定
+dev-playbooks-cn init --tools claude --scope project  # 项目级
+dev-playbooks-cn init --tools claude --scope global   # 全局
+```
 
 ### 快速集成
 
@@ -193,6 +204,7 @@ DevBooks 使用两个目录根：
 |-------|------|
 | `devbooks-entropy-monitor` | 系统熵度量 |
 | `devbooks-brownfield-bootstrap` | 存量项目初始化 |
+| `devbooks-convergence-audit` | 收敛性审计（反迷惑设计） |
 
 ---
 
