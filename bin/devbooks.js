@@ -24,7 +24,7 @@ import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-import { checkbox, confirm } from '@inquirer/prompts';
+import { checkbox, confirm, select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import ora from 'ora';
 
@@ -43,6 +43,15 @@ const SKILLS_SUPPORT = {
   RULES: 'rules',    // Rules 类似系统（自动应用的规则）
   AGENTS: 'agents',  // Agents/自定义指令（项目级指令文件）
   BASIC: 'basic'     // 仅基础指令（无独立 Skills 概念）
+};
+
+// ============================================================================
+// Skills 安装范围
+// ============================================================================
+
+const INSTALL_SCOPE = {
+  GLOBAL: 'global',   // 全局安装（~/.claude/skills 等）
+  PROJECT: 'project'  // 项目级安装（.claude/skills 等）
 };
 
 // ============================================================================
@@ -540,12 +549,68 @@ async function promptToolSelection(projectDir) {
   return selectedTools;
 }
 
+async function promptInstallScope(projectDir, selectedTools) {
+  // 检查是否有需要安装 Skills 的工具
+  const fullSupportTools = selectedTools.filter(id => {
+    const tool = AI_TOOLS.find(t => t.id === id);
+    return tool && tool.skillsSupport === SKILLS_SUPPORT.FULL;
+  });
+
+  if (fullSupportTools.length === 0) {
+    return INSTALL_SCOPE.PROJECT; // 没有完整 Skills 支持的工具，默认项目级
+  }
+
+  // 读取已保存的配置
+  const config = loadConfig(projectDir);
+  const savedScope = config.installScope;
+
+  console.log();
+  console.log(chalk.bold('📦 Skills 安装位置'));
+  console.log(chalk.gray('─'.repeat(50)));
+  console.log();
+
+  const scope = await select({
+    message: 'Skills 安装到哪里？',
+    choices: [
+      {
+        name: `项目级 ${chalk.gray('(.claude/skills 等，仅当前项目可用)')}`,
+        value: INSTALL_SCOPE.PROJECT,
+        description: '推荐：Skills 随项目走，不影响其他项目'
+      },
+      {
+        name: `全局 ${chalk.gray('(~/.claude/skills 等，所有项目共享)')}`,
+        value: INSTALL_SCOPE.GLOBAL,
+        description: '所有项目共享同一套 Skills'
+      }
+    ],
+    default: savedScope || INSTALL_SCOPE.PROJECT
+  });
+
+  return scope;
+}
+
 
 // ============================================================================
 // 安装 Skills（Claude Code, Codex CLI, Qoder）
 // ============================================================================
 
-function installSkills(toolIds, update = false) {
+function getSkillsDestDir(tool, scope, projectDir) {
+  // 根据安装范围确定目标目录
+  if (scope === INSTALL_SCOPE.PROJECT) {
+    // 项目级安装：使用项目目录下的相对路径
+    if (tool.id === 'claude') {
+      return path.join(projectDir, '.claude', 'skills');
+    } else if (tool.id === 'codex') {
+      return path.join(projectDir, '.codex', 'skills');
+    } else if (tool.id === 'opencode') {
+      return path.join(projectDir, '.opencode', 'skill');
+    }
+  }
+  // 全局安装：使用工具定义的全局目录
+  return tool.skillsDir;
+}
+
+function installSkills(toolIds, projectDir, scope = INSTALL_SCOPE.GLOBAL, update = false) {
   const results = [];
 
   for (const toolId of toolIds) {
@@ -555,7 +620,7 @@ function installSkills(toolIds, update = false) {
     // Claude Code / Codex CLI / OpenCode（含 oh-my-opencode）支持相同格式的 Skills
     if ((toolId === 'claude' || toolId === 'codex' || toolId === 'opencode') && tool.skillsDir) {
       const skillsSrcDir = path.join(__dirname, '..', 'skills');
-      const skillsDestDir = tool.skillsDir;
+      const skillsDestDir = getSkillsDestDir(tool, scope, projectDir);
 
       if (!fs.existsSync(skillsSrcDir)) continue;
 
@@ -601,7 +666,9 @@ function installSkills(toolIds, update = false) {
         type: 'skills',
         count: installedCount,
         total: skillDirs.length,
-        removed: removedCount
+        removed: removedCount,
+        scope: scope,
+        path: skillsDestDir
       });
     }
 
@@ -1013,7 +1080,7 @@ function createProjectStructure(projectDir) {
 // 保存配置
 // ============================================================================
 
-function saveConfig(toolIds, projectDir) {
+function saveConfig(toolIds, projectDir, installScope = INSTALL_SCOPE.PROJECT) {
   const configPath = path.join(projectDir, '.devbooks', 'config.yaml');
 
   // 读取现有配置或创建新配置
@@ -1033,6 +1100,17 @@ function saveConfig(toolIds, projectDir) {
     configContent = configContent.trimEnd() + '\n\n' + toolsYaml + '\n';
   }
 
+  // 更新 install_scope 部分
+  const scopeYaml = `install_scope: ${installScope}`;
+
+  if (configContent.includes('install_scope:')) {
+    // 替换现有的 install_scope 部分
+    configContent = configContent.replace(/install_scope:.*/, scopeYaml);
+  } else {
+    // 追加 install_scope 部分
+    configContent = configContent.trimEnd() + '\n\n' + scopeYaml + '\n';
+  }
+
   fs.writeFileSync(configPath, configContent);
 }
 
@@ -1040,23 +1118,26 @@ function loadConfig(projectDir) {
   const configPath = path.join(projectDir, '.devbooks', 'config.yaml');
 
   if (!fs.existsSync(configPath)) {
-    return { aiTools: [] };
+    return { aiTools: [], installScope: null };
   }
 
   const content = fs.readFileSync(configPath, 'utf-8');
-  const match = content.match(/ai_tools:\s*([\s\S]*?)(?=\n\w|\n$|$)/);
 
-  if (!match) {
-    return { aiTools: [] };
-  }
+  // 解析 ai_tools
+  const toolsMatch = content.match(/ai_tools:\s*([\s\S]*?)(?=\n\w|\n$|$)/);
+  const tools = toolsMatch
+    ? toolsMatch[1]
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('-'))
+        .map(line => line.replace(/^-\s*/, '').trim())
+    : [];
 
-  const tools = match[1]
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.startsWith('-'))
-    .map(line => line.replace(/^-\s*/, '').trim());
+  // 解析 install_scope
+  const scopeMatch = content.match(/install_scope:\s*(\w+)/);
+  const installScope = scopeMatch ? scopeMatch[1] : null;
 
-  return { aiTools: tools };
+  return { aiTools: tools, installScope };
 }
 
 // ============================================================================
@@ -1072,6 +1153,7 @@ async function initCommand(projectDir, options) {
 
   // 确定选择的工具
   let selectedTools;
+  let installScope = INSTALL_SCOPE.PROJECT; // 默认项目级安装
 
   if (options.tools) {
     if (options.tools === 'all') {
@@ -1084,8 +1166,16 @@ async function initCommand(projectDir, options) {
       );
     }
     console.log(chalk.blue('ℹ') + ` 非交互式模式：${selectedTools.length > 0 ? selectedTools.join(', ') : '无'}`);
+
+    // 非交互式模式下，检查 --scope 选项
+    if (options.scope) {
+      installScope = options.scope === 'global' ? INSTALL_SCOPE.GLOBAL : INSTALL_SCOPE.PROJECT;
+    }
   } else {
     selectedTools = await promptToolSelection(projectDir);
+
+    // 交互式选择安装范围
+    installScope = await promptInstallScope(projectDir, selectedTools);
   }
 
   // 创建项目结构
@@ -1093,8 +1183,8 @@ async function initCommand(projectDir, options) {
   const templateCount = createProjectStructure(projectDir);
   spinner.succeed(`创建了 ${templateCount} 个模板文件`);
 
-  // 保存配置
-  saveConfig(selectedTools, projectDir);
+  // 保存配置（包含安装范围）
+  saveConfig(selectedTools, projectDir, installScope);
 
   if (selectedTools.length === 0) {
     console.log();
@@ -1111,12 +1201,16 @@ async function initCommand(projectDir, options) {
 
   if (fullSupportTools.length > 0) {
     const skillsSpinner = ora('安装 Skills...').start();
-    const skillsResults = installSkills(fullSupportTools);
+    const skillsResults = installSkills(fullSupportTools, projectDir, installScope);
     skillsSpinner.succeed('Skills 安装完成');
 
     for (const result of skillsResults) {
       if (result.count > 0) {
-        console.log(chalk.gray(`  └ ${result.tool}: ${result.count}/${result.total} 个 ${result.type}`));
+        const scopeLabel = result.scope === INSTALL_SCOPE.PROJECT ? '项目级' : '全局';
+        console.log(chalk.gray(`  └ ${result.tool}: ${result.count}/${result.total} 个 ${result.type} (${scopeLabel})`));
+        if (result.path) {
+          console.log(chalk.gray(`    → ${result.path}`));
+        }
       } else if (result.note) {
         console.log(chalk.gray(`  └ ${result.tool}: ${result.note}`));
       }
@@ -1217,6 +1311,7 @@ async function updateCommand(projectDir) {
   // 加载配置
   const config = loadConfig(projectDir);
   const configuredTools = config.aiTools;
+  const installScope = config.installScope || INSTALL_SCOPE.PROJECT;
 
   if (configuredTools.length === 0) {
     console.log(chalk.yellow('⚠') + ` 未配置任何 AI 工具。运行 \`${CLI_COMMAND} init\` 进行配置。`);
@@ -1227,13 +1322,17 @@ async function updateCommand(projectDir) {
     const tool = AI_TOOLS.find(t => t.id === id);
     return tool ? tool.name : id;
   });
-  console.log(chalk.blue('ℹ') + ` 检测到已配置的工具: ${toolNames.join(', ')}`);
+  const scopeLabel = installScope === INSTALL_SCOPE.PROJECT ? '项目级' : '全局';
+  console.log(chalk.blue('ℹ') + ` 检测到已配置的工具: ${toolNames.join(', ')} (${scopeLabel}安装)`);
 
-  // 更新 Skills（全局目录）
-  const skillsResults = installSkills(configuredTools, true);
+  // 更新 Skills（使用配置中保存的安装范围）
+  const skillsResults = installSkills(configuredTools, projectDir, installScope, true);
   for (const result of skillsResults) {
     if (result.count > 0) {
       console.log(chalk.green('✓') + ` ${result.tool} ${result.type}: 更新了 ${result.count}/${result.total} 个`);
+      if (result.path) {
+        console.log(chalk.gray(`    → ${result.path}`));
+      }
     }
     if (result.removed && result.removed > 0) {
       console.log(chalk.green('✓') + ` ${result.tool} ${result.type}: 清理了 ${result.removed} 个已删除的技能`);
@@ -1375,6 +1474,8 @@ function showHelp() {
   console.log(chalk.cyan('选项:'));
   console.log('  --tools <tools>    非交互式指定 AI 工具');
   console.log('                     可用值: all, none, 或逗号分隔的工具 ID');
+  console.log('  --scope <scope>    Skills 安装位置 (非交互式模式)');
+  console.log('                     可用值: project (默认), global');
   console.log('  --from <framework> 迁移来源框架 (openspec, speckit)');
   console.log('  --dry-run          模拟运行，不实际修改文件');
   console.log('  --keep-old         迁移后保留原目录');
@@ -1419,7 +1520,8 @@ function showHelp() {
   console.log(chalk.cyan('示例:'));
   console.log(`  ${CLI_COMMAND} init                        # 交互式初始化`);
   console.log(`  ${CLI_COMMAND} init my-project             # 在 my-project 目录初始化`);
-  console.log(`  ${CLI_COMMAND} init --tools claude,cursor  # 非交互式`);
+  console.log(`  ${CLI_COMMAND} init --tools claude,cursor  # 非交互式（默认项目级安装）`);
+  console.log(`  ${CLI_COMMAND} init --tools claude --scope global  # 非交互式（全局安装）`);
   console.log(`  ${CLI_COMMAND} update                      # 更新已配置的工具`);
   console.log(`  ${CLI_COMMAND} migrate --from openspec     # 从 OpenSpec 迁移`);
   console.log(`  ${CLI_COMMAND} migrate --from speckit      # 从 spec-kit 迁移`);
@@ -1449,6 +1551,8 @@ async function main() {
       process.exit(0);
     } else if (arg === '--tools') {
       options.tools = args[++i];
+    } else if (arg === '--scope') {
+      options.scope = args[++i];
     } else if (arg === '--from') {
       options.from = args[++i];
     } else if (arg === '--dry-run') {
