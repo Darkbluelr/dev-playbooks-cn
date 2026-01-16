@@ -14,15 +14,26 @@ allowed-tools:
 
 ## 工作流位置感知（Workflow Position Awareness）
 
-> **核心原则**：Coder 在 Test Owner 阶段 1 之后执行，完成后交给 Test Owner 阶段 2 验证。
+> **核心原则**：Coder 在 Test Owner 阶段 1 之后执行，通过**模式标签**（而非会话隔离）实现思维清晰。
 
 ### 我在整体工作流中的位置
 
 ```
-proposal → design → test-owner(阶段1) → [Coder] → test-owner(阶段2) → code-review → archive
-                                            ↓
-                                    实现代码、让测试变绿
+proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-review → archive
+                                      ↓              ↓
+                               实现+快轨测试    证据审计+打勾
+                              (@smoke/@critical)  (不重跑@full)
 ```
+
+### AI 时代个人开发优化
+
+> **重要变更**：本协议针对 AI 编程 + 个人开发场景优化，**去掉了"单独会话"的硬性要求**。
+
+| 旧设计 | 新设计 | 原因 |
+|--------|--------|------|
+| Test Owner 和 Coder 必须单独会话 | 同一会话，用 `[TEST-OWNER]` / `[CODER]` 模式标签切换 | 减少上下文重建成本 |
+| Coder 跑完整测试等待结果 | Coder 跑快轨（`@smoke`/`@critical`），`@full` 异步触发 | 快速迭代 |
+| 完成后直接交给 Test Owner | 完成后状态为 `Implementation Done`，等 @full 通过 | 异步不阻塞，归档同步 |
 
 ### Coder 的职责边界
 
@@ -31,18 +42,60 @@ proposal → design → test-owner(阶段1) → [Coder] → test-owner(阶段2) 
 | 修改 `src/**` 代码 | ❌ 修改 `tests/**` |
 | 勾选 `tasks.md` 任务项 | ❌ 修改 `verification.md` |
 | 记录偏离到 `deviation-log.md` | ❌ 勾选 AC 覆盖矩阵 |
-| 运行测试验证 | ❌ 设置 verification.md Status |
+| 运行快轨测试（`@smoke`/`@critical`） | ❌ 设置 verification.md Status 为 Verified/Done |
+| 触发 `@full` 测试（CI/后台） | ❌ 等待 @full 完成（可以开始下一个变更） |
 
 ### Coder 完成后的流程
 
-1. **任务完成**：tasks.md 全部 `[x]`
-2. **测试全绿**：运行 `npm test` 确认通过
-3. **交付 Test Owner**：通知 Test Owner 进入阶段 2 验证
-4. **等待验证结果**：
-   - Test Owner 确认全绿 → 进入 Code Review
-   - Test Owner 发现问题 → Coder 修复
+1. **快轨测试绿**：`@smoke` + `@critical` 通过
+2. **触发 @full**：提交代码，CI 开始异步运行 @full 测试
+3. **状态变更**：设置变更状态为 `Implementation Done`
+4. **可以开始下一个变更**（不阻塞）
+5. **等待 @full 结果**：
+   - @full 通过 → Test Owner 进入阶段 2 审计证据
+   - @full 失败 → Coder 修复
 
-**关键提醒**：Coder 完成后，**不是直接进入 Code Review**，而是先让 Test Owner 验证并打勾。
+**关键提醒**：
+- Coder 完成后，状态是 `Implementation Done`，**不是直接进入 Code Review**
+- 开发迭代是异步的（可以开始下一个变更），但归档是同步的（必须等 @full 通过）
+
+---
+
+## 测试分层与运行策略（关键！）
+
+> **核心原则**：Coder 只运行快轨测试，@full 测试异步触发，不阻塞开发迭代。
+
+### 测试分层标签
+
+| 标签 | 用途 | Coder 何时运行 | 预期耗时 |
+|------|------|----------------|----------|
+| `@smoke` | 快速反馈，核心路径 | 每次代码修改后 | 秒级 |
+| `@critical` | 关键功能验证 | 准备提交前 | 分钟级 |
+| `@full` | 完整验收测试 | **不运行**，触发 CI 异步执行 | 可以慢 |
+
+### Coder 的测试运行策略
+
+```bash
+# 开发过程中：频繁运行 @smoke
+npm test -- --grep "@smoke"
+
+# 准备提交前：运行 @critical
+npm test -- --grep "@smoke|@critical"
+
+# 提交后：CI 自动运行 @full（Coder 不等待）
+git push  # 触发 CI
+# → Coder 可以开始下一个任务
+```
+
+### 异步与同步的边界
+
+| 动作 | 阻塞/异步 | 说明 |
+|------|-----------|------|
+| `@smoke` 测试 | 同步 | 每次修改后立即运行 |
+| `@critical` 测试 | 同步 | 提交前必须通过 |
+| `@full` 测试 | **异步** | CI 后台运行，不阻塞 Coder |
+| 开始下一个变更 | **不阻塞** | Coder 可以立即开始 |
+| 归档 | **阻塞** | 必须等 @full 通过 |
 
 ---
 
@@ -319,26 +372,29 @@ fi
 
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
-| ✅ | COMPLETED | 所有任务完成，无偏离 | `devbooks-code-review` |
-| ⚠️ | COMPLETED_WITH_DEVIATION | 任务完成，deviation-log 有未回写记录 | `devbooks-design-backport` |
-| 🔄 | HANDOFF | 发现测试问题需要修改 | `devbooks-test-owner` |
+| ✅ | IMPLEMENTATION_DONE | 快轨测试绿，@full 已触发，无偏离 | 切换到 `[TEST-OWNER]` 等待 @full |
+| ⚠️ | IMPLEMENTATION_DONE_WITH_DEVIATION | 快轨绿，deviation-log 有未回写记录 | `devbooks-design-backport` |
+| 🔄 | HANDOFF | 发现测试问题需要修改 | 切换到 `[TEST-OWNER]` 模式修复测试 |
 | ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
-| 💥 | FAILED | 闸门未通过 | 修复后重试 |
+| 💥 | FAILED | 快轨测试未通过 | 修复后重试 |
 
 ### 状态判定流程
 
 ```
 1. 检查 deviation-log.md 是否有 "| ❌" 记录
-   → 有：COMPLETED_WITH_DEVIATION
+   → 有：IMPLEMENTATION_DONE_WITH_DEVIATION
 
 2. 检查是否需要修改 tests/
-   → 是：HANDOFF to test-owner
+   → 是：HANDOFF to [TEST-OWNER] 模式
 
-3. 检查 tasks.md 是否全部完成
-   → 否：BLOCKED 或 FAILED
+3. 检查快轨测试（@smoke + @critical）是否全部通过
+   → 否：FAILED
 
-4. 以上都通过
-   → COMPLETED
+4. 检查 tasks.md 是否全部完成
+   → 否：BLOCKED 或继续实现
+
+5. 以上都通过，触发 @full
+   → IMPLEMENTATION_DONE
 ```
 
 ### 路由输出模板（必须使用）
@@ -348,37 +404,41 @@ fi
 ```markdown
 ## 完成状态
 
-**状态**：✅ COMPLETED / ⚠️ COMPLETED_WITH_DEVIATION / 🔄 HANDOFF / ❌ BLOCKED / 💥 FAILED
+**状态**：✅ IMPLEMENTATION_DONE / ⚠️ ... / 🔄 HANDOFF / ❌ BLOCKED / 💥 FAILED
 
 **任务进度**：X/Y 已完成
+
+**快轨测试**：@smoke ✅ / @critical ✅
+
+**@full 测试**：已触发（CI 异步运行中）
 
 **偏离记录**：有 N 条待回写 / 无
 
 ## 下一步
 
-**推荐**：`devbooks-xxx skill`
+**推荐**：切换到 `[TEST-OWNER]` 模式等待 @full / `devbooks-xxx skill`
 
 **原因**：[具体原因]
 
-### 如何调用
-运行 devbooks-xxx skill 处理变更 <change-id>
+**注意**：可以开始下一个变更，不需要等待 @full 完成
 ```
 
 ### 具体路由规则
 
 | 我的状态 | 下一步 | 原因 |
 |----------|--------|------|
-| COMPLETED | `devbooks-test-owner`（阶段 2 验证） | 任务完成，需要 Test Owner 验证并打勾 |
-| COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再让 Test Owner 验证 |
-| HANDOFF (测试问题) | `devbooks-test-owner` | Coder 不能修改测试 |
+| IMPLEMENTATION_DONE | 切换到 `[TEST-OWNER]` 模式（等 @full） | 快轨绿，等 @full 通过后审计证据 |
+| IMPLEMENTATION_DONE_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计 |
+| HANDOFF (测试问题) | 切换到 `[TEST-OWNER]` 模式 | Coder 不能修改测试 |
 | BLOCKED | 等待用户 | 记录断点区 |
 | FAILED | 修复后重试 | 分析失败原因 |
 
 **关键约束**：
 - Coder **永远不能修改** `tests/**`
-- 如发现测试问题，必须 HANDOFF 给 Test Owner（单独会话）
+- 如发现测试问题，必须切换到 `[TEST-OWNER]` 模式处理
 - 如有偏离，必须先 design-backport 再继续
-- **Coder 完成后必须先经过 Test Owner 阶段 2 验证，再进入 Code Review**
+- **Coder 完成后状态是 `Implementation Done`，必须等 @full 通过后才能进入 Test Owner 阶段 2**
+- **模式切换替代会话隔离**：使用 `[TEST-OWNER]` / `[CODER]` 标签切换模式
 
 ---
 

@@ -14,41 +14,95 @@ allowed-tools:
 
 ## 工作流位置感知（Workflow Position Awareness）
 
-> **核心原则**：Test Owner 在整体工作流中承担**双阶段职责**，确保与 Coder 的角色隔离。
+> **核心原则**：Test Owner 在整体工作流中承担**双阶段职责**，通过**模式标签**（而非会话隔离）实现思维清晰。
 
 ### 我在整体工作流中的位置
 
 ```
-proposal → design → [Test Owner 阶段1] → coder → [Test Owner 阶段2] → code-review → archive
-                         ↓                           ↓
-                    Red 基线产出              Green 验证 + 打勾
+proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-review → archive
+                         ↓              ↓           ↓
+                    Red 基线      实现+快轨     证据审计+打勾
+                   (增量测试)    (@smoke)     (不重跑@full)
 ```
+
+### AI 时代个人开发优化
+
+> **重要变更**：本协议针对 AI 编程 + 个人开发场景优化，**去掉了"单独会话"的硬性要求**。
+
+| 旧设计 | 新设计 | 原因 |
+|--------|--------|------|
+| Test Owner 和 Coder 必须单独会话 | 同一会话，用 `[TEST-OWNER]` / `[CODER]` 模式标签切换 | 减少上下文重建成本 |
+| 阶段2 重跑完整测试 | 阶段2 默认**审计证据**，可选抽样重跑 | 避免慢测试多次运行 |
+| 测试无分层要求 | 强制测试分层：`@smoke`/`@critical`/`@full` | 快速反馈循环 |
 
 ### Test Owner 的双阶段职责
 
-| 阶段 | 触发时机 | 核心职责 | 产出 |
-|------|----------|----------|------|
-| **阶段 1：Red 基线** | design.md 完成后 | 编写测试、产出失败证据 | verification.md (Status=Ready)、Red 基线 |
-| **阶段 2：Green 验证** | Coder 完成后 | 验证测试通过、勾选 AC 覆盖矩阵 | AC 矩阵打勾、Status 保持 Ready（等 Reviewer 设 Done） |
+| 阶段 | 触发时机 | 核心职责 | 测试运行方式 | 产出 |
+|------|----------|----------|--------------|------|
+| **阶段 1：Red 基线** | design.md 完成后 | 编写测试、产出失败证据 | 只跑**增量测试**（新写的/P0） | verification.md (Status=Ready)、Red 基线 |
+| **阶段 2：Green 验证** | Coder 完成 + @full 通过后 | **审计证据**、勾选 AC 覆盖矩阵 | 默认不重跑，可选抽样 | AC 矩阵打勾、Status=Verified |
 
 ### 阶段 2 详细职责（关键！）
 
 当用户说"Coder 完成了，请验证"或类似请求时，Test Owner 进入**阶段 2**：
 
-1. **运行全部测试**：执行 `npm test` 或项目测试命令
-2. **验证 Green 状态**：确认所有测试通过
-3. **勾选 AC 覆盖矩阵**：在 verification.md 的 AC 覆盖矩阵中将 `[ ]` 改为 `[x]`
-4. **收集 Green 证据**：保存到 `evidence/green-final/`
-5. **输出验证报告**：总结测试结果和覆盖情况
+1. **检查前置条件**：确认 @full 测试已通过（查看 CI 结果或 `evidence/green-final/`）
+2. **审计证据**（默认模式）：
+   - 检查 `evidence/green-final/` 目录下的测试日志
+   - 验证 commit hash 与当前代码一致
+   - 确认测试覆盖了所有 AC
+3. **可选抽样重跑**：对高风险 AC 或有疑问的测试进行抽样验证
+4. **勾选 AC 覆盖矩阵**：在 verification.md 的 AC 覆盖矩阵中将 `[ ]` 改为 `[x]`
+5. **设置状态为 Verified**：表示测试验证通过，等待 Code Review
 
 ### AC 覆盖矩阵复选框权限（重要！）
 
 | 复选框位置 | 谁可以勾选 | 勾选时机 |
 |------------|-----------|----------|
-| AC 覆盖矩阵中的 `[ ]` | **Test Owner** | 阶段 2 验证 Green 状态后 |
+| AC 覆盖矩阵中的 `[ ]` | **Test Owner** | 阶段 2 审计证据确认后 |
+| Status 字段 `Verified` | **Test Owner** | 阶段 2 完成后 |
 | Status 字段 `Done` | Reviewer | Code Review 通过后 |
 
 **禁止**：Coder 不能勾选 AC 覆盖矩阵，不能修改 verification.md。
+
+---
+
+## 测试分层与运行策略（关键！）
+
+> **核心原则**：测试分层是解决"慢测试阻塞开发"问题的关键。
+
+### 测试分层标签（必须使用）
+
+| 标签 | 用途 | 谁运行 | 预期耗时 | 何时运行 |
+|------|------|--------|----------|----------|
+| `@smoke` | 快速反馈，核心路径 | Coder 频繁运行 | 秒级 | 每次代码修改后 |
+| `@critical` | 关键功能验证 | Coder 提交前运行 | 分钟级 | 准备提交时 |
+| `@full` | 完整验收测试 | CI 异步运行 | 可以慢（小时级） | 后台/CI |
+
+### 各阶段测试运行策略
+
+| 阶段 | 运行什么 | 目的 | 阻塞/异步 |
+|------|----------|------|-----------|
+| **Test Owner 阶段1** | 只跑**新写的测试** | 确认 Red 状态 | 同步（但只是增量） |
+| **Coder 开发中** | `@smoke` | 快速反馈循环 | 同步 |
+| **Coder 提交前** | `@critical` | 关键路径验证 | 同步 |
+| **Coder 完成时** | `@full`（触发 CI） | 完整验收 | **异步**（不阻塞开发） |
+| **Test Owner 阶段2** | **不运行**（审计证据） | 独立验证 | N/A |
+
+### 异步与同步的边界（关键！）
+
+```
+✅ 异步的：开发迭代（Coder 完成后可以开始下一个变更，不等 @full）
+❌ 同步的：归档门禁（归档必须等 @full 通过）
+
+时间线示例：
+T1: Coder 完成实现，触发 @full 异步测试 → 状态 = Implementation Done
+T2: Coder 可以开始下一个变更（不阻塞）
+T3: @full 测试通过 → 状态 = 可进入阶段2
+T4: Test Owner 审计证据 + 打勾 → 状态 = Verified
+T5: Code Review → 状态 = Done
+T6: 归档（此时 @full 一定已通过）
+```
 
 ---
 
@@ -86,10 +140,15 @@ Test Owner 必须产出结构化的 `verification.md`，同时作为测试计划
 |------|------|-----------|
 | `Draft` | 初始状态 | 自动生成 |
 | `Ready` | 测试计划就绪 | **Test Owner** |
+| `Implementation Done` | 实现完成，等待 @full 测试 | **Coder** |
+| `Verified` | @full 通过 + 证据审计完成 | **Test Owner** |
 | `Done` | Review 通过 | Reviewer（禁止 Test Owner/Coder） |
-| `Archived` | 已归档 | Spec Gardener |
+| `Archived` | 已归档 | Archiver |
 
-**约束**：Test Owner 完成测试计划后，应将 Status 设为 `Ready`。
+**关键约束**：
+- `Verified` 状态要求 @full 测试必须已通过
+- 只有 `Verified` 或 `Done` 状态的变更才能归档
+- Test Owner 完成测试计划后设 `Ready`，完成证据审计后设 `Verified`
 
 ```markdown
 # 验证计划：<change-id>
@@ -385,14 +444,14 @@ Test Owner 有两个阶段，完成状态因阶段而异：
 
 | 当前阶段 | 如何判断 | 完成后下一步 |
 |----------|----------|--------------|
-| **阶段 1** | verification.md 不存在或 Red 基线未产出 | → Coder |
-| **阶段 2** | 用户说"验证/打勾"且 Coder 已完成 | → Code Review |
+| **阶段 1** | verification.md 不存在或 Red 基线未产出 | → `[CODER]` 模式 |
+| **阶段 2** | 用户说"验证/打勾"且 @full 测试已通过 | → Code Review |
 
 ### 阶段 1 完成状态分类（MECE）
 
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
-| ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | `devbooks-coder`（单独会话） |
+| ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | 切换到 `[CODER]` 模式 |
 | ⚠️ | PHASE1_COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
 | ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
 | 💥 | FAILED | 测试框架问题等 | 修复后重试 |
@@ -401,8 +460,9 @@ Test Owner 有两个阶段，完成状态因阶段而异：
 
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
-| ✅ | PHASE2_VERIFIED | 测试全绿，AC 矩阵已打勾 | `devbooks-code-review` |
-| ❌ | PHASE2_FAILED | 测试未通过 | 通知 Coder 修复，或 HANDOFF |
+| ✅ | PHASE2_VERIFIED | 证据审计通过，AC 矩阵已打勾 | `devbooks-code-review` |
+| ⏳ | PHASE2_WAITING | @full 测试仍在运行 | 等待 CI 完成 |
+| ❌ | PHASE2_FAILED | @full 测试未通过 | 通知 Coder 修复 |
 | 🔄 | PHASE2_HANDOFF | 发现测试本身有问题 | 修复测试后重新验证 |
 
 ### 阶段判定流程
@@ -421,11 +481,13 @@ Test Owner 有两个阶段，完成状态因阶段而异：
    c. 以上都通过 → PHASE1_COMPLETED
 
 3. 阶段 2 状态判定：
-   a. 运行测试，检查是否全绿
+   a. 检查 @full 测试是否已完成
+      → 否：PHASE2_WAITING
+   b. 检查 @full 测试是否通过
       → 否：PHASE2_FAILED
-   b. 检查测试本身是否有问题
+   c. 检查测试本身是否有问题
       → 是：PHASE2_HANDOFF
-   c. 全绿且无问题 → PHASE2_VERIFIED
+   d. 审计证据，确认覆盖 → PHASE2_VERIFIED
 ```
 
 ### 路由输出模板（必须使用）
@@ -437,11 +499,13 @@ Test Owner 有两个阶段，完成状态因阶段而异：
 
 **阶段**：阶段 1（Red 基线）/ 阶段 2（Green 验证）
 
-**状态**：✅ PHASE1_COMPLETED / ✅ PHASE2_VERIFIED / ⚠️ ... / ❌ ... / 💥 ...
+**状态**：✅ PHASE1_COMPLETED / ✅ PHASE2_VERIFIED / ⏳ PHASE2_WAITING / ...
 
 **Red 基线**：已产出 / 未完成（仅阶段 1）
 
-**Green 验证**：全绿 / 有失败（仅阶段 2）
+**@full 测试**：已通过 / 运行中 / 失败（仅阶段 2）
+
+**证据审计**：已完成 / 待审计（仅阶段 2）
 
 **AC 矩阵**：已打勾 N/M / 未打勾（仅阶段 2）
 
@@ -449,31 +513,29 @@ Test Owner 有两个阶段，完成状态因阶段而异：
 
 ## 下一步
 
-**推荐**：`devbooks-xxx skill`
+**推荐**：切换到 `[CODER]` 模式 / `devbooks-xxx skill`
 
 **原因**：[具体原因]
-
-### 如何调用
-运行 devbooks-xxx skill 处理变更 <change-id>
 ```
 
 ### 具体路由规则
 
 | 我的状态 | 下一步 | 原因 |
 |----------|--------|------|
-| PHASE1_COMPLETED | `devbooks-coder`（单独会话） | Red 基线已产出，Coder 实现以变绿 |
+| PHASE1_COMPLETED | 切换到 `[CODER]` 模式 | Red 基线已产出，Coder 实现以变绿 |
 | PHASE1_COMPLETED_WITH_DEVIATION | `devbooks-design-backport` | 先回写设计，再交给 Coder |
-| PHASE2_VERIFIED | `devbooks-code-review` | 测试全绿，可以进入代码评审 |
-| PHASE2_FAILED | 通知 Coder | 测试未通过，需要 Coder 修复 |
+| PHASE2_VERIFIED | `devbooks-code-review` | 证据审计通过，可以进入代码评审 |
+| PHASE2_WAITING | 等待 CI | @full 测试仍在运行 |
+| PHASE2_FAILED | 通知 Coder 修复 | 测试未通过，需要 Coder 修复 |
 | PHASE2_HANDOFF | 修复测试 | 测试本身有问题，Test Owner 修复 |
 | BLOCKED | 等待用户 | 记录断点区 |
 | FAILED | 修复后重试 | 分析失败原因 |
 
 **关键约束**：
-- **角色隔离**：Coder 必须在**单独的会话/实例**中工作
-- Test Owner 和 Coder 不能共享同一会话上下文
+- **模式切换替代会话隔离**：使用 `[TEST-OWNER]` / `[CODER]` 标签切换模式
 - 如有偏离，必须先 design-backport 再交给 Coder
 - **阶段 2 的 AC 矩阵打勾只能由 Test Owner 执行**
+- **阶段 2 必须等 @full 测试通过后才能打勾**
 
 ---
 
