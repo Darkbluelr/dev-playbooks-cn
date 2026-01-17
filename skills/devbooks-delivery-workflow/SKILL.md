@@ -58,6 +58,86 @@ allowed-tools:
 ✅ 必须：所有检查通过后才执行归档
 ```
 
+### 禁令 4：禁止演示模式（NO DEMO MODE）
+
+```
+❌ 禁止：将工作流当作"演示"或"展示"
+❌ 禁止：输出"演示已完成"、"工作流演示"等措辞
+❌ 禁止：声称完成但实际产物不存在或为空
+❌ 禁止：用"模拟"、"假设"、"如果"代替实际执行
+
+✅ 必须：每个阶段都要产出真实的、可验证的产物
+✅ 必须：产物必须写入文件系统（可通过 ls/cat 验证）
+✅ 必须：使用"执行"、"完成"、"已创建"等真实动作词汇
+✅ 必须：如果无法真实执行，立即停止并告知用户
+```
+
+**检测演示模式的信号**：
+- 使用"演示"、"展示"、"模拟"等词汇
+- 声称完成但没有实际文件写入
+- 提供"选项 A/B"而非执行下一步
+- 输出"后续建议"而非继续执行
+
+### 禁令 5：禁止忽略 REVISE REQUIRED
+
+```
+❌ 禁止：收到 REVISE REQUIRED 后继续下一阶段
+❌ 禁止：收到 REVISE REQUIRED 后声称"已完成"
+❌ 禁止：收到 REVISE REQUIRED 后提供"选项"让用户选择
+❌ 禁止：收到 REJECTED 后继续执行
+
+✅ 必须：Judge 返回 REVISE → 回到阶段 1 重写提案
+✅ 必须：Judge 返回 REJECTED → 停止流程，告知用户
+✅ 必须：Test-Review 返回 REVISE REQUIRED → 回到阶段 7 修复测试
+✅ 必须：Code-Review 返回 REVISE REQUIRED → 回到阶段 8 修复代码
+✅ 必须：修复后重新执行评审阶段，直到通过
+```
+
+**回退执行流程**：
+```
+Test-Review REVISE REQUIRED:
+    → 回到阶段 7（Test-Red）
+    → 修复测试问题
+    → 重新执行阶段 7-9
+    → 循环直到 Test-Review 通过
+
+Code-Review REVISE REQUIRED:
+    → 回到阶段 8（Code）
+    → 修复代码问题
+    → 重新执行阶段 8-10
+    → 循环直到 Code-Review 通过
+```
+
+### 禁令 6：禁止部分完成前进
+
+```
+❌ 禁止：tasks.md 任务完成率 < 100% 时进入下一阶段
+❌ 禁止：测试覆盖率 < AC 要求时进入下一阶段
+❌ 禁止：存在空壳测试（skip/todo/not_implemented）时进入 Code 阶段
+❌ 禁止：存在未实现函数（raise NotImplementedError）时进入 Review 阶段
+
+✅ 必须：阶段 7 完成时，所有测试必须是真实的、可执行的
+✅ 必须：阶段 8 完成时，tasks.md 所有任务 100% 完成
+✅ 必须：如果发现范围过大，必须拆分变更包，不能部分完成
+```
+
+**空壳测试的定义**：
+```python
+# 以下都是空壳测试，禁止存在：
+def test_something():
+    pass
+
+def test_something():
+    pytest.skip("not implemented")
+
+def test_something():
+    # TODO: implement
+    assert True
+
+def test_something():
+    raise NotImplementedError
+```
+
 ---
 
 ## 前置：配置发现（协议无关）

@@ -67,6 +67,93 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 ---
 
+## 🚨 绝对禁令（ABSOLUTE RULES）
+
+> **这些规则没有例外，违反即失败。**
+
+### 禁令 1：禁止空壳测试
+
+```
+❌ 禁止：测试函数体为空（pass / return）
+❌ 禁止：测试包含 skip / pytest.skip / @skip
+❌ 禁止：测试包含 TODO / FIXME / not_implemented
+❌ 禁止：测试只有 assert True 或 assert 1 == 1
+❌ 禁止：测试抛出 NotImplementedError
+
+✅ 必须：每个测试都有真实的断言
+✅ 必须：每个测试都能独立运行
+✅ 必须：测试失败时给出有意义的错误信息
+```
+
+**空壳测试示例（全部禁止）**：
+
+```python
+# ❌ 空函数体
+def test_login():
+    pass
+
+# ❌ 跳过标记
+def test_login():
+    pytest.skip("not implemented yet")
+
+# ❌ TODO 占位
+def test_login():
+    # TODO: implement this test
+    assert True
+
+# ❌ 无意义断言
+def test_login():
+    assert 1 == 1
+
+# ❌ 抛出未实现异常
+def test_login():
+    raise NotImplementedError("pending")
+```
+
+**合格测试示例**：
+
+```python
+# ✅ 真实的、有断言的测试
+def test_login_returns_jwt():
+    # Arrange
+    user = create_test_user(email="test@example.com", password="secret")
+
+    # Act
+    result = login_service.login(email="test@example.com", password="secret")
+
+    # Assert
+    assert result.token is not None
+    assert result.token.startswith("eyJ")
+    assert result.user_id == user.id
+```
+
+### 禁令 2：禁止演示模式（NO DEMO MODE）
+
+```
+❌ 禁止：将测试编写当作"演示"或"展示"
+❌ 禁止：声称"测试已编写"但文件为空或不存在
+❌ 禁止：输出测试计划但不实际创建测试文件
+❌ 禁止：用"模拟"、"假设"代替实际编写测试
+
+✅ 必须：每个声称的测试必须是真实文件
+✅ 必须：文件必须包含可执行的测试代码
+✅ 必须：Red 基线证据必须来自实际运行的测试
+```
+
+### 禁令 3：禁止测试与 AC 脱钩
+
+```
+❌ 禁止：测试不关联任何 AC
+❌ 禁止：AC 没有对应的测试
+❌ 禁止：测试通过但 AC 实际未验证
+
+✅ 必须：每个 AC 至少有一个测试
+✅ 必须：每个测试关联到具体的 AC-xxx
+✅ 必须：verification.md AC 覆盖矩阵 100% 有测试映射
+```
+
+---
+
 ## 测试分层与运行策略（关键！）
 
 > **核心原则**：测试分层是解决"慢测试阻塞开发"问题的关键。
