@@ -12,6 +12,36 @@ allowed-tools:
 
 # DevBooks：归档器（Archiver）
 
+## 🚨 绝对禁令（ABSOLUTE RULES）
+
+> **这些规则没有例外，违反即失败。**
+
+### 禁令 1：禁止跳过脚本验证
+
+```
+❌ 禁止：不运行 change-check.sh 就执行归档
+❌ 禁止：change-check.sh 返回非零就继续归档
+❌ 禁止：手动跳过或绕过脚本检查
+
+✅ 必须：归档前运行 change-check.sh --mode strict
+✅ 必须：脚本返回 0 才能继续
+✅ 必须：脚本失败时停止并输出完整错误信息
+```
+
+### 禁令 2：禁止假完成归档
+
+```
+❌ 禁止：evidence/green-final/ 不存在或为空时归档
+❌ 禁止：verification.md AC 覆盖率 < 100% 时归档
+❌ 禁止：tasks.md 存在未完成任务时归档
+
+✅ 必须：所有检查项全部通过
+✅ 必须：Green 证据目录非空
+✅ 必须：AC 覆盖率 100%
+```
+
+---
+
 ## 工作流位置感知（Workflow Position Awareness）
 
 > **核心原则**：Archiver 是归档阶段的**唯一入口**，负责完成从代码评审到变更包归档的所有收尾工作。
@@ -62,10 +92,48 @@ proposal → design → test-owner(P1) → coder → test-owner(P2) → code-rev
 
 ## 归档完整流程
 
-### 第 1 步：前置检查
+### 第 0 步：运行强制验证脚本（MANDATORY）
+
+> **这是归档的第一个动作，不可跳过。**
+
+```bash
+# 必须运行此命令
+change-check.sh <change-id> --mode strict
+```
+
+**执行规则**：
+
+| 脚本返回值 | 行为 |
+|-----------|------|
+| `0` (成功) | 继续执行后续步骤 |
+| 非零 (失败) | **立即停止**，输出完整错误信息，不执行任何归档操作 |
+
+**脚本检查内容**（--mode strict）：
+
+- 变更包存在性
+- verification.md 状态和 AC 覆盖率
+- evidence/green-final/ 存在且非空
+- tasks.md 任务完成率
+- 所有闸门检查
+
+**失败时的输出格式**：
+
+```
+❌ 归档前置检查失败
+
+脚本输出：
+<change-check.sh 的完整输出>
+
+建议操作：
+- 根据上述错误修复问题
+- 重新运行 change-check.sh --mode strict
+- 确认所有检查通过后再次尝试归档
+```
+
+### 第 1 步：前置检查（脚本通过后的二次确认）
 
 ```markdown
-前置检查清单：
+前置检查清单（验证脚本已检查，此为二次确认）：
 - [ ] 变更包存在（<change-root>/<change-id>/）
 - [ ] verification.md Status = Ready 或 Done
 - [ ] evidence/green-final/ 存在且非空
@@ -234,7 +302,7 @@ archived-by: devbooks-archiver
 
 | 模式 | 触发条件 | 行为 |
 |------|----------|------|
-| **归档模式** | 提供 change-id 且闸门通过 | 执行完整归档流程（6步） |
+| **归档模式** | 提供 change-id 且闸门通过 | 执行完整归档流程（7步：0-6） |
 | **维护模式** | 无 change-id | 执行 truth-root 去重、清理、整理 |
 | **检查模式** | 带 --dry-run 参数 | 只输出计划，不实际修改/移动 |
 
@@ -245,7 +313,13 @@ archived-by: devbooks-archiver
 │                      归档模式流程                            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  1. 前置检查                                                 │
+│  0. 运行强制验证脚本（MANDATORY）                             │
+│     └─ change-check.sh <change-id> --mode strict           │
+│              │                                               │
+│              ├─ 返回非零 → ❌ 停止，输出错误                  │
+│              │                                               │
+│              ▼ 返回 0                                        │
+│  1. 前置检查（二次确认）                                      │
 │     ├─ 变更包存在？                                          │
 │     ├─ verification.md Status = Ready/Done？                │
 │     ├─ evidence/green-final/ 存在？                          │
