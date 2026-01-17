@@ -97,6 +97,20 @@ dev-playbooks-cn init --tools claude --scope project  # 项目级
 dev-playbooks-cn init --tools claude --scope global   # 全局
 ```
 
+### 更新
+
+使用 `update` 命令同时更新 CLI 和项目中的 Skills：
+
+```bash
+dev-playbooks-cn update
+```
+
+更新命令会：
+1. **检查 CLI 新版本**：自动检测 npm 上是否有新版本，交互式询问是否更新
+2. **更新项目文件**：更新 Skills、规则文件、指令文件等
+
+> **提示**：不再需要手动运行 `npm install -g dev-playbooks-cn`，`update` 命令会自动处理。
+
 ### 快速集成
 
 DevBooks 使用两个目录根：
