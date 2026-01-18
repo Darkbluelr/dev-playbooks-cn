@@ -184,7 +184,7 @@ allowed-tools:
 
 - 工作流：`references/存量项目初始化.md`
 - 代码导航策略：`references/代码导航策略.md`
-- **项目画像模板（三层架构）**：`templates/项目画像模板-project-profile.md`
+- **项目画像模板（三层架构）**：`templates/项目画像模板.md`
 - 一次性提示词：`references/存量项目初始化提示词.md`
 - 模板（按需）：`references/术语表模板.md`
 
@@ -194,7 +194,7 @@ allowed-tools:
 
 本 Skill 在执行前自动检测上下文，选择合适的初始化范围。
 
-检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
+检测规则参考：`skills/_shared/上下文检测模板.md`
 
 ### 检测流程
 
@@ -234,7 +234,7 @@ allowed-tools:
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
 
-MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
 
 ### 依赖的 MCP 服务
 

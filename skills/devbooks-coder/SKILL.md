@@ -297,7 +297,7 @@ fi
 
 本 Skill 在执行前自动检测上下文，确保前置条件满足。
 
-检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
+检测规则参考：`skills/_shared/上下文检测模板.md`
 
 ### 检测流程
 
@@ -446,7 +446,7 @@ fi
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
 
-MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
 
 ### 依赖的 MCP 服务
 

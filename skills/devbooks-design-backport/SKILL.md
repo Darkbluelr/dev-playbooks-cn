@@ -72,7 +72,7 @@ coder 有偏离 → 归档时 archiver 自动检测并回写 → 归档
 
 本 Skill 在执行前自动检测上下文，识别需要回写的内容。
 
-检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
+检测规则参考：`skills/_shared/上下文检测模板.md`
 
 ### 检测流程
 
@@ -103,5 +103,5 @@ coder 有偏离 → 归档时 archiver 自动检测并回写 → 归档
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
 
-MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
 

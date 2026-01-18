@@ -78,7 +78,7 @@ proposal → design → [Implementation Plan] → test-owner(阶段1) → coder 
 
 本 Skill 在执行前自动检测上下文，选择合适的运行模式。
 
-检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
+检测规则参考：`skills/_shared/上下文检测模板.md`
 
 ### 检测流程
 
@@ -113,7 +113,7 @@ proposal → design → [Implementation Plan] → test-owner(阶段1) → coder 
 
 ## 下一步推荐
 
-**参考**：`skills/_shared/工作流下一步-workflow-next-steps.md`
+**参考**：`skills/_shared/工作流下一步.md`
 
 完成 implementation-plan 后，**必须**的下一步是：
 
@@ -157,5 +157,5 @@ implementation-plan → test-owner (会话A) → coder (会话B)
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
 
-MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
 
