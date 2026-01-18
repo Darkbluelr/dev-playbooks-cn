@@ -135,6 +135,17 @@ install_into() {
     mkdir -p "$dest_root"
   fi
 
+  # Install _shared directory (used by all skills for common references)
+  local shared_src="${src_root}/_shared"
+  if [[ -d "$shared_src" ]]; then
+    local shared_dest="${dest_root}/_shared"
+    if [[ "$dry_run" == true ]]; then
+      echo "[dry-run] install: $shared_src -> $shared_dest"
+    else
+      copy_dir "$shared_src" "$shared_dest"
+    fi
+  fi
+
   for src in "${skill_dirs[@]}"; do
     local name
     name="$(basename "$src")"
