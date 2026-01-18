@@ -2,7 +2,7 @@
 
 > 本项目推荐使用的 MCP 服务器详细配置和使用指南
 >
-> 日期：2025-12-30
+> 日期：2026-01-18
 > 配置级别：User Scope（所有项目可用）
 
 ---
@@ -10,13 +10,10 @@
 ## 📋 目录
 
 1. [概览](#概览)
-2. [TaskMaster AI](#taskmaster-ai)
-3. [CKB (Code Knowledge Backend)](#ckb-code-knowledge-backend)
-4. [tree-sitter-mcp](#tree-sitter-mcp)
-5. [Context7](#context7)
-6. [GitHub MCP Server](#github-mcp-server)
-7. [Playwright MCP](#playwright-mcp)
-8. [配置位置](#配置位置)
+2. [Context7](#context7)
+3. [GitHub MCP Server](#github-mcp-server)
+4. [Playwright MCP](#playwright-mcp)
+5. [配置位置](#配置位置)
 
 ---
 
@@ -26,9 +23,6 @@
 
 | 服务器 | 类型 | 作用域 | 主要功能 |
 |--------|------|--------|----------|
-| **task-master** | 任务管理 | User Scope | AI 驱动的任务管理系统 |
-| **ckb** | 代码分析 | User Scope | 代码符号搜索、引用查找 |
-| **tree-sitter-mcp** | 代码搜索 | User Scope | 语义代码搜索和分析 |
 | **context7** | 代码文档 | User Scope | 实时获取最新的库文档和代码示例 |
 | **github** | GitHub集成 | User Scope | GitHub仓库、Issues、PR管理和自动化 |
 | **playwright** | 浏览器自动化 | User Scope | 网页自动化测试、爬取和交互 |
@@ -36,351 +30,6 @@
 **配置文件**：`~/.claude.json` (顶层 `mcpServers` 字段)
 
 **作用范围**：✅ 所有项目
-
----
-
-## TaskMaster AI
-
-### 基本信息
-
-- **npm 包**：`task-master-ai`
-- **类型**：AI 驱动的任务管理系统
-- **安装方式**：npx（自动下载）
-- **官方文档**：[https://docs.task-master.dev](https://docs.task-master.dev)
-- **GitHub**：[eyaltoledano/claude-task-master](https://github.com/eyaltoledano/claude-task-master)
-
-### 功能特性
-
-- ✅ **任务管理**：创建、更新、删除、搜索任务
-- ✅ **优先级管理**：设置任务优先级（高、中、低）
-- ✅ **状态跟踪**：待办、进行中、已完成
-- ✅ **智能分析**：AI 驱动的任务分析和建议
-- ✅ **自然语言交互**：通过对话管理任务
-- ✅ **多模型支持**：支持 Claude、GPT 等多种 AI 模型
-
-### 配置
-
-```json
-{
-  "mcpServers": {
-    "task-master": {
-      "command": "npx",
-      "args": ["-y", "task-master-ai"],
-      "env": {
-        "ANTHROPIC_API_KEY": "sk-...",
-        "ANTHROPIC_BASE_URL": "https://anyrouter.top",
-        "OPENAI_API_KEY": "sk-...",
-        "OPENAI_BASE_URL": "https://anyrouter.top/v1",
-        "TASK_MASTER_TOOLS": "core"
-      }
-    }
-  }
-}
-```
-
-### 环境变量说明
-
-| 变量 | 必需 | 说明 |
-|------|------|------|
-| `ANTHROPIC_API_KEY` | ✅ | Claude 模型的 API Key |
-| `ANTHROPIC_BASE_URL` | ❌ | 自定义 Anthropic API 端点 |
-| `OPENAI_API_KEY` | ❌ | OpenAI GPT 模型的 API Key |
-| `OPENAI_BASE_URL` | ❌ | 自定义 OpenAI API 端点 |
-| `TASK_MASTER_TOOLS` | ❌ | 启用的工具集合：`core`/`standard`/`all`/自定义逗号列表 |
-
-### 工具集合（TASK_MASTER_TOOLS）
-
-> 说明：`task-master-ai` 实际读取的是 `TASK_MASTER_TOOLS`（不是 `TASK_MASTER_TOOL_MODE`）。
-
-常见取值：
-
-- `core`：精简工具集（默认/推荐）
-- `standard`：标准工具集
-- `all`：启用全部工具
-- `tool_a,tool_b,...`：自定义工具白名单（逗号分隔）
-
-**当前使用**：`core` 模式
-
-### 使用示例
-
-**创建任务**：
-```
-使用 task-master 创建任务：完成 MCP 配置文档
-```
-
-**列出任务**：
-```
-使用 task-master 列出所有待办任务
-```
-
-**更新任务状态**：
-```
-使用 task-master 将任务标记为已完成
-```
-
-**搜索任务**：
-```
-使用 task-master 搜索关于"文档"的任务
-```
-
-### 模型配置（可选）
-
-如果想指定使用的 AI 模型，可以创建配置文件：
-
-```bash
-# 交互式配置
-npx task-master-ai models --setup
-
-# 或直接设置
-npx task-master-ai models --set-main=gpt-4o
-npx task-master-ai models --set-research=claude-3-5-sonnet-20241022
-npx task-master-ai models --set-fallback=gpt-3.5-turbo
-```
-
-配置文件位置：`~/.taskmaster/config.json`
-
-### 支持的 API 提供商
-
-- Anthropic (Claude)
-- OpenAI (GPT-4, GPT-3.5)
-- Perplexity
-- Google (Gemini)
-- Mistral
-- Groq
-- OpenRouter
-- xAI (Grok)
-- Azure OpenAI
-- Ollama (本地)
-
----
-
-## CKB (Code Knowledge Backend)
-
-### 基本信息
-
-- **版本**：7.5.0
-- **类型**：语言无关的代码理解层
-- **安装位置**：`/usr/local/bin/ckb`
-- **GitHub**：[simplyliz/codemcp](https://github.com/simplyliz/codemcp)
-
-### 功能特性
-
-- ✅ **符号搜索**：快速查找函数、类、变量
-- ✅ **查找引用**：找到符号的所有使用位置
-- ✅ **影响分析**：评估代码修改的影响范围
-- ✅ **架构视图**：项目结构和依赖关系
-- ✅ **Git 集成**：Blame 信息和历史追踪
-
-### 后端支持
-
-- **LSP** (Language Server Protocol)：支持 Python、TypeScript、Go 等
-- **SCIP**：预计算索引（适用于 Go/Java/TypeScript）
-- **Git**：仓库历史和 blame 信息
-
-### 配置
-
-```json
-{
-  "mcpServers": {
-    "ckb": {
-      "command": "/usr/local/bin/ckb",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-### 安装步骤
-
-#### 1. 安装 CKB 二进制
-
-```bash
-# 克隆仓库
-cd ~/Projects/mcps
-git clone https://github.com/simplyliz/codemcp.git
-cd codemcp
-
-# 设置 Go 代理（国内环境）
-export GOPROXY=https://goproxy.cn,direct
-export GOSUMDB=sum.golang.google.cn
-
-# 编译
-go build -o ckb ./cmd/ckb
-
-# 安装到系统路径
-sudo cp ckb /usr/local/bin/ckb
-sudo chmod +x /usr/local/bin/ckb
-
-# 验证安装
-ckb --version
-```
-
-#### 2. 安装 Python LSP 支持
-
-```bash
-pip3 install python-lsp-server
-
-# 验证安装
-python3 -m pylsp --version
-```
-
-#### 3. 为项目初始化 CKB
-
-```bash
-cd /path/to/your/project
-ckb init
-```
-
-这会创建 `.ckb/config.json` 配置文件。
-
-### 项目配置文件
-
-位置：`项目/.ckb/config.json`
-
-```json
-{
-  "backends": {
-    "lsp": {
-      "enabled": true,
-      "servers": {
-        "python": {
-          "command": "python3",
-          "args": ["-m", "pylsp"]
-        }
-      }
-    },
-    "git": {
-      "enabled": true
-    }
-  }
-}
-```
-
-### 使用示例
-
-**搜索符号**：
-```
-使用 CKB 搜索项目中的 FastAPI 符号
-```
-
-**查找引用**：
-```
-使用 CKB 查找 get_user 函数的所有引用
-```
-
-**影响分析**：
-```
-使用 CKB 分析修改 User 类的影响
-```
-
-### 常用命令
-
-```bash
-# 查看系统状态
-ckb status
-
-# 搜索符号
-ckb search <符号名>
-
-# 查找引用
-ckb refs <符号名>
-
-# 获取架构概览
-ckb arch
-
-# 运行诊断
-ckb doctor
-```
-
-### 支持的语言
-
-- ✅ Python (通过 LSP)
-- ✅ TypeScript/JavaScript (通过 LSP)
-- ✅ Go (通过 SCIP + LSP)
-- ✅ Java (通过 SCIP)
-- ✅ 任何有 Git 历史的项目
-
-### 注意事项
-
-⚠️ **每个项目需要单独初始化**：虽然 CKB MCP 服务器是 User Scope（全局可用），但每个项目需要运行 `ckb init` 来创建项目特定的配置。
-
----
-
-## tree-sitter-mcp
-
-### 基本信息
-
-- **npm 包**：`@nendo/tree-sitter-mcp`
-- **类型**：语义代码搜索
-- **安装方式**：npx（自动下载）
-- **GitHub**：[nendo/tree-sitter-mcp](https://github.com/nendo/tree-sitter-mcp)
-
-### 功能特性
-
-- ✅ **实时代码解析**：无需预生成索引
-- ✅ **语义搜索**：理解代码结构的搜索
-- ✅ **AST 查询**：抽象语法树级别的分析
-- ✅ **多语言支持**：支持主流编程语言
-- ✅ **轻量级**：不需要复杂配置
-
-### 配置
-
-```json
-{
-  "mcpServers": {
-    "tree-sitter-mcp": {
-      "command": "npx",
-      "args": ["-y", "@nendo/tree-sitter-mcp", "--mcp"]
-    }
-  }
-}
-```
-
-### 特点
-
-- ✅ 首次使用时自动安装
-- ✅ 自动更新到最新版本
-- ✅ 无需维护本地安装
-- ✅ 适用于任何项目（无需初始化）
-- ✅ 零配置
-
-### 使用示例
-
-**分析文件结构**：
-```
-使用 tree-sitter 分析 backend/main.py 的结构
-```
-
-**查找函数定义**：
-```
-使用 tree-sitter 查找所有异步函数定义
-```
-
-**代码模式搜索**：
-```
-使用 tree-sitter 搜索所有 try-except 块
-```
-
-### 支持的语言
-
-- Python
-- JavaScript/TypeScript
-- Go
-- Rust
-- C/C++
-- Java
-- Ruby
-- 以及更多...
-
-### 优势对比
-
-| 特性 | tree-sitter-mcp | CKB |
-|------|----------------|-----|
-| 安装复杂度 | 简单（自动） | 中等（需编译） |
-| 项目初始化 | 不需要 | 需要 |
-| 语义理解 | 中等 | 高 |
-| 引用查找 | 基础 | 完整 |
-| 适用场景 | 快速搜索 | 深度分析 |
 
 ---
 
@@ -527,17 +176,6 @@ Context7 支持标准的 HTTPS 代理环境变量：
 export https_proxy=http://proxy.example.com:8080
 export HTTPS_PROXY=http://proxy.example.com:8080
 ```
-
-### 优势对比
-
-| 特性 | Context7 | CKB | tree-sitter-mcp |
-|------|----------|-----|-----------------|
-| 安装复杂度 | 简单（自动） | 中等（需编译） | 简单（自动） |
-| 文档来源 | 在线最新 | 本地代码 | 本地代码 |
-| 版本特定 | ✅ | ❌ | ❌ |
-| 代码示例 | ✅ 最新 | ❌ | ❌ |
-| 离线使用 | ❌ | ✅ | ✅ |
-| 适用场景 | 查库文档 | 分析本地代码 | 搜索本地代码 |
 
 ### 故障排查
 
@@ -911,18 +549,6 @@ docker ps
 ```bash
 docker pull ghcr.io/github/github-mcp-server
 ```
-
-### 优势对比
-
-| 特性 | GitHub MCP | CKB | tree-sitter-mcp |
-|------|-----------|-----|-----------------|
-| 安装复杂度 | 中等（需 Docker） | 中等（需编译） | 简单（自动） |
-| GitHub 集成 | ✅ 完整 | ❌ | ❌ |
-| 本地代码分析 | ❌ | ✅ | ✅ |
-| Issue/PR 管理 | ✅ | ❌ | ❌ |
-| CI/CD 监控 | ✅ | ❌ | ❌ |
-| 需要网络 | ✅ | ❌ | ❌ |
-| 需要认证 | ✅ PAT | ❌ | ❌ |
 
 ### 故障排查
 
@@ -1595,11 +1221,6 @@ Playwright 可以与其他 MCP 服务器协同工作：
 - GitHub MCP 管理源代码
 - 自动化部署后的测试流程
 
-#### + tree-sitter-mcp
-- tree-sitter 分析本地测试文件
-- Playwright 运行浏览器测试
-- 全栈测试覆盖
-
 ### 最佳实践
 
 #### 1. 选择合适的模式
@@ -1676,9 +1297,6 @@ npx playwright install
 ```json
 {
   "mcpServers": {
-    "task-master": { ... },
-    "ckb": { ... },
-    "tree-sitter-mcp": { ... },
     "context7": { ... },
     "github": { ... },
     "playwright": { ... }
@@ -1699,39 +1317,9 @@ npx playwright install
 - **推荐**：使用本仓库脚本从 Claude 配置一键同步到 Codex：`scripts/sync_mcp_from_claude_to_codex.py`
 - **教程**：`mcp_codex.md`
 
-### 项目特定配置
-
-**CKB 配置**：`项目/.ckb/config.json`
-
-**TaskMaster 配置**：`~/.taskmaster/config.json`（可选）
-
 ---
 
 ## 使用场景
-
-### TaskMaster AI 适用于
-
-- 📋 项目任务管理和追踪
-- ✅ 开发待办事项记录
-- 🔧 代码重构任务规划
-- 🐛 Bug 修复任务跟踪
-- 📊 项目进度管理
-
-### CKB 适用于
-
-- 🏗️ 大型代码库的架构理解
-- 🔍 查找符号引用
-- 📈 影响分析（修改代码前评估影响）
-- 🕒 Git blame 和历史分析
-- 🔗 依赖关系追踪
-
-### tree-sitter-mcp 适用于
-
-- ⚡ 快速代码搜索
-- 🌳 语义分析
-- 🆕 临时项目（无需初始化）
-- 🪶 轻量级代码理解
-- 🔎 代码模式匹配
 
 ### Context7 适用于
 
@@ -1765,47 +1353,6 @@ npx playwright install
 
 ## 故障排查
 
-### TaskMaster 无法启动
-
-**常见原因**：
-- 缺少 API Key
-- API 端点不可访问
-- npx 下载失败
-
-**解决方案**：
-```bash
-# 检查环境变量
-cat ~/.claude.json | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-env = data['mcpServers']['task-master']['env']
-print('环境变量:', list(env.keys()))
-"
-
-# 测试 API 连接
-curl -I https://anyrouter.top
-```
-
-### CKB 显示 "LSP not ready"
-
-**解决方案**：
-```bash
-# 验证 pylsp 安装
-python3 -m pylsp --version
-
-# 检查项目配置
-cat .ckb/config.json
-
-# 重新初始化
-ckb init
-```
-
-### tree-sitter-mcp 首次运行慢
-
-**原因**：npx 需要下载包（正常现象）
-
-**解决方案**：等待下载完成，后续运行会很快
-
 ### Context7 相关问题
 
 请参考 [Context7 章节](#context7) 的故障排查部分。
@@ -1821,29 +1368,6 @@ ckb init
 ---
 
 ## 维护和更新
-
-### 更新 TaskMaster
-
-```bash
-# 使用 npx 会自动使用最新版本
-# 无需手动更新
-```
-
-### 更新 CKB
-
-```bash
-cd ~/Projects/mcps/codemcp
-git pull
-go build -o ckb ./cmd/ckb
-sudo cp ckb /usr/local/bin/ckb
-```
-
-### 更新 tree-sitter-mcp
-
-```bash
-# 使用 npx -y 会自动下载最新版本
-# 无需手动更新
-```
 
 ### 更新 Context7
 
@@ -1877,19 +1401,6 @@ npx playwright install
 
 ## 参考资源
 
-### TaskMaster AI
-- [官方文档](https://docs.task-master.dev)
-- [GitHub 仓库](https://github.com/eyaltoledano/claude-task-master)
-- [npm 包](https://www.npmjs.com/package/task-master-ai)
-
-### CKB
-- [GitHub 仓库](https://github.com/simplyliz/codemcp)
-- [MCP 服务器列表](https://mcp.lobehub.com/)
-
-### tree-sitter-mcp
-- [GitHub 仓库](https://github.com/nendo/tree-sitter-mcp)
-- [npm 包](https://www.npmjs.com/package/@nendo/tree-sitter-mcp)
-
 ### Context7
 - [官方网站](https://context7.com)
 - [GitHub 仓库](https://github.com/upstash/context7)
@@ -1918,6 +1429,6 @@ npx playwright install
 
 ---
 
-**文档更新日期**：2025-12-30
+**文档更新日期**：2026-01-18
 **作者**：Claude Code
 **维护**：定期更新配置和使用说明
