@@ -1,6 +1,6 @@
 # API 设计指南
 
-借鉴 VS Code Extension API 设计原则，本文档定义了 API 设计的最佳实践。
+本文档定义了 API 设计的最佳实践。
 
 ---
 

@@ -1,6 +1,6 @@
 # Pull Request 模板与指南
 
-借鉴 VS Code 的 `.github/pull_request_template.md`，本文档定义了 PR 提交的标准流程。
+本文档定义了 PR 提交的标准流程。
 
 ---
 
