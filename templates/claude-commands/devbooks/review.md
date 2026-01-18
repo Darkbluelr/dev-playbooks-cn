@@ -1,10 +1,10 @@
 ---
-skill: devbooks-code-review
+skill: devbooks-reviewer
 ---
 
 # DevBooks: 代码评审
 
-使用 devbooks-code-review 做可读性/一致性/依赖健康/坏味道审查。
+使用 devbooks-reviewer 做可读性/一致性/依赖健康/坏味道审查。
 
 ## 用法
 

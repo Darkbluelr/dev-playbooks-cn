@@ -220,7 +220,7 @@ Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局�
 
 ---
 
-## `devbooks-code-review`（Reviewer）
+## `devbooks-reviewer`（Reviewer）
 
 - 作用：以 Reviewer 角色做可读性/一致性/依赖健康/坏味道审查，只输出可执行建议，不讨论业务正确性。
 - **热点优先审查**：审查前调用 `mcp__ckb__getHotspots` 获取项目热点，按风险排序审查
@@ -232,7 +232,7 @@ Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局�
   - 想发现耦合、依赖方向、复杂度、坏味道
 - 使用话术：
   ```text
-  你现在是 Reviewer。请点名使用 `devbooks-code-review`。
+  你现在是 Reviewer。请点名使用 `devbooks-reviewer`。
   请只做可读性/一致性/依赖健康度/坏味道审查，不讨论业务正确性；不改 tests/，不改设计。
   输入：本次变更涉及的代码 + `dev-playbooks/specs/**`（如需要项目画像/术语表/坑库）。
   输出：严重问题 / 可维护性风险 / 一致性建议 / 需要新增的质量闸门建议。

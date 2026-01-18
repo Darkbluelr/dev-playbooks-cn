@@ -18,7 +18,7 @@
 
 | Skill 类型 | 幂等性要求 | 示例 |
 |------------|------------|------|
-| **验证/检查类** | 必须幂等（不修改文件） | `change-check.sh`、`guardrail-check.sh`、`devbooks-code-review` |
+| **验证/检查类** | 必须幂等（不修改文件） | `change-check.sh`、`guardrail-check.sh`、`devbooks-reviewer` |
 | **生成类** | 必须明确"覆盖/增量"行为 | `change-scaffold.sh`、`devbooks-design-doc`、`devbooks-proposal-author` |
 | **修改类** | 必须可安全重跑 | `devbooks-archiver`、`devbooks-design-backport` |
 

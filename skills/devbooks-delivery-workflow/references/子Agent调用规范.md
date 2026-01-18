@@ -27,7 +27,7 @@
 | 7 | devbooks-test-owner | "使用 devbooks-test-owner skill 为变更 [change-id] 编写测试并建立 Red 基线" |
 | 8 | devbooks-coder | "使用 devbooks-coder skill 为变更 [change-id] 实现功能" |
 | 9 | devbooks-reviewer | "使用 devbooks-test-reviewer skill 评审变更 [change-id] 的测试" |
-| 10 | devbooks-reviewer | "使用 devbooks-code-review skill 评审变更 [change-id] 的代码" |
+| 10 | devbooks-reviewer | "使用 devbooks-reviewer skill 评审变更 [change-id] 的代码" |
 | 11 | devbooks-test-owner | "使用 devbooks-test-owner skill 运行变更 [change-id] 的所有测试并收集 Green 证据" |
 | 12 | devbooks-archiver | "使用 devbooks-archiver skill 归档变更 [change-id]" |
 

@@ -3,7 +3,7 @@ skill: multi-skill-combo
 skills:
   - devbooks-test-owner
   - devbooks-coder
-  - devbooks-code-review
+  - devbooks-reviewer
 ---
 
 # DevBooks: 应用变更（向后兼容）
@@ -23,7 +23,7 @@ $ARGUMENTS
 这是一个向后兼容命令，触发多 Skill 组合：
 1. devbooks-test-owner：创建验收测试
 2. devbooks-coder：实现功能代码
-3. devbooks-code-review：代码评审
+3. devbooks-reviewer：代码评审
 
 建议使用更精确的直达命令：
 - /devbooks:test - 验收测试

@@ -105,7 +105,7 @@ allowed-tools:
 
 | Skill | 关系 |
 |-------|------|
-| devbooks-code-review | 熵度量**不**嵌入每次 review，作为独立任务 |
+| devbooks-reviewer | 熵度量**不**嵌入每次 review，作为独立任务 |
 | devbooks-proposal-author | 熵报告可作为重构提案的数据支撑 |
 | devbooks-impact-analysis | 高熵区域变更需更谨慎的影响分析 |
 

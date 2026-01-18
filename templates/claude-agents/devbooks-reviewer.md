@@ -1,7 +1,7 @@
 ---
 name: devbooks-reviewer
 description: DevBooks Reviewer 子代理：执行代码评审和测试评审，输出可执行建议。
-skills: devbooks-code-review, devbooks-test-reviewer
+skills: devbooks-reviewer, devbooks-test-reviewer
 ---
 
 # DevBooks Reviewer 子代理

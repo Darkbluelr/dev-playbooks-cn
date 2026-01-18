@@ -84,7 +84,7 @@
 | Skill | MCP 依赖 | 增强功能 |
 |-------|----------|----------|
 | devbooks-coder | mcp__ckb__getHotspots | 热点文件预警 |
-| devbooks-code-review | mcp__ckb__getHotspots | 热点文件高亮 |
+| devbooks-reviewer | mcp__ckb__getHotspots | 热点文件高亮 |
 | devbooks-impact-analysis | mcp__ckb__analyzeImpact, findReferences | 精确影响分析 |
 | devbooks-brownfield-bootstrap | mcp__ckb__* | COD 模型生成 |
 | devbooks-router | mcp__ckb__getStatus | 索引可用性检测 |

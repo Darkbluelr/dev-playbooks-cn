@@ -131,7 +131,7 @@ change_root: dev-playbooks/changes/ # 变更包目录根
 | Planner | `devbooks-implementation-plan` | `tasks.md` |
 | Test Owner | `devbooks-test-owner` | `verification.md` + `tests/` |
 | Coder | `devbooks-coder` | 按 tasks 实现（禁止改 tests） |
-| Reviewer | `devbooks-code-review` | 评审意见 |
+| Reviewer | `devbooks-reviewer` | 评审意见 |
 | Archiver | `devbooks-archiver` | 归档修剪 + C4 合并 |
 | Design Backport | `devbooks-design-backport` | 回写设计缺口 |
 
@@ -185,6 +185,6 @@ AI 可以根据用户意图自动选择 Skills：
 | 用户意图 | 自动路由 |
 |----------|----------|
 | "修 bug"、"定位问题" | `devbooks-impact-analysis` → `devbooks-coder` |
-| "重构"、"优化代码" | `devbooks-code-review` → `devbooks-coder` |
+| "重构"、"优化代码" | `devbooks-reviewer` → `devbooks-coder` |
 | "新功能"、"实现 XX" | `devbooks-router` → 输出闭环路线 |
 | "写测试"、"补测试" | `devbooks-test-owner` |

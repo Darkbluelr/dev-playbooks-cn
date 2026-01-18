@@ -164,7 +164,7 @@ DevBooks 使用两个目录根：
 **3. Review 阶段**
 
 ```
-请运行 devbooks-code-review skill，变更 ID：add-oauth2
+请运行 devbooks-reviewer skill，变更 ID：add-oauth2
 ```
 
 **4. Archive 阶段**
@@ -202,7 +202,7 @@ DevBooks 使用两个目录根：
 
 | Skill | 说明 |
 |-------|------|
-| `devbooks-code-review` | 代码评审（可读性/一致性） |
+| `devbooks-reviewer` | 代码评审（可读性/一致性） |
 | `devbooks-test-reviewer` | 测试质量与覆盖率评审 |
 
 ### Archive 阶段

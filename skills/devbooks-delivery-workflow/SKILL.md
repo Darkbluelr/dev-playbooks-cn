@@ -163,7 +163,7 @@ allowed-tools:
 | 7 | Test-Red | `devbooks-test-owner` | devbooks-test-owner | verification.md + tests/ | ✅ |
 | 8 | Code | `devbooks-coder` | devbooks-coder | src/ 实现 | ✅ |
 | 9 | Test-Review | `devbooks-reviewer` | devbooks-test-reviewer | 测试评审意见 | ✅ |
-| 10 | Code-Review | `devbooks-reviewer` | devbooks-code-review | 代码评审意见 | ✅ |
+| 10 | Code-Review | `devbooks-reviewer` | devbooks-reviewer | 代码评审意见 | ✅ |
 | 11 | Green-Verify | `devbooks-test-owner` | devbooks-test-owner | evidence/green-final/ | ✅ |
 | 12 | Archive | `devbooks-archiver` | devbooks-archiver | 归档到 archive/ | ✅ |
 

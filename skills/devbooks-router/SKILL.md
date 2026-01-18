@@ -68,7 +68,7 @@ fi
 
 **降级模式说明**：
 - 无索引时，`devbooks-impact-analysis` 退化为 Grep 文本搜索（准确度下降）
-- 无索引时，`devbooks-code-review` 无法获取调用图上下文
+- 无索引时，`devbooks-reviewer` 无法获取调用图上下文
 - 建议在 Apply 阶段前完成索引生成
 
 ## 你要做的事
@@ -228,7 +228,7 @@ LSC（大规模同质化修改）建议：
 触发信号：用户说"review/坏味道/可维护性/依赖风险/一致性"等。
 
 默认路由：
-- `devbooks-code-review`（输出可执行建议；不改业务结论、不改 tests）
+- `devbooks-reviewer`（输出可执行建议；不改业务结论、不改 tests）
 - `devbooks-test-reviewer`（评审测试质量、覆盖率、边界条件）
 
 ### D) Docs Sync（文档同步）
