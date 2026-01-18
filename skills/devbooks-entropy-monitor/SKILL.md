@@ -40,7 +40,7 @@ allowed-tools:
 
 ## 执行方式
 
-1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/AI行为规范.md`（可验证性 + 结构质量守门）。
 2) 严格按完整提示词输出：`references/熵度量方法论.md`。
 
 ## 脚本

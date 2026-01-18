@@ -126,7 +126,7 @@ override dispose() {
 
 ## 执行方式
 
-1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/AI行为规范.md`（可验证性 + 结构质量守门）。
 2) 阅读资源管理指南：`references/资源管理审查清单.md`。
 3) 严格按完整提示词输出评审意见：`references/代码评审提示词.md`。
 

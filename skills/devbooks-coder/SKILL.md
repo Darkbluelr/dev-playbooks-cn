@@ -57,7 +57,7 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 ### 必读（立即阅读）
 
-1. **通用守门协议**：`~/.claude/skills/_shared/references/通用守门协议.md`
+1. **AI行为规范**：`~/.claude/skills/_shared/references/AI行为规范.md`
    - 可验证性守门、结构质量守门、完整性守门
    - 所有 skills 的基础规则
 
