@@ -93,21 +93,6 @@ allowed-tools:
 ✅ 必须：修复后重新执行评审阶段，直到通过
 ```
 
-**回退执行流程**：
-```
-Test-Review REVISE REQUIRED:
-    → 回到阶段 7（Test-Red）
-    → 修复测试问题
-    → 重新执行阶段 7-9
-    → 循环直到 Test-Review 通过
-
-Code-Review REVISE REQUIRED:
-    → 回到阶段 8（Code）
-    → 修复代码问题
-    → 重新执行阶段 8-10
-    → 循环直到 Code-Review 通过
-```
-
 ### 禁令 6：禁止部分完成前进
 
 ```
@@ -121,26 +106,9 @@ Code-Review REVISE REQUIRED:
 ✅ 必须：如果发现范围过大，必须拆分变更包，不能部分完成
 ```
 
-**空壳测试的定义**：
-```python
-# 以下都是空壳测试，禁止存在：
-def test_something():
-    pass
-
-def test_something():
-    pytest.skip("not implemented")
-
-def test_something():
-    # TODO: implement
-    assert True
-
-def test_something():
-    raise NotImplementedError
-```
-
 ---
 
-## 前置：配置发现（协议无关）
+## 前置：配置发现
 
 执行前**必须**按以下顺序查找配置：
 1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
@@ -201,234 +169,35 @@ def test_something():
 
 ---
 
-## 编排逻辑（伪代码）
+## 📚 参考文档
 
-```python
-def run_delivery_workflow(user_requirement):
-    """
-    主 Agent 只执行此编排逻辑，不做任何实际工作
-    """
+### 必读（立即阅读）
 
-    # ==================== 阶段 1: Propose ====================
-    change_id = call_subagent("devbooks-proposal-author", {
-        "task": "创建变更提案",
-        "requirement": user_requirement
-    })
-    verify_output(f"{change_root}/{change_id}/proposal.md")
+1. **子 Agent 调用规范**：`references/子Agent调用规范.md`
+   - 调用格式和示例
+   - 角色隔离约束
+   - 何时阅读：开始编排前
 
-    # ==================== 阶段 2: Challenge ====================
-    challenge_result = call_subagent("devbooks-challenger", {
-        "task": "质疑提案",
-        "change_id": change_id
-    })
-    # 不跳过，即使没有质疑也要运行
+2. **编排逻辑伪代码**：`references/编排逻辑伪代码.md`
+   - 完整的编排逻辑
+   - 12 个阶段的详细实现
+   - 何时阅读：需要理解编排逻辑时
 
-    # ==================== 阶段 3: Judge ====================
-    judge_result = call_subagent("devbooks-judge", {
-        "task": "裁决提案",
-        "change_id": change_id,
-        "challenge_result": challenge_result
-    })
-    if judge_result == "REJECTED":
-        return "提案被拒绝，流程终止"
-    if judge_result == "REVISE":
-        # 回到阶段 1，重新编写提案
-        return run_delivery_workflow(revised_requirement)
-    # judge_result == "APPROVED" 继续
+### 按需阅读
 
-    # ==================== 阶段 4: Design ====================
-    call_subagent("devbooks-designer", {
-        "task": "创建设计文档",
-        "change_id": change_id
-    })
-    verify_output(f"{change_root}/{change_id}/design.md")
+3. **闸门检查与错误处理**：`references/闸门检查与错误处理.md`
+   - 阶段闸门检查点
+   - 错误处理流程
+   - 回退执行规则
+   - 何时阅读：遇到错误或需要回退时
 
-    # ==================== 阶段 5: Spec ====================
-    call_subagent("devbooks-spec-owner", {
-        "task": "定义规格契约",
-        "change_id": change_id
-    })
-    # specs/ 目录可能为空（无对外契约时）
+4. **交付验收工作流**：`references/交付验收工作流.md`
+   - 完整的工作流说明
+   - 何时阅读：需要详细了解工作流时
 
-    # ==================== 阶段 6: Plan ====================
-    call_subagent("devbooks-planner", {
-        "task": "创建实现计划",
-        "change_id": change_id
-    })
-    verify_output(f"{change_root}/{change_id}/tasks.md")
-
-    # ==================== 阶段 7: Test-Red ====================
-    # 必须使用独立 Agent 会话
-    call_subagent("devbooks-test-owner", {
-        "task": "编写测试并建立 Red 基线",
-        "change_id": change_id,
-        "isolation": "required"  # 强制隔离
-    })
-    verify_output(f"{change_root}/{change_id}/verification.md")
-    verify_output(f"{change_root}/{change_id}/evidence/red-baseline/")
-
-    # ==================== 阶段 8: Code ====================
-    # 必须使用独立 Agent 会话
-    call_subagent("devbooks-coder", {
-        "task": "按 tasks.md 实现功能",
-        "change_id": change_id,
-        "isolation": "required"  # 强制隔离
-    })
-
-    # ==================== 阶段 9: Test-Review ====================
-    test_review_result = call_subagent("devbooks-reviewer", {
-        "task": "评审测试质量",
-        "change_id": change_id,
-        "review_type": "test-review"
-    })
-    if test_review_result == "REVISE REQUIRED":
-        # 回到阶段 7，修复测试问题
-        goto_stage(7)
-
-    # ==================== 阶段 10: Code-Review ====================
-    code_review_result = call_subagent("devbooks-reviewer", {
-        "task": "评审代码质量",
-        "change_id": change_id,
-        "review_type": "code-review"
-    })
-    if code_review_result == "REVISE REQUIRED":
-        # 回到阶段 8，修复代码问题
-        goto_stage(8)
-
-    # ==================== 阶段 11: Green-Verify ====================
-    # 必须使用独立 Agent 会话（与阶段 7 相同的 Test Owner）
-    call_subagent("devbooks-test-owner", {
-        "task": "运行所有测试并收集 Green 证据",
-        "change_id": change_id,
-        "isolation": "required",
-        "phase": "green-verify"
-    })
-    verify_output(f"{change_root}/{change_id}/evidence/green-final/")
-
-    # ==================== 阶段 12: Archive ====================
-    # Archiver 会自动运行 change-check.sh --mode strict
-    call_subagent("devbooks-archiver", {
-        "task": "执行归档",
-        "change_id": change_id
-    })
-
-    return "闭环完成"
-```
-
----
-
-## 子 Agent 调用模板
-
-### 调用格式
-
-使用 Task 工具调用子 Agent：
-
-```markdown
-## 调用 devbooks-proposal-author 子 Agent
-
-请执行以下任务：
-- 使用 devbooks-proposal-author skill
-- 为以下需求创建变更提案：[需求描述]
-- 生成符合规范的 change-id
-- 完成后输出 change-id 和 proposal.md 路径
-```
-
-### 各阶段调用示例
-
-| 阶段 | 子 Agent | 调用 Prompt |
-|------|----------|-------------|
-| 1 | devbooks-proposal-author | "使用 devbooks-proposal-author skill 为 [需求] 创建变更提案" |
-| 2 | devbooks-challenger | "使用 devbooks-proposal-challenger skill 质疑变更 [change-id] 的提案" |
-| 3 | devbooks-judge | "使用 devbooks-proposal-judge skill 裁决变更 [change-id]" |
-| 4 | devbooks-designer | "使用 devbooks-design-doc skill 为变更 [change-id] 创建设计文档" |
-| 5 | devbooks-spec-owner | "使用 devbooks-spec-contract skill 为变更 [change-id] 定义规格" |
-| 6 | devbooks-planner | "使用 devbooks-implementation-plan skill 为变更 [change-id] 创建计划" |
-| 7 | devbooks-test-owner | "使用 devbooks-test-owner skill 为变更 [change-id] 编写测试并建立 Red 基线" |
-| 8 | devbooks-coder | "使用 devbooks-coder skill 为变更 [change-id] 实现功能" |
-| 9 | devbooks-reviewer | "使用 devbooks-test-reviewer skill 评审变更 [change-id] 的测试" |
-| 10 | devbooks-reviewer | "使用 devbooks-code-review skill 评审变更 [change-id] 的代码" |
-| 11 | devbooks-test-owner | "使用 devbooks-test-owner skill 运行变更 [change-id] 的所有测试并收集 Green 证据" |
-| 12 | devbooks-archiver | "使用 devbooks-archiver skill 归档变更 [change-id]" |
-
----
-
-## 角色隔离约束
-
-**关键原则**：Test Owner 和 Coder 必须使用**独立的 Agent 实例/会话**。
-
-| 角色 | 隔离要求 | 原因 |
-|------|----------|------|
-| Test Owner (阶段 7, 11) | 独立 Agent | 防止 Coder 篡改测试 |
-| Coder (阶段 8) | 独立 Agent | 防止 Coder 看到测试实现细节 |
-| Reviewer (阶段 9, 10) | 独立 Agent（推荐） | 保持评审客观性 |
-
----
-
-## 闸门检查点
-
-### 阶段闸门
-
-| 检查点 | 时机 | 命令 |
-|--------|------|------|
-| 提案完成 | 阶段 3 后 | `change-check.sh <change-id> --mode proposal` |
-| 设计完成 | 阶段 6 后 | `change-check.sh <change-id> --mode apply --role test-owner` |
-| 实现完成 | 阶段 10 后 | `change-check.sh <change-id> --mode apply --role coder` |
-| 归档前 | 阶段 12 前 | `change-check.sh <change-id> --mode strict` |
-
-### 归档前强制检查项
-
-Archiver 子 Agent 必须验证：
-
-| 检查项 | 要求 |
-|--------|------|
-| evidence/green-final/ | 存在且非空 |
-| verification.md AC 覆盖 | 100%（所有 AC 有对应测试） |
-| tasks.md 任务完成率 | 100%（所有 [x] 或 SKIP-APPROVED） |
-| change-check.sh --mode strict | 全部通过 |
-
----
-
-## 错误处理
-
-### Judge 返回 REVISE
-
-```
-阶段 3 返回 REVISE
-    ↓
-通知用户裁决意见
-    ↓
-回到阶段 1，携带修改建议
-    ↓
-重新执行阶段 1-3
-```
-
-### Review 返回 REVISE REQUIRED
-
-```
-阶段 9（Test-Review）返回 REVISE REQUIRED
-    ↓
-回到阶段 7，修复测试问题
-    ↓
-重新执行阶段 7-9
-
-阶段 10（Code-Review）返回 REVISE REQUIRED
-    ↓
-回到阶段 8，修复代码问题
-    ↓
-重新执行阶段 8-10
-```
-
-### Archive 检查失败
-
-```
-阶段 12 检查失败
-    ↓
-输出失败原因（缺失 evidence / AC 未覆盖 / 任务未完成）
-    ↓
-回到相应阶段修复
-    ↓
-重新执行到阶段 12
-```
+5. **变更验证与追溯模板**：`references/变更验证与追溯模板.md`
+   - 验证模板
+   - 何时阅读：需要模板参考时
 
 ---
 
@@ -471,11 +240,6 @@ Archiver 子 Agent 必须验证：
 3. 若不可用 → 建议在 apply 阶段前生成索引
 
 ---
-
-## 参考骨架（按需读取）
-
-- 工作流：`references/交付验收工作流.md`
-- 模板：`references/变更验证与追溯模板.md`
 
 ## 可选检查脚本
 
