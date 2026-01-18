@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 # Default configuration
 project_root="."
@@ -42,7 +42,7 @@ Usage:
 Options:
   --project-root DIR  Project root directory (default: current directory)
   --dry-run           Simulate run, do not actually modify files
-  --keep-old          Keep openspec/ directory after migration
+  --keep-old          Keep openspec/ directory after migration (don't archive)
   --force             Force re-execute all steps (ignore checkpoints)
   --help, -h          Show help
 
@@ -52,22 +52,19 @@ Migration Steps:
   3. [CONFIG]    Create/update .devbooks/config.yaml
   4. [REFS]      Update path references in all documents
   5. [COMMANDS]  Remove OpenSpec AI tool commands
-  6. [CLEANUP]   Cleanup (optionally keep old directory)
+  6. [ARCHIVE]   Archive original openspec/ to .devbooks/archive/
 
-Cleanup includes:
-  - openspec/ directory (backed up)
-  - .claude/commands/openspec/ (Claude Code commands)
-  - .codex/commands/openspec/ (Codex CLI commands)
-  - .cursor/commands/openspec/ (Cursor commands)
-  - .windsurf/workflows/openspec/ (Windsurf workflows)
-  - .continue/prompts/openspec/ (Continue prompts)
-  - OpenSpec references in CLAUDE.md, AGENTS.md, etc.
+Archive includes:
+  - openspec/ directory -> .devbooks/archive/openspec-{timestamp}/
+  - .claude/commands/openspec/ -> .devbooks/archive/commands-openspec-{timestamp}/
+  - Other AI tool command directories
 
 Features:
   - Idempotent execution: safe to run repeatedly
   - State checkpoints: supports resume from breakpoint
-  - Reference updates: automatic batch path replacement
-  - Rollback support: backup created before cleanup
+  - Reference updates: automatic batch path replacement (optimized)
+  - Archive support: original files preserved in .devbooks/archive/
+  - dev-playbooks/ only contains necessary migrated structure
 
 EOF
 }
@@ -253,32 +250,42 @@ step_refs() {
 
     local files_updated=0
 
-    # Find files that need updating
+    # Use grep -rl to find files containing openspec/ (much faster than find + grep per file)
+    # Exclude common large directories for performance
+    local exclude_dirs="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor --exclude-dir=dist --exclude-dir=build --exclude-dir=.devbooks/backup --exclude-dir=.devbooks/archive"
+
+    # Find all files with openspec/ references
+    local files_to_update
+    files_to_update=$(grep -rl $exclude_dirs "openspec/" "${project_root}" 2>/dev/null || true)
+
+    if [[ -z "$files_to_update" ]]; then
+        log_info "No files contain openspec/ references"
+        save_checkpoint "REFS"
+        log_pass "Updated references in 0 files"
+        return 0
+    fi
+
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
         [[ ! -f "$file" ]] && continue
 
-        # Skip binary files and .git directory
-        [[ "$file" == *".git"* ]] && continue
-        [[ "$file" == *".png" ]] && continue
-        [[ "$file" == *".jpg" ]] && continue
-        [[ "$file" == *".ico" ]] && continue
+        # Skip binary files
+        case "$file" in
+            *.png|*.jpg|*.jpeg|*.gif|*.ico|*.pdf|*.zip|*.tar|*.gz) continue ;;
+        esac
 
-        # Check if contains openspec/ references
-        if grep -q "openspec/" "$file" 2>/dev/null; then
-            if [[ "$dry_run" == true ]]; then
-                log_info "[DRY-RUN] Updating references: $file"
+        if [[ "$dry_run" == true ]]; then
+            log_info "[DRY-RUN] Updating references: $file"
+        else
+            # macOS compatible sed
+            if [[ "$(uname)" == "Darwin" ]]; then
+                sed -i '' 's|openspec/|dev-playbooks/|g' "$file"
             else
-                # macOS compatible sed
-                if [[ "$(uname)" == "Darwin" ]]; then
-                    sed -i '' 's|openspec/|dev-playbooks/|g' "$file"
-                else
-                    sed -i 's|openspec/|dev-playbooks/|g' "$file"
-                fi
+                sed -i 's|openspec/|dev-playbooks/|g' "$file"
             fi
-            files_updated=$((files_updated + 1))
         fi
-    done < <(find "${project_root}" -type f \( -name "*.md" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sh" -o -name "*.ts" -o -name "*.js" -o -name "*.json" \) 2>/dev/null)
+        files_updated=$((files_updated + 1))
+    done <<< "$files_to_update"
 
     save_checkpoint "REFS"
     log_pass "Updated references in ${files_updated} files"
@@ -310,12 +317,12 @@ step_commands() {
         local full_path="${project_root}/${cmd_dir}"
         if [[ -d "$full_path" ]]; then
             if [[ "$dry_run" == true ]]; then
-                log_info "[DRY-RUN] rm -rf $full_path"
+                log_info "[DRY-RUN] Archive $full_path"
             else
-                local backup_dir="${project_root}/.devbooks/backup/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
-                mkdir -p "$(dirname "$backup_dir")"
-                mv "$full_path" "$backup_dir"
-                log_info "Backed up ${cmd_dir} to ${backup_dir}"
+                local archive_dir="${project_root}/.devbooks/archive/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$archive_dir")"
+                mv "$full_path" "$archive_dir"
+                log_info "Archived ${cmd_dir} to ${archive_dir}"
             fi
             removed_count=$((removed_count + 1))
         fi
@@ -359,9 +366,9 @@ step_commands() {
     log_pass "Removed ${removed_count} OpenSpec command directories"
 }
 
-# Step 6: Cleanup
+# Step 6: Cleanup and archive original directory
 step_cleanup() {
-    log_step "6. Cleanup"
+    log_step "6. Archive and cleanup"
 
     if is_step_done "CLEANUP" && [[ "$force" == false ]]; then
         log_info "Cleanup already complete (skipping)"
@@ -369,18 +376,20 @@ step_cleanup() {
     fi
 
     local openspec_dir="${project_root}/openspec"
+    local archive_base="${project_root}/.devbooks/archive"
 
     if [[ "$keep_old" == true ]]; then
         log_info "Keeping openspec/ directory (--keep-old)"
     elif [[ -d "$openspec_dir" ]]; then
         if [[ "$dry_run" == true ]]; then
-            log_info "[DRY-RUN] rm -rf $openspec_dir"
+            log_info "[DRY-RUN] Archive openspec/ to ${archive_base}/"
         else
-            # Create backup
-            local backup_dir="${project_root}/.devbooks/backup/openspec-$(date +%Y%m%d%H%M%S)"
-            mkdir -p "$(dirname "$backup_dir")"
-            mv "$openspec_dir" "$backup_dir"
-            log_info "Backed up openspec/ to ${backup_dir}"
+            # Archive original directory to .devbooks/archive/
+            local archive_dir="${archive_base}/openspec-$(date +%Y%m%d%H%M%S)"
+            mkdir -p "$archive_base"
+            mv "$openspec_dir" "$archive_dir"
+            log_info "Archived openspec/ to ${archive_dir}"
+            log_info "Original files preserved in archive, dev-playbooks/ contains migrated structure"
         fi
     fi
 
@@ -414,11 +423,12 @@ verify_migration() {
         errors=$((errors + 1))
     fi
 
-    # Check remaining references (warning only)
+    # Check remaining references (warning only, exclude archive directory)
     local remaining_refs
-    remaining_refs=$(grep -r "openspec/" "${project_root}" --include="*.md" --include="*.yaml" --include="*.sh" 2>/dev/null | grep -v ".devbooks/backup" | wc -l || echo "0")
+    remaining_refs=$(grep -r "openspec/" "${project_root}" --include="*.md" --include="*.yaml" --include="*.sh" 2>/dev/null | grep -v ".devbooks/archive" | grep -v ".devbooks/backup" | wc -l || echo "0")
+    remaining_refs=$(echo "$remaining_refs" | tr -d ' ')
     if [[ "$remaining_refs" -gt 0 ]]; then
-        log_warn "Still ${remaining_refs} openspec/ references remaining"
+        log_warn "Still ${remaining_refs} openspec/ references remaining (excluding archive)"
     fi
 
     if [[ "$errors" -eq 0 ]]; then

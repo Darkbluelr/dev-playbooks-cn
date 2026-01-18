@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 
 # Default configuration
 project_root="."
@@ -42,7 +42,7 @@ Usage:
 Options:
   --project-root DIR  Project root directory (default: current directory)
   --dry-run           Simulate run, do not actually modify files
-  --keep-old          Keep specs/ directory after migration
+  --keep-old          Keep specs/memory directories after migration (don't archive)
   --force             Force re-execute all steps (ignore checkpoints)
   --help, -h          Show help
 
@@ -53,15 +53,14 @@ Migration Steps:
   4. [CONFIG]       Create/update .devbooks/config.yaml
   5. [REFS]         Update path references in all documents
   6. [COMMANDS]     Remove spec-kit AI tool commands
-  7. [CLEANUP]      Cleanup (optionally keep old directories)
+  7. [ARCHIVE]      Archive original directories to .devbooks/archive/
 
-Cleanup includes:
-  - specs/ directory (backed up)
-  - memory/ directory (backed up)
-  - templates/ directory (spec-kit templates, backed up)
+Archive includes:
+  - specs/ directory -> .devbooks/archive/speckit-specs-{timestamp}/
+  - memory/ directory -> .devbooks/archive/speckit-memory-{timestamp}/
+  - templates/ directory (if spec-kit style)
   - scripts/bash/ and scripts/powershell/ (spec-kit scripts)
-  - .claude/commands/speckit/ and similar AI tool directories
-  - spec-kit references in CLAUDE.md, AGENTS.md, etc.
+  - AI tool command directories
 
 Mapping Rules:
   Spec-Kit                         DevBooks
@@ -78,8 +77,9 @@ Mapping Rules:
 Features:
   - Idempotent execution: safe to run repeatedly
   - State checkpoints: supports resume from breakpoint
-  - Reference updates: automatic batch path replacement
-  - Rollback support: backup created before cleanup
+  - Reference updates: automatic batch path replacement (optimized)
+  - Archive support: original files preserved in .devbooks/archive/
+  - dev-playbooks/ only contains necessary migrated structure
 
 EOF
 }
@@ -429,45 +429,44 @@ step_refs() {
 
     local files_updated=0
 
-    # Reference patterns to update
-    declare -a patterns=(
-        "specs/[^/]*/spec.md:changes/*/design.md"
-        "specs/[^/]*/plan.md:changes/*/proposal.md"
-        "specs/[^/]*/tasks.md:changes/*/tasks.md"
-        "memory/constitution.md:dev-playbooks/specs/_meta/constitution.md"
-    )
+    # Use grep -rl to find files containing spec-kit style references (much faster)
+    # Exclude common large directories for performance
+    local exclude_dirs="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor --exclude-dir=dist --exclude-dir=build --exclude-dir=.devbooks/backup --exclude-dir=.devbooks/archive"
 
-    # Find files that need updating
+    # Find all files with spec-kit style references
+    local files_to_update
+    files_to_update=$(grep -rlE $exclude_dirs "(specs/[^/]+/|memory/constitution)" "${project_root}" 2>/dev/null || true)
+
+    if [[ -z "$files_to_update" ]]; then
+        log_info "No files contain spec-kit style references"
+        save_checkpoint "REFS"
+        log_pass "Updated references in 0 files"
+        return 0
+    fi
+
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
         [[ ! -f "$file" ]] && continue
 
-        # Skip binary files and .git directory
-        [[ "$file" == *".git"* ]] && continue
-        [[ "$file" == *".png" ]] && continue
-        [[ "$file" == *".jpg" ]] && continue
-        [[ "$file" == *".ico" ]] && continue
+        # Skip binary files
+        case "$file" in
+            *.png|*.jpg|*.jpeg|*.gif|*.ico|*.pdf|*.zip|*.tar|*.gz) continue ;;
+        esac
 
-        local modified=false
-
-        # Check if contains spec-kit style references
-        if grep -qE "(specs/[^/]+/|memory/constitution)" "$file" 2>/dev/null; then
-            if [[ "$dry_run" == true ]]; then
-                log_info "[DRY-RUN] Updating references: $file"
+        if [[ "$dry_run" == true ]]; then
+            log_info "[DRY-RUN] Updating references: $file"
+        else
+            # Update common patterns (macOS compatible)
+            if [[ "$(uname)" == "Darwin" ]]; then
+                sed -i '' 's|memory/constitution\.md|dev-playbooks/specs/_meta/constitution.md|g' "$file"
+                sed -i '' 's|spec-driven\.md|dev-playbooks/specs/_meta/spec-driven.md|g' "$file"
             else
-                # Update common patterns (macOS compatible)
-                if [[ "$(uname)" == "Darwin" ]]; then
-                    sed -i '' 's|memory/constitution\.md|dev-playbooks/specs/_meta/constitution.md|g' "$file"
-                    sed -i '' 's|spec-driven\.md|dev-playbooks/specs/_meta/spec-driven.md|g' "$file"
-                else
-                    sed -i 's|memory/constitution\.md|dev-playbooks/specs/_meta/constitution.md|g' "$file"
-                    sed -i 's|spec-driven\.md|dev-playbooks/specs/_meta/spec-driven.md|g' "$file"
-                fi
-                modified=true
+                sed -i 's|memory/constitution\.md|dev-playbooks/specs/_meta/constitution.md|g' "$file"
+                sed -i 's|spec-driven\.md|dev-playbooks/specs/_meta/spec-driven.md|g' "$file"
             fi
-            files_updated=$((files_updated + 1))
         fi
-    done < <(find "${project_root}" -type f \( -name "*.md" -o -name "*.yaml" -o -name "*.yml" -o -name "*.sh" -o -name "*.ts" -o -name "*.js" -o -name "*.json" \) 2>/dev/null)
+        files_updated=$((files_updated + 1))
+    done <<< "$files_to_update"
 
     save_checkpoint "REFS"
     log_pass "Updated references in ${files_updated} files"
@@ -510,12 +509,12 @@ step_commands() {
         local full_path="${project_root}/${cmd_dir}"
         if [[ -d "$full_path" ]]; then
             if [[ "$dry_run" == true ]]; then
-                log_info "[DRY-RUN] rm -rf $full_path"
+                log_info "[DRY-RUN] Archive $full_path"
             else
-                local backup_dir="${project_root}/.devbooks/backup/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
-                mkdir -p "$(dirname "$backup_dir")"
-                mv "$full_path" "$backup_dir"
-                log_info "Backed up ${cmd_dir} to ${backup_dir}"
+                local archive_dir="${project_root}/.devbooks/archive/commands-$(basename "$cmd_dir")-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$archive_dir")"
+                mv "$full_path" "$archive_dir"
+                log_info "Archived ${cmd_dir} to ${archive_dir}"
             fi
             removed_count=$((removed_count + 1))
         fi
@@ -533,12 +532,12 @@ step_commands() {
             # Check if it contains spec-kit scripts (by looking for spec-kit patterns)
             if ls "${full_path}"/*.sh 2>/dev/null | xargs grep -l "spec-kit\|speckit\|SPEC_FILE\|create-new-feature" 2>/dev/null | head -1 > /dev/null; then
                 if [[ "$dry_run" == true ]]; then
-                    log_info "[DRY-RUN] backup and remove $full_path (spec-kit scripts)"
+                    log_info "[DRY-RUN] archive $full_path (spec-kit scripts)"
                 else
-                    local backup_dir="${project_root}/.devbooks/backup/speckit-scripts-$(date +%Y%m%d%H%M%S)"
-                    mkdir -p "$(dirname "$backup_dir")"
-                    mv "$full_path" "$backup_dir"
-                    log_info "Backed up ${sk_dir}/ to ${backup_dir}"
+                    local archive_dir="${project_root}/.devbooks/archive/speckit-scripts-$(date +%Y%m%d%H%M%S)"
+                    mkdir -p "$(dirname "$archive_dir")"
+                    mv "$full_path" "$archive_dir"
+                    log_info "Archived ${sk_dir}/ to ${archive_dir}"
                 fi
                 removed_count=$((removed_count + 1))
             fi
@@ -551,12 +550,12 @@ step_commands() {
         # Check if it's spec-kit templates (look for spec-template.md or commands/)
         if [[ -f "${templates_dir}/spec-template.md" ]] || [[ -d "${templates_dir}/commands" ]]; then
             if [[ "$dry_run" == true ]]; then
-                log_info "[DRY-RUN] backup and remove $templates_dir (spec-kit templates)"
+                log_info "[DRY-RUN] archive $templates_dir (spec-kit templates)"
             else
-                local backup_dir="${project_root}/.devbooks/backup/speckit-templates-$(date +%Y%m%d%H%M%S)"
-                mkdir -p "$(dirname "$backup_dir")"
-                mv "$templates_dir" "$backup_dir"
-                log_info "Backed up templates/ to ${backup_dir}"
+                local archive_dir="${project_root}/.devbooks/archive/speckit-templates-$(date +%Y%m%d%H%M%S)"
+                mkdir -p "$(dirname "$archive_dir")"
+                mv "$templates_dir" "$archive_dir"
+                log_info "Archived templates/ to ${archive_dir}"
             fi
             removed_count=$((removed_count + 1))
         fi
@@ -602,37 +601,39 @@ step_commands() {
     log_pass "Removed ${removed_count} spec-kit directories/commands"
 }
 
-# Step 7: Cleanup
+# Step 7: Archive and cleanup
 step_cleanup() {
-    log_step "7. Cleanup"
+    log_step "7. Archive and cleanup"
 
     if is_step_done "CLEANUP" && [[ "$force" == false ]]; then
         log_info "Cleanup already complete (skipping)"
         return 0
     fi
 
-    local dirs_to_backup=(
+    local dirs_to_archive=(
         "specs"
         "memory"
     )
+    local archive_base="${project_root}/.devbooks/archive"
 
     if [[ "$keep_old" == true ]]; then
         log_info "Keeping original directories (--keep-old)"
     else
-        for dir in "${dirs_to_backup[@]}"; do
+        for dir in "${dirs_to_archive[@]}"; do
             local src_dir="${project_root}/${dir}"
             if [[ -d "$src_dir" ]]; then
                 if [[ "$dry_run" == true ]]; then
-                    log_info "[DRY-RUN] backup and remove $src_dir"
+                    log_info "[DRY-RUN] archive $src_dir"
                 else
-                    # Create backup
-                    local backup_dir="${project_root}/.devbooks/backup/speckit-${dir}-$(date +%Y%m%d%H%M%S)"
-                    mkdir -p "$(dirname "$backup_dir")"
-                    mv "$src_dir" "$backup_dir"
-                    log_info "Backed up ${dir}/ to ${backup_dir}"
+                    # Archive to .devbooks/archive/
+                    local archive_dir="${archive_base}/speckit-${dir}-$(date +%Y%m%d%H%M%S)"
+                    mkdir -p "$archive_base"
+                    mv "$src_dir" "$archive_dir"
+                    log_info "Archived ${dir}/ to ${archive_dir}"
                 fi
             fi
         done
+        log_info "Original files preserved in .devbooks/archive/, dev-playbooks/ contains migrated structure"
     fi
 
     save_checkpoint "CLEANUP"
