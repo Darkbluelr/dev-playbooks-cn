@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-19
+
+### Added
+
+- **Version Changelog Display**: When running `dev-playbooks-cn update`, the CLI now displays a formatted changelog summary showing all changes between the current version and the latest version
+  - ✅ Automatic fetch from GitHub: Retrieves CHANGELOG.md from the repository
+  - 📋 Smart parsing: Extracts and displays only relevant version changes
+  - 🎨 Colorized output: Highlights different types of changes (features, warnings, etc.)
+  - 🔗 Graceful fallback: Shows GitHub release link if network fails
+  - 📊 Content limit: Displays first 10 lines per version to avoid information overload
+
+### Improved
+
+- **User Experience**: Users can now make informed decisions about updates by reviewing what's new before upgrading
+
+---
+
 ## [2.0.0] - 2026-01-19
 
 ### Added
