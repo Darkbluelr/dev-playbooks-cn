@@ -216,7 +216,7 @@ allowed-tools:
 
 本 Skill 在执行前自动检测上下文，选择合适的评审范围。
 
-检测规则参考：`skills/_shared/context-detection-template.md`
+检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
 
 ### 检测流程
 
@@ -248,7 +248,7 @@ allowed-tools:
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
 
-MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
 
 ---
 

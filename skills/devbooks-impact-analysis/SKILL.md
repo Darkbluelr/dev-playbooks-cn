@@ -101,7 +101,7 @@ AI：[使用 Grep/CKB 分析引用]
 
 本 Skill 在执行前自动检测上下文，选择合适的分析范围。
 
-检测规则参考：`skills/_shared/context-detection-template.md`
+检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
 
 ### 检测流程
 
@@ -133,7 +133,7 @@ AI：[使用 Grep/CKB 分析引用]
 
 本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
 
-MCP 增强规则参考：`skills/_shared/mcp-enhancement-template.md`
+MCP 增强规则参考：`skills/_shared/MCP增强模板-mcp-enhancement.md`
 
 ### 依赖的 MCP 服务
 

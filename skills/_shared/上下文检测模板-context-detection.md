@@ -2,7 +2,7 @@
 
 > 本模板为所有 SKILL.md 提供标准化的上下文检测规则。
 >
-> 产物落点：`skills/_shared/context-detection-template.md`
+> 产物落点：`skills/_shared/上下文检测模板-context-detection.md`
 
 ---
 
@@ -277,7 +277,7 @@ echo "=== 测试完成 ==="
 
 本 Skill 在执行前自动检测上下文，选择合适的运行模式。
 
-检测规则参考：`skills/_shared/context-detection-template.md`
+检测规则参考：`skills/_shared/上下文检测模板-context-detection.md`
 
 ### 检测流程
 
