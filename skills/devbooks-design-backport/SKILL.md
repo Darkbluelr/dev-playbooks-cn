@@ -63,7 +63,7 @@ coder 有偏离 → 归档时 archiver 自动检测并回写 → 归档
 
 ## 执行方式
 
-1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
 2) 严格按完整提示词执行：`references/回写设计文档提示词.md`。
 
 ---

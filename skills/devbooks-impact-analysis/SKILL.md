@@ -67,7 +67,7 @@ AI：[使用 Grep/CKB 分析引用]
 
 ## 执行方式
 
-1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
 2) 使用 `Grep` 搜索符号引用，`Glob` 查找相关文件。
 3) 严格按完整提示词输出影响分析 Markdown：`references/影响分析提示词.md`。
 

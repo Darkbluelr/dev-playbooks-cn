@@ -58,7 +58,7 @@ allowed-tools:
 
 ### 标准流程
 
-1) 先阅读并遵守：`_shared/references/通用守门协议.md`
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`
 2) 规格部分：按 `references/规格变更提示词.md` 输出 Requirements/Scenarios
 3) 契约部分：按 `references/契约与数据定义提示词.md` 输出契约计划
 4) **隐式变更检测（按需）**：`references/隐式变更检测提示词.md`

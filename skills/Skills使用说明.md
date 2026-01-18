@@ -1,11 +1,22 @@
 # DevBooks Skills 速查表（作用 / 场景 / 话术）
 
+## 路径约定
+
+### 项目内路径（相对路径）
 默认按 DevBooks 项目示例写路径：
 - `<truth-root>` = `dev-playbooks/specs`
 - `<change-root>` = `dev-playbooks/changes`
 - `<change-id>` = 本次变更包目录名（动词开头）
 
-如果你不是 DevBooks：把 `dev-playbooks/specs` / `dev-playbooks/changes` 替换成你项目“指路牌文件”里定义的 `<truth-root>` / `<change-root>`。
+如果你不是 DevBooks：把 `dev-playbooks/specs` / `dev-playbooks/changes` 替换成你项目"指路牌文件"里定义的 `<truth-root>` / `<change-root>`。
+
+### Skills 共享资源路径（绝对路径）
+Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局安装目录：
+- **Claude Code**: `~/.claude/skills/_shared/`
+- **Codex CLI**: `~/.codex/skills/_shared/`
+- **OpenCode**: `~/.config/opencode/skill/_shared/`
+
+在 SKILL.md 提示词中，`~/.claude/skills/_shared/` 路径应根据你使用的工具替换为对应的绝对路径。
 
 ---
 

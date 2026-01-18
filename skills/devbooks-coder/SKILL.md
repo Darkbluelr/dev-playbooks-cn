@@ -287,7 +287,7 @@ fi
 
 ## 执行方式
 
-1) 先阅读并遵守：`_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
+1) 先阅读并遵守：`~/.claude/skills/_shared/references/通用守门协议.md`（可验证性 + 结构质量守门）。
 2) 阅读低风险改动技术：`references/低风险改动技术.md`（需要时再读）。
 3) 严格按完整提示词执行：`references/代码实现提示词.md`。
 
