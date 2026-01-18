@@ -380,6 +380,195 @@ async function performNpmUpdate() {
   });
 }
 
+/**
+ * 显示版本变更摘要
+ * @param {string} fromVersion - 当前版本
+ * @param {string} toVersion - 目标版本
+ */
+async function displayVersionChangelog(fromVersion, toVersion) {
+  try {
+    // 尝试从 npm 获取 CHANGELOG
+    const { execSync } = await import('child_process');
+    const changelogUrl = `https://raw.githubusercontent.com/Darkbluelr/dev-playbooks-cn/master/CHANGELOG.md`;
+
+    // 使用 curl 获取 CHANGELOG（如果可用）
+    let changelog = '';
+    try {
+      changelog = execSync(`curl -s -m 5 "${changelogUrl}"`, {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+    } catch {
+      // 如果获取失败，显示简化信息
+      console.log(chalk.cyan('📋 版本变更摘要'));
+      console.log(chalk.gray('─'.repeat(60)));
+      console.log(chalk.yellow('⚠ 无法获取详细变更日志，请访问：'));
+      console.log(chalk.blue(`   https://github.com/Darkbluelr/dev-playbooks-cn/releases/tag/v${toVersion}`));
+      return;
+    }
+
+    // 解析 CHANGELOG，提取相关版本的变更
+    const changes = parseChangelog(changelog, fromVersion, toVersion);
+
+    if (changes.length === 0) {
+      console.log(chalk.cyan('📋 版本变更摘要'));
+      console.log(chalk.gray('─'.repeat(60)));
+      console.log(chalk.yellow('⚠ 未找到详细变更信息，请访问：'));
+      console.log(chalk.blue(`   https://github.com/Darkbluelr/dev-playbooks-cn/releases/tag/v${toVersion}`));
+      return;
+    }
+
+    // 显示变更摘要
+    console.log(chalk.cyan('📋 版本变更摘要'));
+    console.log(chalk.gray('─'.repeat(60)));
+
+    for (const change of changes) {
+      console.log();
+      console.log(chalk.bold.green(`## ${change.version}`));
+      if (change.date) {
+        console.log(chalk.gray(`   发布日期: ${change.date}`));
+      }
+      console.log();
+
+      // 显示主要变更（限制显示前10条）
+      const highlights = change.content.split('\n')
+        .filter(line => line.trim().length > 0)
+        .slice(0, 10);
+
+      for (const line of highlights) {
+        if (line.startsWith('###')) {
+          console.log(chalk.bold.yellow(line));
+        } else if (line.startsWith('####')) {
+          console.log(chalk.bold(line));
+        } else if (line.startsWith('- ✅') || line.startsWith('- ✓')) {
+          console.log(chalk.green(line));
+        } else if (line.startsWith('- ⚠️') || line.startsWith('- ❌')) {
+          console.log(chalk.yellow(line));
+        } else if (line.startsWith('- ')) {
+          console.log(chalk.white(line));
+        } else {
+          console.log(chalk.gray(line));
+        }
+      }
+
+      if (change.content.split('\n').length > 10) {
+        console.log(chalk.gray('   ... (更多变更请查看完整日志)'));
+      }
+    }
+
+    console.log();
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log(chalk.blue('📖 完整变更日志: ') + chalk.underline(`https://github.com/Darkbluelr/dev-playbooks-cn/blob/master/CHANGELOG.md`));
+
+  } catch (error) {
+    // 静默失败，不影响更新流程
+    console.log(chalk.gray('提示: 无法显示变更摘要'));
+  }
+}
+
+/**
+ * 解析 CHANGELOG 内容，提取指定版本范围的变更
+ * @param {string} changelog - CHANGELOG 内容
+ * @param {string} fromVersion - 起始版本
+ * @param {string} toVersion - 目标版本
+ * @returns {Array} - 变更列表
+ */
+function parseChangelog(changelog, fromVersion, toVersion) {
+  const changes = [];
+  const lines = changelog.split('\n');
+
+  let currentVersion = null;
+  let currentDate = null;
+  let currentContent = [];
+  let inVersionBlock = false;
+  let shouldCapture = false;
+
+  // 解析版本号（移除 'v' 前缀）
+  const from = fromVersion.replace(/^v/, '');
+  const to = toVersion.replace(/^v/, '');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // 匹配版本标题：## [2.0.0] - 2026-01-19
+    const versionMatch = line.match(/^##\s+\[?(\d+\.\d+\.\d+)\]?\s*(?:-\s*(\d{4}-\d{2}-\d{2}))?/);
+
+    if (versionMatch) {
+      // 保存上一个版本的内容
+      if (inVersionBlock && shouldCapture && currentVersion) {
+        changes.push({
+          version: currentVersion,
+          date: currentDate,
+          content: currentContent.join('\n').trim()
+        });
+      }
+
+      // 开始新版本
+      currentVersion = versionMatch[1];
+      currentDate = versionMatch[2] || null;
+      currentContent = [];
+      inVersionBlock = true;
+
+      // 判断是否应该捕获这个版本
+      // 捕获从 fromVersion 到 toVersion 之间的所有版本
+      const versionNum = currentVersion.split('.').map(Number);
+      const fromNum = from.split('.').map(Number);
+      const toNum = to.split('.').map(Number);
+
+      const isAfterFrom = compareVersions(versionNum, fromNum) > 0;
+      const isBeforeOrEqualTo = compareVersions(versionNum, toNum) <= 0;
+
+      shouldCapture = isAfterFrom && isBeforeOrEqualTo;
+
+      continue;
+    }
+
+    // 如果遇到下一个版本标题或分隔线，结束当前版本
+    if (line.startsWith('---') && inVersionBlock) {
+      if (shouldCapture && currentVersion) {
+        changes.push({
+          version: currentVersion,
+          date: currentDate,
+          content: currentContent.join('\n').trim()
+        });
+      }
+      inVersionBlock = false;
+      shouldCapture = false;
+      continue;
+    }
+
+    // 收集内容
+    if (inVersionBlock && shouldCapture) {
+      currentContent.push(line);
+    }
+  }
+
+  // 保存最后一个版本
+  if (inVersionBlock && shouldCapture && currentVersion) {
+    changes.push({
+      version: currentVersion,
+      date: currentDate,
+      content: currentContent.join('\n').trim()
+    });
+  }
+
+  return changes;
+}
+
+/**
+ * 比较两个版本号
+ * @param {number[]} v1 - 版本1 [major, minor, patch]
+ * @param {number[]} v2 - 版本2 [major, minor, patch]
+ * @returns {number} - 1 if v1 > v2, -1 if v1 < v2, 0 if equal
+ */
+function compareVersions(v1, v2) {
+  for (let i = 0; i < 3; i++) {
+    if (v1[i] > v2[i]) return 1;
+    if (v1[i] < v2[i]) return -1;
+  }
+  return 0;
+}
+
 // ============================================================================
 // 自动更新 .gitignore 和 .npmignore
 // ============================================================================
@@ -1373,6 +1562,12 @@ async function updateCommand(projectDir) {
 
   if (hasUpdate) {
     spinner.info(`发现新版本: ${currentVersion} → ${latestVersion}`);
+
+    // 显示版本变更摘要
+    console.log();
+    await displayVersionChangelog(currentVersion, latestVersion);
+    console.log();
+
     const shouldUpdate = await confirm({
       message: `是否更新 ${CLI_COMMAND} 到 ${latestVersion}?`,
       default: true
