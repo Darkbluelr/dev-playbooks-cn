@@ -10,10 +10,11 @@
 ## 📋 目录
 
 1. [概览](#概览)
-2. [Context7](#context7)
-3. [GitHub MCP Server](#github-mcp-server)
-4. [Playwright MCP](#playwright-mcp)
-5. [配置位置](#配置位置)
+2. [CKB (Code Knowledge Backend)](#ckb-code-knowledge-backend)
+3. [Context7](#context7)
+4. [GitHub MCP Server](#github-mcp-server)
+5. [Playwright MCP](#playwright-mcp)
+6. [配置位置](#配置位置)
 
 ---
 
@@ -23,6 +24,7 @@
 
 | 服务器 | 类型 | 作用域 | 主要功能 |
 |--------|------|--------|----------|
+| **ckb** | 代码分析 | User Scope | 代码符号搜索、引用查找、影响分析 |
 | **context7** | 代码文档 | User Scope | 实时获取最新的库文档和代码示例 |
 | **github** | GitHub集成 | User Scope | GitHub仓库、Issues、PR管理和自动化 |
 | **playwright** | 浏览器自动化 | User Scope | 网页自动化测试、爬取和交互 |
@@ -30,6 +32,158 @@
 **配置文件**：`~/.claude.json` (顶层 `mcpServers` 字段)
 
 **作用范围**：✅ 所有项目
+
+---
+
+## CKB (Code Knowledge Backend)
+
+### 基本信息
+
+- **版本**：7.5.0
+- **类型**：语言无关的代码理解层
+- **安装位置**：`/usr/local/bin/ckb`
+- **GitHub**：[simplyliz/codemcp](https://github.com/simplyliz/codemcp)
+
+### 功能特性
+
+- ✅ **符号搜索**：快速查找函数、类、变量
+- ✅ **查找引用**：找到符号的所有使用位置
+- ✅ **影响分析**：评估代码修改的影响范围
+- ✅ **架构视图**：项目结构和依赖关系
+- ✅ **Git 集成**：Blame 信息和历史追踪
+
+### 后端支持
+
+- **LSP** (Language Server Protocol)：支持 Python、TypeScript、Go 等
+- **SCIP**：预计算索引（适用于 Go/Java/TypeScript）
+- **Git**：仓库历史和 blame 信息
+
+### 配置
+
+```json
+{
+  "mcpServers": {
+    "ckb": {
+      "command": "/usr/local/bin/ckb",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+### 安装步骤
+
+#### 1. 安装 CKB 二进制
+
+```bash
+# 克隆仓库
+cd ~/Projects/mcps
+git clone https://github.com/simplyliz/codemcp.git
+cd codemcp
+
+# 设置 Go 代理（国内环境）
+export GOPROXY=https://goproxy.cn,direct
+export GOSUMDB=sum.golang.google.cn
+
+# 编译
+go build -o ckb ./cmd/ckb
+
+# 安装到系统路径
+sudo cp ckb /usr/local/bin/ckb
+sudo chmod +x /usr/local/bin/ckb
+
+# 验证安装
+ckb --version
+```
+
+#### 2. 安装 Python LSP 支持
+
+```bash
+pip3 install python-lsp-server
+
+# 验证安装
+python3 -m pylsp --version
+```
+
+#### 3. 为项目初始化 CKB
+
+```bash
+cd /path/to/your/project
+ckb init
+```
+
+这会创建 `.ckb/config.json` 配置文件。
+
+### 项目配置文件
+
+位置：`项目/.ckb/config.json`
+
+```json
+{
+  "backends": {
+    "lsp": {
+      "enabled": true,
+      "servers": {
+        "python": {
+          "command": "python3",
+          "args": ["-m", "pylsp"]
+        }
+      }
+    },
+    "git": {
+      "enabled": true
+    }
+  }
+}
+```
+
+### 使用示例
+
+**搜索符号**：
+```
+使用 CKB 搜索项目中的 FastAPI 符号
+```
+
+**查找引用**：
+```
+使用 CKB 查找 get_user 函数的所有引用
+```
+
+**影响分析**：
+```
+使用 CKB 分析修改 User 类的影响
+```
+
+### 常用命令
+
+```bash
+# 查看系统状态
+ckb status
+
+# 搜索符号
+ckb search <符号名>
+
+# 查找引用
+ckb refs <符号名>
+
+# 获取架构概览
+ckb arch
+
+# 运行诊断
+ckb doctor
+```
+
+### 支持的语言
+
+- ✅ Python (通过 LSP)
+- ✅ TypeScript/JavaScript (通过 LSP)
+- ✅ Go (通过 SCIP + LSP)
+- ✅ Java (通过 SCIP)
+- ✅ 任何有 Git 历史的项目
+
+### 注意事项
+
+⚠️ **每个项目需要单独初始化**：虽然 CKB MCP 服务器是 User Scope（全局可用），但每个项目需要运行 `ckb init` 来创建项目特定的配置。
 
 ---
 
