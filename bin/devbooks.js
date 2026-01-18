@@ -1188,13 +1188,15 @@ function loadConfig(projectDir) {
   const content = fs.readFileSync(configPath, 'utf-8');
 
   // 解析 ai_tools
-  const toolsMatch = content.match(/ai_tools:\s*([\s\S]*?)(?=\n\w|\n$|$)/);
+  // 修复：使用更健壮的正则，匹配到下一个顶级 key（非缩进的行）或文件结尾
+  const toolsMatch = content.match(/ai_tools:\s*\n((?:[ \t]+-[ \t]+.+\n?)*)/);
   const tools = toolsMatch
     ? toolsMatch[1]
         .split('\n')
         .map(line => line.trim())
         .filter(line => line.startsWith('-'))
         .map(line => line.replace(/^-\s*/, '').trim())
+        .filter(line => line.length > 0)
     : [];
 
   // 解析 install_scope
