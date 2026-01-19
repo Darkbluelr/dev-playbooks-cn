@@ -84,7 +84,7 @@ const AI_TOOLS = [
   {
     id: 'opencode',
     name: 'OpenCode',
-    description: 'OpenCode AI CLI (compatible with oh-my-opencode)',
+    description: 'OpenCode AI CLI',
     skillsSupport: SKILLS_SUPPORT.FULL,
     slashDir: '.opencode/command',
     agentsDir: '.opencode/agent',
@@ -870,7 +870,7 @@ function installSkills(toolIds, projectDir, scope = INSTALL_SCOPE.GLOBAL, update
     const tool = AI_TOOLS.find(t => t.id === toolId);
     if (!tool || tool.skillsSupport !== SKILLS_SUPPORT.FULL) continue;
 
-    // Claude Code / Codex CLI / OpenCode（含 oh-my-opencode）支持相同格式的 Skills
+    // Claude Code / Codex CLI / OpenCode 支持相同格式的 Skills
     if ((toolId === 'claude' || toolId === 'codex' || toolId === 'opencode') && tool.skillsDir) {
       const skillsSrcDir = path.join(__dirname, '..', 'skills');
       const skillsDestDir = getSkillsDestDir(tool, scope, projectDir);
@@ -940,11 +940,11 @@ function installSkills(toolIds, projectDir, scope = INSTALL_SCOPE.GLOBAL, update
 
 function generateOpenCodeDevbooksCommand() {
   return `---
-description: DevBooks 工作流入口（OpenCode / oh-my-opencode）
+description: DevBooks 工作流入口(OpenCode)
 ---
 
 ${DEVBOOKS_MARKERS.start}
-# DevBooks（OpenCode / oh-my-opencode）
+# DevBooks(OpenCode)
 
 本项目使用 DevBooks 工作流进行规格驱动开发。
 
@@ -953,7 +953,7 @@ ${DEVBOOKS_MARKERS.start}
 1. **推荐入口（Router）**：在对话中输入：\`/devbooks-router\`
 2. 或使用自然语言：\`请运行 devbooks-router skill，分析需求：<你的需求>\`
 
-> 说明：在 oh-my-opencode 中，Skills 会作为可用的 Slash Commands 被加载，因此可以直接用 \`/<skill-name>\` 调用。
+> 说明：在 OpenCode 中，Skills 会作为可用的 Slash Commands 被加载，因此可以直接用 \`/<skill-name>\` 调用。
 
 ## 常用命令（直接用 /<skill-name>）
 
