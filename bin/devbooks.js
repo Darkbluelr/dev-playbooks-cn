@@ -172,6 +172,19 @@ const AI_TOOLS = [
     globalSlashDir: path.join(os.homedir(), '.codex', 'prompts'),
     instructionFile: 'AGENTS.md',
     available: true
+  },
+
+  // === Every Code / just-every/code（完整 Skills 支持）===
+  {
+    id: 'code',
+    name: 'Every Code',
+    description: 'Every Code CLI (@just-every/code)',
+    skillsSupport: SKILLS_SUPPORT.FULL,
+    slashDir: null,
+    skillsDir: path.join(os.homedir(), '.code', 'skills'),
+    globalSlashDir: null,
+    instructionFile: 'AGENTS.md',
+    available: true
   }
 ];
 
@@ -643,6 +656,8 @@ function getNpmIgnoreEntries() {
     '.opencode/',
     '.continue/',
     '.qoder/',
+    '.code/',
+    '.codex/',
     '.github/instructions/',
     '.github/copilot-instructions.md',
     '',
@@ -737,7 +752,7 @@ function printSkillsSupportInfo() {
   console.log(chalk.gray('─'.repeat(50)));
   console.log();
 
-  console.log(chalk.green('★ 完整 Skills') + chalk.gray(' - Claude Code, Codex CLI, OpenCode, Qoder'));
+  console.log(chalk.green('★ 完整 Skills') + chalk.gray(' - Claude Code, Codex CLI, OpenCode, Qoder, Every Code'));
   console.log(chalk.gray('   └ 独立的 Skills/Agents 系统，可按需调用，有独立上下文'));
   console.log();
 
@@ -857,6 +872,8 @@ function getSkillsDestDir(tool, scope, projectDir) {
       return path.join(projectDir, '.codex', 'skills');
     } else if (tool.id === 'opencode') {
       return path.join(projectDir, '.opencode', 'skill');
+    } else if (tool.id === 'code') {
+      return path.join(projectDir, '.code', 'skills');
     }
   }
   // 全局安装：使用工具定义的全局目录
@@ -870,8 +887,8 @@ function installSkills(toolIds, projectDir, scope = INSTALL_SCOPE.GLOBAL, update
     const tool = AI_TOOLS.find(t => t.id === toolId);
     if (!tool || tool.skillsSupport !== SKILLS_SUPPORT.FULL) continue;
 
-    // Claude Code / Codex CLI / OpenCode 支持相同格式的 Skills
-    if ((toolId === 'claude' || toolId === 'codex' || toolId === 'opencode') && tool.skillsDir) {
+    // Claude Code / Codex CLI / OpenCode / Every Code 支持相同格式的 Skills
+    if ((toolId === 'claude' || toolId === 'codex' || toolId === 'opencode' || toolId === 'code') && tool.skillsDir) {
       const skillsSrcDir = path.join(__dirname, '..', 'skills');
       const skillsDestDir = getSkillsDestDir(tool, scope, projectDir);
 

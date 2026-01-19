@@ -4,12 +4,13 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/install-skills.sh [--claude-only|--codex-only|--opencode-only] [--with-opencode] [--with-codex-prompts] [--dry-run] [--no-prune]
+  ./scripts/install-skills.sh [--claude-only|--codex-only|--opencode-only|--code-only] [--with-opencode] [--with-code] [--with-codex-prompts] [--dry-run] [--no-prune]
 
 Installs DevBooks skills (skills/devbooks-*) to:
   - Claude Code: ~/.claude/skills/
   - Codex CLI:   $CODEX_HOME/skills (default: ~/.codex/skills/)
   - OpenCode:    $XDG_CONFIG_HOME/opencode/skill (default: ~/.config/opencode/skill/)
+  - Every Code:  $CODE_HOME/skills (default: ~/.code/skills/)
 
 Optionally installs Codex prompt entrypoints (templates/claude-commands/devbooks/*.md) to:
   - Codex CLI:   $CODEX_HOME/prompts (default: ~/.codex/prompts/)
@@ -22,6 +23,7 @@ EOF
 install_claude=true
 install_codex=true
 install_opencode=false
+install_code=false
 install_codex_prompts=false
 dry_run=false
 prune_removed=true
@@ -29,10 +31,12 @@ prune_removed=true
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
-    --claude-only) install_codex=false ;;
-    --codex-only) install_claude=false ;;
-    --opencode-only) install_claude=false; install_codex=false; install_opencode=true ;;
+    --claude-only) install_codex=false; install_code=false ;;
+    --codex-only) install_claude=false; install_code=false ;;
+    --opencode-only) install_claude=false; install_codex=false; install_opencode=true; install_code=false ;;
+    --code-only) install_claude=false; install_codex=false; install_code=true ;;
     --with-opencode) install_opencode=true ;;
+    --with-code) install_code=true ;;
     --with-codex-prompts) install_codex_prompts=true ;;
     --dry-run) dry_run=true ;;
     --no-prune) prune_removed=false ;;
@@ -227,6 +231,11 @@ fi
 if [[ "$install_opencode" == true ]]; then
   xdg_config_home="${XDG_CONFIG_HOME:-${HOME}/.config}"
   install_into "${xdg_config_home}/opencode/skill"
+fi
+
+if [[ "$install_code" == true ]]; then
+  code_home="${CODE_HOME:-${HOME}/.code}"
+  install_into "${code_home}/skills"
 fi
 
 if [[ "$dry_run" == true ]]; then

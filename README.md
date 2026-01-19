@@ -80,6 +80,7 @@ AI 编码助手很强大，但往往**不可预测**：
 | **Codex CLI** | 完整 Skills | `AGENTS.md` |
 | **Qoder** | 完整 Skills | `AGENTS.md` |
 | **OpenCode** | 完整 Skills | `AGENTS.md` |
+| **Every Code** | 完整 Skills | `AGENTS.md` |
 | **Cursor** | Rules 系统 | `.cursor/rules/` |
 | **Windsurf** | Rules 系统 | `.windsurf/rules/` |
 | **Gemini CLI** | Rules 系统 | `GEMINI.md` |
