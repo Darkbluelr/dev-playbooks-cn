@@ -34,6 +34,10 @@ const __dirname = path.dirname(__filename);
 const CLI_COMMAND = 'dev-playbooks-cn';
 const XDG_CONFIG_HOME = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
 
+// 版本检查缓存配置
+const VERSION_CACHE_FILE = path.join(os.tmpdir(), `${CLI_COMMAND}-version-cache.json`);
+const VERSION_CACHE_TTL = 10 * 60 * 1000; // 10 分钟缓存
+
 // ============================================================================
 // Skills 支持级别定义
 // ============================================================================
@@ -330,11 +334,32 @@ function getCliVersion() {
 }
 
 /**
- * 检查 npm 上是否有新版本
+ * 检查 npm 上是否有新版本（带缓存）
  * @returns {Promise<{hasUpdate: boolean, latestVersion: string|null, currentVersion: string}>}
  */
 async function checkNpmUpdate() {
   const currentVersion = getCliVersion();
+
+  // 检查缓存
+  try {
+    if (fs.existsSync(VERSION_CACHE_FILE)) {
+      const cache = JSON.parse(fs.readFileSync(VERSION_CACHE_FILE, 'utf-8'));
+      const cacheAge = Date.now() - cache.timestamp;
+
+      // 如果缓存未过期且当前版本匹配缓存的最新版本，跳过网络请求
+      if (cacheAge < VERSION_CACHE_TTL && cache.currentVersion === currentVersion) {
+        // 如果缓存显示已是最新版本，直接返回
+        if (!cache.hasUpdate) {
+          return { hasUpdate: false, latestVersion: cache.latestVersion, currentVersion };
+        }
+        // 如果缓存显示有更新，仍返回缓存结果
+        return { hasUpdate: cache.hasUpdate, latestVersion: cache.latestVersion, currentVersion };
+      }
+    }
+  } catch {
+    // 缓存读取失败，继续网络请求
+  }
+
   try {
     const { execSync } = await import('child_process');
     const latestVersion = execSync(`npm view ${CLI_COMMAND} version`, {
@@ -343,16 +368,29 @@ async function checkNpmUpdate() {
       stdio: ['pipe', 'pipe', 'pipe']
     }).trim();
 
+    let hasUpdate = false;
     if (latestVersion && latestVersion !== currentVersion) {
       // 简单版本比较（假设语义化版本）
       const current = currentVersion.split('.').map(Number);
       const latest = latestVersion.split('.').map(Number);
-      const hasUpdate = latest[0] > current[0] ||
+      hasUpdate = latest[0] > current[0] ||
         (latest[0] === current[0] && latest[1] > current[1]) ||
         (latest[0] === current[0] && latest[1] === current[1] && latest[2] > current[2]);
-      return { hasUpdate, latestVersion, currentVersion };
     }
-    return { hasUpdate: false, latestVersion, currentVersion };
+
+    // 保存缓存
+    try {
+      fs.writeFileSync(VERSION_CACHE_FILE, JSON.stringify({
+        timestamp: Date.now(),
+        currentVersion,
+        latestVersion,
+        hasUpdate
+      }));
+    } catch {
+      // 缓存写入失败，忽略
+    }
+
+    return { hasUpdate, latestVersion, currentVersion };
   } catch {
     // 网络错误或超时，静默忽略
     return { hasUpdate: false, latestVersion: null, currentVersion };

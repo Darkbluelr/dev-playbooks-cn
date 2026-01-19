@@ -5,7 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2026-01-19
+## [2.2.1] - 2025-01-20
+
+### 修复
+- 修复 update 命令的 changelog 显示功能
+  - 添加完整的版本变更记录
+  - 将 CHANGELOG.md 添加到 npm 发布文件列表
+- 优化 update 命令性能
+  - 添加版本检查缓存（10 分钟 TTL）
+  - 避免重复网络请求导致的卡顿
+
+---
+
+## [2.2.0] - 2025-01-20
+
+### 新增
+- 添加 Every Code (`@just-every/code`) 支持
+  - 完整 Skills 系统支持
+  - Skills 安装目录：`~/.code/skills/` 或 `.code/skills/`（项目级）
+  - 使用 `AGENTS.md` 指令文件
+- 安装脚本新增 `--code-only` 和 `--with-code` 选项
+- 版本检查缓存（10 分钟 TTL）加速重复 `update` 命令
+
+### 变更
+- 更新 README 工具支持表格
+
+---
+
+## [2.1.1] - 2025-01-19
+
+### 修复
+- 规范用语修正
+
+---
+
+## [2.1.0] - 2025-01-19
 
 ### Added
 
