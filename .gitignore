@@ -12,12 +12,8 @@ CLAUDE.md
 .devbooks/backup/
 .devbooks/*.log
 
-# DevBooks internal playbooks for this repo (do not publish)
-# NOTE: Do not ignore the change packages under dev-playbooks/changes/, they are
-# the primary delivery artifacts for this repository.
-/dev-playbooks/
-!/dev-playbooks/changes/
-!/dev-playbooks/changes/**
+# DevBooks internal playbooks for this repo
+# Keep documentation and specs, ignore only temporary/local files
 
 # Project self-test artifacts (not part of the library)
 AGENTS.md

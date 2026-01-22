@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-01-22T22:07:47Z",
+  "base_commit": "HEAD~1",
+  "change_id": "20260122-0827-enhance-docs-consistency",
+  "design_md_exists": true,
+  "dependency_changes": [],
+  "config_changes": [],
+  "build_changes": [],
+  "summary": {
+    "total": 0,
+    "dependency": 0,
+    "config": 0,
+    "build": 0
+  }
+}

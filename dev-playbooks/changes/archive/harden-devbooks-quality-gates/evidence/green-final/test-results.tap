@@ -1,0 +1,63 @@
+1..62
+ok 1 AC-011: script exists and is executable
+ok 2 AC-011: supports --help parameter
+ok 3 AC-011: can scan directory and output results
+ok 4 AC-011: supports --format markdown output
+ok 5 AC-011: supports --format json output
+ok 6 AC-011: returns usage error with no args
+ok 7 AC-011: returns error when scanning nonexistent directory
+ok 8 AC-011: returns error with invalid format parameter
+ok 9 AC-001: archive mode should fail when no Green evidence
+ok 10 AC-001: archive mode should pass with Green evidence
+ok 11 AC-001: archive mode should fail when green-final directory is empty
+ok 12 AC-002: strict mode should fail with incomplete tasks
+ok 13 AC-002: strict mode should pass with all tasks complete
+ok 14 AC-003: coder role modifying tests/ should fail # skip Requires git repository with staged test changes - integration test needed
+ok 15 AC-005: strict mode P0 skip without approval should fail
+ok 16 AC-005: strict mode P0 skip with approval should pass
+ok 17 AC-005: strict mode should pass when no P0 tasks exist
+ok 18 AC-007: archive mode with failed tests in Green evidence should fail
+ok 19 AC-007: archive mode with all passed tests in Green evidence should pass
+ok 20 change-check.sh supports --help parameter
+ok 21 change-check.sh returns usage error with no args
+ok 22 change-check.sh returns error with invalid mode
+ok 23 change-check.sh returns error with invalid role
+ok 24 AC-006: script exists and is executable
+ok 25 AC-006: supports --help parameter
+ok 26 AC-006: should fail when verification.md has no env declaration
+ok 27 AC-006: should pass when verification.md has env declaration
+ok 28 AC-006: env declaration with N/A should pass
+ok 29 AC-006: Chinese format header should be recognized
+ok 30 AC-006: section header without content still passes
+ok 31 AC-004: script exists and is executable
+ok 32 AC-004: supports --help parameter
+ok 33 AC-004: should fail when no handoff.md
+ok 34 AC-004: should fail when handoff.md has no confirmation
+ok 35 AC-004: should pass when handoff.md has confirmation
+ok 36 AC-004: partial signature should fail (only Test Owner signed)
+ok 37 AC-004: multi-role handoff chain should validate all transitions
+ok 38 AC-004: multi-role chain with incomplete middle handoff should fail
+ok 39 AC-008: change-check.sh passes shellcheck
+ok 40 AC-008: handoff-check.sh passes shellcheck
+ok 41 AC-008: env-match-check.sh passes shellcheck
+ok 42 AC-008: audit-scope.sh passes shellcheck
+ok 43 AC-008: progress-dashboard.sh passes shellcheck
+ok 44 AC-008: migrate-to-v2-gates.sh passes shellcheck
+ok 45 AC-009: change-check.sh supports --help
+ok 46 AC-009: handoff-check.sh supports --help
+ok 47 AC-009: env-match-check.sh supports --help
+ok 48 AC-009: audit-scope.sh supports --help
+ok 49 AC-009: progress-dashboard.sh supports --help
+ok 50 AC-012: Makefile exists
+ok 51 AC-012: make test can run (basic validation)
+ok 52 AC-012: bats is installed
+ok 53 AC-012: shellcheck is installed
+ok 54 migrate-to-v2-gates.sh exists
+ok 55 migrate-to-v2-gates.sh is executable
+ok 56 migrate-to-v2-gates.sh supports --help
+ok 57 AC-010: script exists and is executable
+ok 58 AC-010: supports --help parameter
+ok 59 AC-010: output contains task completion section
+ok 60 AC-010: output contains role status section
+ok 61 AC-010: output contains evidence status section
+ok 62 AC-010: should error when change package not found
