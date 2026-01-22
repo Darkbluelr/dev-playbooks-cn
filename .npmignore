@@ -43,3 +43,28 @@ CLAUDE.md
 AGENTS.md
 templates/CLAUDE.md
 templates/AGENTS.md
+
+# DevBooks managed - DO NOT EDIT
+# DevBooks 开发文档（运行时不需要）
+dev-playbooks/
+.devbooks/
+
+# AI 工具配置目录
+.claude/
+.cursor/
+.windsurf/
+.gemini/
+.agent/
+.opencode/
+.continue/
+.qoder/
+.code/
+.codex/
+.github/instructions/
+.github/copilot-instructions.md
+
+# DevBooks 指令文件
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+# End DevBooks managed

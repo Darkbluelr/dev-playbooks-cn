@@ -44,3 +44,9 @@ node_modules/
 # Env
 .env
 .env.*
+
+# DevBooks managed - DO NOT EDIT
+# DevBooks 本地配置（包含用户偏好，不应提交）
+.devbooks/
+.claude/
+# End DevBooks managed
