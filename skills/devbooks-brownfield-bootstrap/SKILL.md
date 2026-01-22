@@ -1,6 +1,7 @@
 ---
 name: devbooks-brownfield-bootstrap
 description: devbooks-brownfield-bootstrap：存量项目初始化：在当前真理目录为空时生成项目画像、术语表、基线规格与最小验证锚点，避免"边补 specs 边改行为"。用户说"存量初始化/基线 specs/项目画像/建立 glossary/把老项目接入上下文协议"等时使用。
+recommended_experts: ["System Architect", "Technical Writer"]
 allowed-tools:
   - Glob
   - Grep
@@ -61,6 +62,7 @@ allowed-tools:
 |------|------|------|
 | 项目画像 | `_meta/project-profile.md` | 三层架构的详细技术画像 |
 | 术语表 | `_meta/glossary.md` | 统一语言表（可选但推荐） |
+| 文档维护元数据 | `_meta/docs-maintenance.md` | 文档风格与维护配置 |
 | 领域概念 | `_meta/key-concepts.md` | CKB 提取的概念（增强模式） |
 
 ### 3. 架构分析产物
@@ -230,42 +232,6 @@ allowed-tools:
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-| `mcp__ckb__getArchitecture` | 获取模块依赖图 | 2s |
-| `mcp__ckb__getHotspots` | 获取技术债热点 | 2s |
-| `mcp__ckb__listKeyConcepts` | 获取领域概念 | 2s |
-| `mcp__ckb__getModuleOverview` | 获取模块概览 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 使用图基分析生成 COD 产物
-3. 若超时或失败 → 降级到传统分析（Git 历史 + 文件统计）
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 模块依赖图 | CKB getArchitecture | 目录结构推断 |
-| 技术债热点 | CKB getHotspots | Git log 统计 |
-| 领域概念 | CKB listKeyConcepts | 命名分析 |
-| 边界识别 | 精确模块边界 | 目录约定 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 不可用，使用传统分析方法生成项目画像。
-如需更精确的架构分析，请手动生成 SCIP 索引。
-```
+本 Skill 不依赖 MCP 服务，无需运行时检测。

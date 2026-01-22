@@ -1,6 +1,7 @@
 ---
 name: devbooks-convergence-audit
 description: devbooks-convergence-audit：以证据优先、声明存疑的原则评估 DevBooks 工作流收敛性，检测"西西弗斯反模式"和"假完成"。主动验证而非信任文档声明。用户说"评估收敛性/检查升级健康度/西西弗斯检测/工作流审计"等时使用。
+recommended_experts: ["System Architect"]
 allowed-tools:
   - Glob
   - Grep

@@ -91,6 +91,14 @@ case "$role" in
     ;;
 esac
 
+# Prefer ripgrep; on macOS Homebrew installs it to /opt/homebrew/bin, which may
+# not be present in non-interactive PATH.
+if ! command -v rg >/dev/null 2>&1; then
+  if [[ -x /opt/homebrew/bin/rg ]]; then
+    export PATH="/opt/homebrew/bin:${PATH}"
+  fi
+fi
+
 if ! command -v rg >/dev/null 2>&1; then
   echo "error: missing dependency: rg (ripgrep)" >&2
   exit 2

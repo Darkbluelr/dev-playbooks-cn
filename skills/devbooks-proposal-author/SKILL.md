@@ -1,6 +1,7 @@
 ---
 name: devbooks-proposal-author
 description: devbooks-proposal-author：撰写变更提案 proposal.md（Why/What/Impact + Debate Packet），作为后续 Design/Spec/Plan 的入口。对设计性决策会呈现选项给用户选择。用户说"写提案/proposal/为什么要改/影响范围/坏味道重构提案"等时使用。
+recommended_experts: ["Product Manager", "System Architect"]
 allowed-tools:
   - Glob
   - Grep
@@ -175,9 +176,12 @@ proposal-author → [impact-analysis] → design-doc → [spec-contract] → imp
 
 ---
 
-## MCP 增强
+## Challenger 审视
+
+在完成提案草案后，执行 Challenger 审视，重点检查遗漏的约束与不确定性，并参考完备性方法论。
+
+- 方法论参考：[完备性思维框架](../_shared/references/完备性思维框架.md)
+
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-

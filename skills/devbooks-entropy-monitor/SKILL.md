@@ -1,6 +1,7 @@
 ---
 name: devbooks-entropy-monitor
 description: devbooks-entropy-monitor：定期采集系统熵度量（结构熵/变更熵/测试熵/依赖熵），生成量化报告，当指标超阈值时建议重构。用户说"熵度量/复杂度趋势/重构预警/代码健康/技术债务度量"等时使用。
+recommended_experts: ["Performance Engineer", "System Architect"]
 allowed-tools:
   - Glob
   - Grep
@@ -150,39 +151,6 @@ allowed-tools:
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getHotspots` | 获取热点文件分析 | 2s |
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 使用 `getHotspots` 获取精确热点分析
-3. 若超时或失败 → 降级到 Git 历史统计
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 热点分析 | CKB 实时分析（含复杂度） | Git log 变更频率统计 |
-| 耦合检测 | 调用图分析 | 文件共变分析 |
-| 趋势预测 | 基于复杂度变化率 | 基于变更频率 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 不可用，使用 Git 历史进行熵度量。
-热点分析基于变更频率，不含代码复杂度数据。
-```
-
+本 Skill 不依赖 MCP 服务，无需运行时检测。

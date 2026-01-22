@@ -1,6 +1,7 @@
 ---
 name: devbooks-design-doc
 description: devbooks-design-doc：产出变更包的设计文档（design.md），只写 What/Constraints 与 AC-xxx，不写实现步骤。用户说"写设计文档/Design Doc/架构设计/约束/验收标准/AC/C4 Delta"等时使用。
+recommended_experts: ["System Architect", "Product Manager"]
 allowed-tools:
   - Glob
   - Grep
@@ -247,9 +248,10 @@ design-doc → [spec-contract] → implementation-plan → test-owner → coder
 
 ---
 
-## MCP 增强
+## 方法论参考
+
+- 完备性思维框架：[完备性思维框架](../_shared/references/完备性思维框架.md)
+
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-

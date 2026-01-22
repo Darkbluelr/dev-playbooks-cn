@@ -1,6 +1,7 @@
 ---
 name: devbooks-proposal-challenger
 description: devbooks-proposal-challenger：对 proposal.md 发起质疑（Challenger）+ 查漏补缺，指出风险/遗漏/不一致并给结论，发现缺失的验收标准和未覆盖场景。用户说"质疑提案/挑刺/风险评估/提案对辩 challenger/查漏补缺"等时使用。
+recommended_experts: ["Product Manager", "System Architect"]
 allowed-tools:
   - Glob
   - Grep
@@ -78,9 +79,6 @@ allowed-tools:
 
 ---
 
-## MCP 增强
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-

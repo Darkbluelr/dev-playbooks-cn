@@ -1,0 +1,25 @@
+- name: 环境依赖
+  patterns:
+    - "Node.js"
+    - "Python"
+    - "依赖"
+- name: 安全权限
+  patterns:
+    - "权限"
+    - "安全"
+    - "密钥"
+- name: 故障排查
+  patterns:
+    - "故障"
+    - "排查"
+    - "Troubleshooting"
+- name: 配置说明
+  patterns:
+    - "配置"
+    - "config"
+    - "配置文件"
+- name: API 文档
+  patterns:
+    - "API"
+    - "接口"
+    - "Endpoint"

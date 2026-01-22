@@ -1,6 +1,7 @@
 ---
 name: devbooks-implementation-plan
 description: devbooks-implementation-plan：从设计文档推导编码计划（tasks.md），输出可跟踪的主线计划/临时计划/断点区，并绑定验收锚点。用户说"写编码计划/Implementation Plan/tasks.md/任务拆解/并行拆分/里程碑/验收锚点"等时使用。
+recommended_experts: ["System Architect", "Product Manager"]
 allowed-tools:
   - Glob
   - Grep
@@ -153,9 +154,6 @@ implementation-plan → test-owner (会话A) → coder (会话B)
 
 ---
 
-## MCP 增强
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-

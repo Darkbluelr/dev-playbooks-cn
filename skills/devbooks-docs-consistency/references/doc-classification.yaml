@@ -1,0 +1,11 @@
+living_docs:
+  - "README.md"
+  - "docs/**/*.md"
+  - "API.md"
+  - "docs/*.md"
+history_docs:
+  - "CHANGELOG.md"
+  - "**/CHANGELOG.md"
+concept_docs:
+  - "architecture/*.md"
+  - "architecture/**/*.md"

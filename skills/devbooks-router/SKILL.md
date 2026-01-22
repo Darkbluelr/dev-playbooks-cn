@@ -1,6 +1,7 @@
 ---
 name: devbooks-router
 description: devbooks-router：DevBooks 工作流入口引导：帮助用户确定从哪个 skill 开始，检测项目当前状态，给出最短闭环路径。用户说"下一步怎么做/从哪开始/按 devbooks 跑闭环/项目状态"等时使用。注意：skill 完成后的路由由各 skill 自己负责，无需调用 router。
+recommended_experts: ["System Architect", "Product Manager"]
 allowed-tools:
   - Glob
   - Grep
@@ -236,7 +237,7 @@ LSC（大规模同质化修改）建议：
 触发信号：用户说"更新文档/同步文档/README 更新/API 文档"等。
 
 默认路由：
-- `devbooks-docs-sync`（维护用户文档与代码一致性）
+- `devbooks-docs-consistency`（维护用户文档与代码一致性）
   - 增量模式：在变更包上下文中，只更新本次 change 相关的文档
   - 全局模式：带 --global 参数，扫描全部文档并生成差异报告
 
@@ -253,7 +254,7 @@ LSC（大规模同质化修改）建议：
 默认路由：
 - 若本次产生了 spec delta：`devbooks-archiver`（先修剪 `<truth-root>/**` 再归档合并）
 - 若需要回写设计决策：`devbooks-design-backport`（按需）
-- 若影响用户文档：`devbooks-docs-sync`（确保文档与代码一致）
+- 若影响用户文档：`devbooks-docs-consistency`（确保文档与代码一致）
 
 归档前的确定性检查（推荐）：
 - `change-check.sh <change-id> --mode strict ...`（要求：proposal 已 Approved、tasks 全勾选、trace matrix 无 TODO、结构守门决策已填写）
@@ -340,37 +341,6 @@ DevBooks 使用 `devbooks-proposal-author skill`、`devbooks-test-owner/coder sk
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 在路由建议中标注"图基能力已激活"
-3. 若超时或失败 → 在路由建议中标注"图基能力降级"，建议手动生成 SCIP 索引
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 影响分析推荐 | 使用 CKB 精确分析 | 使用 Grep 文本搜索 |
-| 代码导航 | 符号级跳转可用 | 文件级搜索 |
-| 热点检测 | CKB 实时分析 | 不可用 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 索引未激活，图基能力（影响分析、调用图等）将降级。
-建议手动生成 SCIP 索引以启用完整功能。
-```
+本 Skill 不依赖 MCP 服务，无需运行时检测。

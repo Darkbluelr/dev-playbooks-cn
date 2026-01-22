@@ -1,6 +1,7 @@
 ---
 name: devbooks-impact-analysis
 description: devbooks-impact-analysis：跨模块/跨文件/对外契约变更前做影响分析，产出可直接写入 proposal.md 的 Impact 部分（Scope/Impacts/Risks/Minimal Diff/Open Questions）。用户说"做影响分析/改动面控制/引用查找/受影响模块/兼容性风险"等时使用。
+recommended_experts: ["System Architect"]
 allowed-tools:
   - Glob
   - Grep
@@ -129,42 +130,6 @@ AI：[使用 Grep/CKB 分析引用]
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__analyzeImpact` | 符号级影响分析 | 2s |
-| `mcp__ckb__findReferences` | 精确引用查找 | 2s |
-| `mcp__ckb__getCallGraph` | 调用图分析 | 2s |
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 使用 `analyzeImpact` 和 `findReferences` 进行精确分析
-3. 若超时或失败 → 降级到基础模式（Grep 文本搜索）
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 引用查找 | 符号级精确匹配 | 文本 Grep 搜索 |
-| 影响范围 | 调用图传递分析 | 直接引用统计 |
-| 风险评估 | 基于调用深度量化 | 基于文件数量估算 |
-| 跨模块分析 | 自动识别模块边界 | 需手动指定范围 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 不可用，使用 Grep 文本搜索进行影响分析。
-分析结果可能不够精确，建议手动生成 SCIP 索引后重新分析。
-```
-
+本 Skill 不依赖 MCP 服务，无需运行时检测。

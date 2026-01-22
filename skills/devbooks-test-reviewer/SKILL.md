@@ -1,6 +1,7 @@
 ---
 name: devbooks-test-reviewer
 description: devbooks-test-reviewer：以 Test Reviewer 角色评审 tests/ 测试质量（覆盖、边界、可读性、可维护性），只输出评审意见，不修改代码。用户说“测试评审/评审测试质量/覆盖率/边界条件”等时使用。
+recommended_experts: ["Test Engineer"]
 allowed-tools:
   - Glob
   - Grep
@@ -244,11 +245,9 @@ allowed-tools:
 
 ---
 
-## MCP 增强
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
 
 ---
 

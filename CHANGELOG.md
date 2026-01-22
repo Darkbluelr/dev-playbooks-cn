@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-01-23
+
+### Added
+
+- 新增 `devbooks-docs-consistency`：文档一致性检查技能（原 `devbooks-docs-sync` 的改名与增强）
+  - 支持自定义规则引擎（持续规则 + 一次性任务）
+  - 增量扫描功能（基于 git diff，减少 90% token 消耗）
+  - 完备性检查（5 个维度：环境依赖、安全权限、故障排查、配置说明、API 文档）
+  - 文档分类（活体/历史/概念性文档）
+  - 风格检查与持久化配置
+- 新增共享参考文档
+  - `skills/_shared/references/完备性思维框架.md`：完备性思维方法论
+  - `skills/_shared/references/专家列表.md`：AI 专家角色列表
+- 新增工具脚本
+  - `scripts/benchmark-scan.sh`：扫描性能基准测试
+  - `scripts/detect-fancy-words.sh`：浮夸词语检测
+
+### Changed
+
+- `devbooks-docs-sync` 改名为 `devbooks-docs-consistency`，旧名称作为别名保留（6 个月弃用期）
+- 更新所有 skills 的 AI 行为规范，添加专家角色声明协议
+- 优化 `devbooks-archiver`：集成文档一致性检查
+- 优化 `devbooks-brownfield-bootstrap`：生成文档维护元数据
+- 优化 `devbooks-proposal-author`：添加 Challenger 审视部分
+
+### Removed
+
+- 删除所有 skills 中的 MCP 增强章节
+- 删除 `CSDN_ARTICLE.md`
+
+---
+
 ## [2.2.1] - 2025-01-20
 
 ### 修复

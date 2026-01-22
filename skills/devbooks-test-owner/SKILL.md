@@ -1,6 +1,7 @@
 ---
 name: devbooks-test-owner
 description: devbooks-test-owner：以 Test Owner 角色把设计/规格转成可执行验收测试与追溯文档（verification.md），强调与实现（Coder）独立对话、先跑出 Red 基线。用户说"写测试/验收测试/追溯矩阵/verification.md/Red-Green/contract tests/fitness tests"，或在 DevBooks apply 阶段以 test owner 执行时使用。
+recommended_experts: ["Test Engineer"]
 allowed-tools:
   - Glob
   - Grep
@@ -279,8 +280,6 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 ---
 
-## MCP 增强
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`~/.claude/skills/_shared/MCP增强模板.md`

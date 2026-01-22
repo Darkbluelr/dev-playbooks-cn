@@ -1,6 +1,7 @@
 ---
 name: devbooks-spec-contract
 description: devbooks-spec-contract：定义对外行为规格与契约（Requirements/Scenarios/API/Schema/兼容策略/迁移），并建议或生成 contract tests。合并了原 spec-delta 和 contract-data 的功能。用户说"写规格/spec/契约/OpenAPI/Schema/兼容策略/contract tests"等时使用。
+recommended_experts: ["System Architect", "Product Manager"]
 allowed-tools:
   - Glob
   - Grep
@@ -188,38 +189,6 @@ spec-contract → implementation-plan → test-owner → coder
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__findReferences` | 检测契约引用范围 | 2s |
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 使用 `findReferences` 检测契约符号的引用范围
-3. 若超时或失败 → 降级到 Grep 文本搜索
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 引用检测 | 符号级精确匹配 | Grep 文本搜索 |
-| 契约影响范围 | 调用图分析 | 直接引用统计 |
-| 兼容性风险 | 自动评估 | 手动判断 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 不可用，使用 Grep 文本搜索检测契约引用。
-结果可能不够精确，建议手动生成 SCIP 索引。
-```
+本 Skill 不依赖 MCP 服务，无需运行时检测。

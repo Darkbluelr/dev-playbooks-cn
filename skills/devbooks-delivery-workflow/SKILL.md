@@ -1,6 +1,7 @@
 ---
 name: devbooks-delivery-workflow
 description: devbooks-delivery-workflow：完整闭环编排器，在支持子 Agent 的 AI 编程工具中调用，自动编排 Proposal→Design→Spec→Plan→Test→Implement→Review→Archive 全流程。用户说"跑一遍闭环/完整交付/从头到尾跑完/自动化变更流程"等时使用。
+recommended_experts: ["System Architect", "Product Manager"]
 allowed-tools:
   - Glob
   - Grep
@@ -223,21 +224,9 @@ allowed-tools:
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 在工作流状态报告中标注索引可用性
-3. 若不可用 → 建议在 apply 阶段前生成索引
+本 Skill 不依赖 MCP 服务，无需运行时检测。
 
 ---
 

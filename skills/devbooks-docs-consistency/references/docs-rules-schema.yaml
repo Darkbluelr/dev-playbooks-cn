@@ -1,0 +1,11 @@
+rules:
+  - id: forbid-smart
+    type: persistent
+    target: content
+    action: check
+    pattern: "智能"
+  - id: remove-augment
+    type: once
+    target: content
+    action: remove
+    pattern: "@augment"

@@ -103,8 +103,12 @@ if [[ -z "$project_root" || -z "$change_root" ]]; then
 fi
 
 if ! command -v rg >/dev/null 2>&1; then
-  echo "error: missing dependency: rg (ripgrep)" >&2
-  exit 2
+  # ripgrep is preferred but not always installed in minimal environments.
+  # We keep guardrail-check usable by falling back to grep/egrep.
+  if ! command -v grep >/dev/null 2>&1; then
+    echo "error: missing dependency: rg (ripgrep) or grep" >&2
+    exit 2
+  fi
 fi
 
 if [[ "$change_root" = /* ]]; then
@@ -120,12 +124,22 @@ if [[ ! -f "$file" ]]; then
 fi
 
 # Check if guardrail section exists - if not, skip (guardrail review not applicable)
-if ! rg -n "^F\\) Structural Quality Gate Record|^## F\\) Structural Quality Gate" "$file" >/dev/null 2>&1; then
+if command -v rg >/dev/null 2>&1; then
+  has_guardrail_section=$(rg -n "^F\\) Structural Quality Gate Record|^## F\\) Structural Quality Gate" "$file" >/dev/null 2>&1 && echo yes || echo no)
+else
+  has_guardrail_section=$(grep -nE "^F\) Structural Quality Gate Record|^## F\) Structural Quality Gate" "$file" >/dev/null 2>&1 && echo yes || echo no)
+fi
+
+if [[ "$has_guardrail_section" != "yes" ]]; then
   echo "ok: guardrail section not present (not applicable for ${change_id})"
   exit 0
 fi
 
-decision_line=$(rg -n "^- Decision and Authorization:" "$file" || true)
+if command -v rg >/dev/null 2>&1; then
+  decision_line=$(rg -n "^- Decision and Authorization:" "$file" || true)
+else
+  decision_line=$(grep -nE "^- Decision and Authorization:" "$file" || true)
+fi
 if [[ -z "$decision_line" ]]; then
   echo "error: guardrail section exists but missing '- Decision and Authorization:' line in ${file}" >&2
   exit 1
@@ -144,11 +158,25 @@ echo "ok: guardrail decision present for ${change_id}"
 # Role Permission Checks (inspired by VS Code role permission separation)
 # =============================================================================
 
-# Define file patterns forbidden for each role
-declare -A ROLE_FORBIDDEN_PATTERNS
-ROLE_FORBIDDEN_PATTERNS[coder]="tests/|test/|\.test\.|\.spec\.|__tests__|verification\.md"
-ROLE_FORBIDDEN_PATTERNS[test-owner]=""  # test-owner can modify test files
-ROLE_FORBIDDEN_PATTERNS[reviewer]=".*"  # reviewer should not modify any files
+# Define file patterns forbidden for each role.
+# Use a plain function instead of associative arrays for bash 3.2 compatibility (macOS default).
+role_forbidden_patterns() {
+  local role_name="$1"
+  case "$role_name" in
+    coder)
+      echo "tests/|test/|\\.test\\.|\\.spec\\.|__tests__|verification\\.md"
+      ;;
+    test-owner)
+      echo ""  # test-owner can modify test files
+      ;;
+    reviewer)
+      echo ".*"  # reviewer should not modify any files
+      ;;
+    *)
+      echo ""
+      ;;
+  esac
+}
 
 # Define sensitive files forbidden for all roles (similar to VS Code engineering system protection)
 SENSITIVE_PATTERNS="\.devbooks/|\.github/workflows/|build/|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock"
@@ -179,7 +207,8 @@ check_role_permissions() {
     return 0
   fi
 
-  local forbidden="${ROLE_FORBIDDEN_PATTERNS[$role]:-}"
+  local forbidden
+  forbidden="$(role_forbidden_patterns "$role")"
   local violations=""
 
   while IFS= read -r file; do

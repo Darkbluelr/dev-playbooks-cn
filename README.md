@@ -238,6 +238,7 @@ DevBooks 使用两个目录根：
 |-------|------|
 | `devbooks-reviewer` | 代码评审（可读性/一致性） |
 | `devbooks-test-reviewer` | 测试质量与覆盖率评审 |
+| `devbooks-docs-consistency` | 文档一致性检查（原 devbooks-docs-sync） |
 
 ### Archive 阶段
 

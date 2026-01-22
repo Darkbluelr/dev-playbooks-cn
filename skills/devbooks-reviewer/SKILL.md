@@ -1,6 +1,7 @@
 ---
 name: devbooks-reviewer
 description: devbooks-reviewer：以 Reviewer 角色做可读性/一致性/依赖健康/坏味道审查，只输出审查意见与可执行建议，不讨论业务正确性。用户说"帮我做代码评审/review 可维护性/坏味道/依赖风险/一致性建议"，或在 DevBooks apply 阶段以 reviewer 执行时使用。
+recommended_experts: ["System Architect", "Security Expert"]
 allowed-tools:
   - Glob
   - Grep
@@ -206,40 +207,6 @@ Review 通过后，Reviewer 必须执行：
 
 ---
 
-## MCP 增强
+## MCP 说明
 
-本 Skill 支持 MCP 运行时增强，自动检测并启用高级功能。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
-
-### 依赖的 MCP 服务
-
-| 服务 | 用途 | 超时 |
-|------|------|------|
-| `mcp__ckb__getHotspots` | 检测热点文件，优先审查 | 2s |
-| `mcp__ckb__getStatus` | 检测 CKB 索引可用性 | 2s |
-
-### 检测流程
-
-1. 调用 `mcp__ckb__getStatus`（2s 超时）
-2. 若 CKB 可用 → 调用 `mcp__ckb__getHotspots` 获取热点文件
-3. 对热点文件进行优先审查
-4. 若超时或失败 → 降级到基础模式
-
-### 增强模式 vs 基础模式
-
-| 功能 | 增强模式 | 基础模式 |
-|------|----------|----------|
-| 热点优先审查 | 自动识别高风险文件 | 按变更顺序审查 |
-| 依赖方向检查 | 基于模块图分析 | 基于文件路径推断 |
-| 循环依赖检测 | CKB 精确检测 | Grep 启发式检测 |
-
-### 降级提示
-
-当 MCP 不可用时，输出以下提示：
-
-```
-⚠️ CKB 不可用，无法进行热点优先审查。
-按变更文件顺序进行审查。
-```
-
+本 Skill 不依赖 MCP 服务，无需运行时检测。

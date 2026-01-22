@@ -1,6 +1,7 @@
 ---
 name: devbooks-archiver
 description: devbooks-archiver：归档阶段的唯一入口，负责完整的归档闭环（自动回写→规格合并→文档同步检查→变更包归档移动）。用户说"归档/archive/收尾/闭环/合并到真理"等时使用。
+recommended_experts: ["System Architect", "Technical Writer"]
 allowed-tools:
   - Glob
   - Grep
@@ -232,7 +233,19 @@ health: active                            # 健康状态：active | stale | depr
    - 更新分层约束（如有变更）
 4. **记录合并日志**：在 c4.md 末尾添加变更记录
 
-### 第 5 步：文档同步检查
+### 第 5 步：文档一致性检查
+
+在归档前运行文档一致性检查：
+
+```
+devbooks-docs-consistency --check
+```
+
+检查结果仅记录与提示，不阻塞归档。
+
+---
+
+### 第 6 步：文档同步检查
 
 检查 design.md 的 "Documentation Impact" 章节：
 
@@ -247,7 +260,7 @@ health: active                            # 健康状态：active | stale | depr
 - 输出警告，列出需要更新的文档
 - 不阻塞归档，但在归档报告中标记为 "文档待更新"
 
-### 第 6 步：变更包归档移动（新增）
+### 第 7 步：变更包归档移动（新增）
 
 将已完成的变更包移动到归档目录：
 
@@ -408,8 +421,6 @@ archived-by: devbooks-archiver
 
 ---
 
-## MCP 增强
+## MCP 说明
 
 本 Skill 不依赖 MCP 服务，无需运行时检测。
-
-MCP 增强规则参考：`skills/_shared/MCP增强模板.md`
