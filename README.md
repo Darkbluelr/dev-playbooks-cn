@@ -72,6 +72,23 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ## 快速开始
 
+**不知道怎么用？** 查看 [使用指南](docs/使用指南.md) 或直接运行：
+
+```bash
+/devbooks-delivery-workflow
+```
+
+这个 skill 会自动编排完整的开发闭环，从提案到归档。
+
+### 文档
+
+- [使用指南](docs/使用指南.md) - 最佳实践和推荐工作流程
+- [Skill 详解](docs/Skill详解.md) - 19 个 Skills 的特色和功能
+- [配置指南](dev-playbooks/docs/DevBooks配置指南.md) - 配置说明
+- [推荐 MCP](dev-playbooks/docs/推荐MCP.md) - MCP 服务器推荐
+
+---
+
 ### 支持的 AI 工具
 
 | 工具 | 支持级别 | 配置文件 |

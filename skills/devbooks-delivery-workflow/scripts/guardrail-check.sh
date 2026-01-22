@@ -321,6 +321,11 @@ check_layering_constraints() {
     return 0
   fi
 
+  if ! command -v rg >/dev/null 2>&1; then
+    echo "error: missing dependency: rg (ripgrep) required for layering checks" >&2
+    return 2
+  fi
+
   # Get changed files
   local changed_files=""
   if [[ -d "${project_root}/.git" ]]; then
@@ -402,6 +407,11 @@ check_circular_dependencies() {
   else
     # Fallback: use simple grep to detect common circular patterns
     echo "info: madge not available, using basic circular detection"
+
+    if ! command -v rg >/dev/null 2>&1; then
+      echo "error: missing dependency: rg (ripgrep) required for fallback circular checks" >&2
+      return 2
+    fi
 
     # Check if files both import each other (simple heuristic)
     if [[ -d "${project_root}/.git" ]]; then
@@ -499,42 +509,73 @@ check_hotspot_changes() {
 
 exit_code=0
 
+update_exit_code() {
+  local rc="$1"
+
+  if [[ $rc -eq 0 ]]; then
+    return 0
+  fi
+
+  # Preserve usage/tooling errors for callers that rely on exit code semantics.
+  if [[ $rc -eq 2 ]]; then
+    exit_code=2
+    return 0
+  fi
+
+  # If we have already hit a tooling error, keep 2 as the final status.
+  if [[ $exit_code -ne 2 ]]; then
+    exit_code=1
+  fi
+
+  return 0
+}
+
 # Role permission check
 if [[ -n "$role" ]]; then
   change_path=$(dirname "$file")
-  if ! check_role_permissions "$role" "$change_path"; then
-    exit_code=1
+  if check_role_permissions "$role" "$change_path"; then
+    :
+  else
+    update_exit_code $?
   fi
 fi
 
 # Lockfile check
 if [[ "$check_lockfile" == "true" ]]; then
   change_path=$(dirname "$file")
-  if ! check_lockfile_changes "$change_path"; then
-    exit_code=1
+  if check_lockfile_changes "$change_path"; then
+    :
+  else
+    update_exit_code $?
   fi
 fi
 
 # Engineering system change check
 if [[ "$check_engineering" == "true" ]]; then
   change_path=$(dirname "$file")
-  if ! check_engineering_changes "$change_path"; then
-    exit_code=1
+  if check_engineering_changes "$change_path"; then
+    :
+  else
+    update_exit_code $?
   fi
 fi
 
 # Layering constraint check (Dependency Guard)
 if [[ "$check_layers" == "true" ]]; then
   change_path=$(dirname "$file")
-  if ! check_layering_constraints "$change_path"; then
-    exit_code=1
+  if check_layering_constraints "$change_path"; then
+    :
+  else
+    update_exit_code $?
   fi
 fi
 
 # Circular dependency check
 if [[ "$check_cycles" == "true" ]]; then
-  if ! check_circular_dependencies; then
-    exit_code=1
+  if check_circular_dependencies; then
+    :
+  else
+    update_exit_code $?
   fi
 fi
 
