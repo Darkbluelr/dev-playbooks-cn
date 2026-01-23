@@ -650,7 +650,16 @@ const IGNORE_MARKERS = {
 function getGitIgnoreEntries(toolIds) {
   const entries = [
     '# DevBooks 本地配置（包含用户偏好，不应提交）',
-    '.devbooks/'
+    '.devbooks/',
+    '',
+    '# DevBooks 工作流产生的临时文件',
+    'evidence/',
+    'dev-playbooks/changes/*/evidence/',
+    '*.tmp',
+    '*.bak',
+    '',
+    '# CKB 代码知识库缓存',
+    '.ckb/'
   ];
 
   // 根据选择的工具添加对应的 AI 工具目录
@@ -661,6 +670,14 @@ function getGitIgnoreEntries(toolIds) {
     // 添加 slash 命令目录
     if (tool.slashDir) {
       const topDir = tool.slashDir.split('/')[0];
+      if (!entries.includes(topDir + '/')) {
+        entries.push(`${topDir}/`);
+      }
+    }
+
+    // 添加 skills 目录（项目级）
+    if (tool.skillsDir && !path.isAbsolute(tool.skillsDir)) {
+      const topDir = tool.skillsDir.split('/')[0];
       if (!entries.includes(topDir + '/')) {
         entries.push(`${topDir}/`);
       }
@@ -701,6 +718,7 @@ function getNpmIgnoreEntries() {
     '# AI 工具配置目录',
     '.claude/',
     '.cursor/',
+    '.factory/',
     '.windsurf/',
     '.gemini/',
     '.agent/',
@@ -715,7 +733,15 @@ function getNpmIgnoreEntries() {
     '# DevBooks 指令文件',
     'CLAUDE.md',
     'AGENTS.md',
-    'GEMINI.md'
+    'GEMINI.md',
+    '',
+    '# DevBooks 工作流临时文件',
+    'evidence/',
+    '*.tmp',
+    '*.bak',
+    '',
+    '# CKB 缓存',
+    '.ckb/'
   ];
 }
 
