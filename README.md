@@ -9,20 +9,6 @@
 
 ---
 
-## 30 秒电梯演讲
-
-AI 编程助手很强大，但有个致命问题：**你无法确定它是真的完成了，还是只是看起来完成了。**
-
-DevBooks 通过三个核心机制解决这个问题：
-
-1. **角色隔离** - Test Owner 与 Coder 必须在独立对话中工作，测试不会沦为"通过性测试"
-2. **证据驱动** - 完成由测试通过 + 构建成功定义，而非 AI 自评
-3. **质量闸门** - 多重检查确保每个变更都是真正可交付的
-
-**结果**：从"边修边破"变成"稳定推进"。
-
----
-
 ## 最佳实践：一键跑完整闭环
 
 不知道怎么用？直接运行：
@@ -96,12 +82,13 @@ dev-playbooks-cn update
 
 | 工具 | 支持级别 |
 |------|----------|
-| Claude Code | 完整 Skills |
-| Codex CLI | 完整 Skills |
+| Claude Code | 完整 Skills（`.claude/skills/`）|
+| Codex CLI | 完整 Skills（`.codex/skills/`）|
 | Qoder | 完整 Skills |
 | OpenCode | 完整 Skills |
 | Every Code | 完整 Skills |
-| Cursor | Rules 系统 |
+| Factory | 原生 Skills（`.factory/skills/`）|
+| Cursor | 原生 Skills（`.cursor/skills/`）|
 | Windsurf | Rules 系统 |
 | Gemini CLI | Rules 系统 |
 

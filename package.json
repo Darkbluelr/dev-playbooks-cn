@@ -1,6 +1,6 @@
 {
   "name": "dev-playbooks-cn",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "AI-driven spec-based development workflow",
   "keywords": [
     "devbooks",
@@ -31,7 +31,9 @@
     "bin/",
     "templates/",
     "skills/",
-    "scripts/"
+    "scripts/",
+    ".factory/",
+    ".cursor/"
   ],
   "engines": {
     "node": ">=18"
