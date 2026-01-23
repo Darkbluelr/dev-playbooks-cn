@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.4] - 2026-01-23
+
+### Fixed
+
+- **修正 ignore 规则**：
+  - 移除 `.ckb/` - 这是外部工具 CKB 的缓存，不属于 DevBooks
+  - 将 `dev-playbooks/changes/*/evidence/` 改为 `dev-playbooks/` - 整个工作目录都应该被 ignore
+
+### Changed
+
+- **更准确的 ignore 范围**：
+  - `dev-playbooks/` - DevBooks 工作目录（包含所有运行时产生的内容）
+  - `.devbooks/` - DevBooks 本地配置
+  - `evidence/` - 测试证据目录
+  - `*.tmp`, `*.bak` - 临时文件
+
+---
+
 ## [2.5.3] - 2026-01-23
 
 ### Added
