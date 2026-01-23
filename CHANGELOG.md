@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] - 2026-01-23
+
+### Added
+
+- **智能 ignore 功能增强**：
+  - 自动识别并 ignore DevBooks 工作流产生的临时文件
+  - 新增 `evidence/` - 测试证据目录
+  - 新增 `dev-playbooks/changes/*/evidence/` - 变更包中的证据
+  - 新增 `*.tmp`, `*.bak` - 临时文件和备份文件
+  - 新增 `.ckb/` - CKB 代码知识库缓存
+  - 自动识别项目级 skills 目录（`.factory/`, `.cursor/` 等）
+
+### Changed
+
+- **更智能的 ignore 规则生成**：
+  - 根据选择的 AI 工具自动添加对应的目录
+  - 支持相对路径的 skills 目录自动识别
+  - 同时更新 `.gitignore` 和 `.npmignore`
+
+---
+
 ## [2.5.2] - 2026-01-23
 
 ### Fixed
