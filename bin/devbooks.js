@@ -98,13 +98,26 @@ const AI_TOOLS = [
     available: true
   },
 
-  // === Rules 类似系统 ===
+  // === Factory（原生 Skills 支持）===
+  {
+    id: 'factory',
+    name: 'Factory',
+    description: 'Factory Droid',
+    skillsSupport: SKILLS_SUPPORT.FULL,
+    slashDir: null,
+    skillsDir: '.factory/skills',  // 项目级
+    instructionFile: null,
+    available: true
+  },
+
+  // === Cursor（原生 Skills 支持）===
   {
     id: 'cursor',
     name: 'Cursor',
     description: 'Cursor AI IDE',
-    skillsSupport: SKILLS_SUPPORT.RULES,
+    skillsSupport: SKILLS_SUPPORT.FULL,
     slashDir: '.cursor/commands/devbooks',
+    skillsDir: '.cursor/skills',  // 项目级
     rulesDir: '.cursor/rules',
     instructionFile: null,
     available: true
@@ -903,7 +916,11 @@ async function promptInstallScope(projectDir, selectedTools) {
 function getSkillsDestDir(tool, scope, projectDir) {
   // 根据安装范围确定目标目录
   if (scope === INSTALL_SCOPE.PROJECT) {
-    // 项目级安装：使用项目目录下的相对路径
+    // 项目级安装：如果 skillsDir 是相对路径，使用项目目录
+    if (tool.skillsDir && !path.isAbsolute(tool.skillsDir)) {
+      return path.join(projectDir, tool.skillsDir);
+    }
+    // 兼容旧的硬编码逻辑
     if (tool.id === 'claude') {
       return path.join(projectDir, '.claude', 'skills');
     } else if (tool.id === 'codex') {
@@ -925,8 +942,8 @@ function installSkills(toolIds, projectDir, scope = INSTALL_SCOPE.GLOBAL, update
     const tool = AI_TOOLS.find(t => t.id === toolId);
     if (!tool || tool.skillsSupport !== SKILLS_SUPPORT.FULL) continue;
 
-    // Claude Code / Codex CLI / OpenCode / Every Code 支持相同格式的 Skills
-    if ((toolId === 'claude' || toolId === 'codex' || toolId === 'opencode' || toolId === 'code') && tool.skillsDir) {
+    // 所有支持完整 Skills 的工具
+    if (tool.skillsDir) {
       const skillsSrcDir = path.join(__dirname, '..', 'skills');
       const skillsDestDir = getSkillsDestDir(tool, scope, projectDir);
 
