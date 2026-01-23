@@ -652,14 +652,13 @@ function getGitIgnoreEntries(toolIds) {
     '# DevBooks 本地配置（包含用户偏好，不应提交）',
     '.devbooks/',
     '',
+    '# DevBooks 工作目录（运行时产生的内容）',
+    'dev-playbooks/',
+    '',
     '# DevBooks 工作流产生的临时文件',
     'evidence/',
-    'dev-playbooks/changes/*/evidence/',
     '*.tmp',
-    '*.bak',
-    '',
-    '# CKB 代码知识库缓存',
-    '.ckb/'
+    '*.bak'
   ];
 
   // 根据选择的工具添加对应的 AI 工具目录
@@ -738,10 +737,7 @@ function getNpmIgnoreEntries() {
     '# DevBooks 工作流临时文件',
     'evidence/',
     '*.tmp',
-    '*.bak',
-    '',
-    '# CKB 缓存',
-    '.ckb/'
+    '*.bak'
   ];
 }
 
