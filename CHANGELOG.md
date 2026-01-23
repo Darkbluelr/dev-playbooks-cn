@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] - 2026-01-23
+
+### Fixed
+
+- **init 命令支持 Factory 和 Cursor**：
+  - 将 Factory 添加为完整 Skills 支持的工具
+  - 将 Cursor 从 Rules 系统升级为完整 Skills 支持
+  - 现在运行 `dev-playbooks-cn init` 时可以选择 Factory 和 Cursor
+  - Skills 会正确安装到 `.factory/skills/` 和 `.cursor/skills/`
+
+- **更通用的 Skills 安装逻辑**：
+  - 移除硬编码的工具 ID 检查
+  - 支持所有定义了 `skillsDir` 的工具
+  - 支持相对路径的 `skillsDir`（如 `.factory/skills`）
+
+---
+
 ## [2.5.1] - 2026-01-23
 
 ### Fixed
