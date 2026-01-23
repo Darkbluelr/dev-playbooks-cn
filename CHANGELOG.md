@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-01-23
+
+### Added
+
+- **Factory 原生 Skills 支持**：添加 `.factory/skills/` 目录，支持 Factory Droid
+  - 使用符号链接指向现有 `skills/` 目录，保持单一数据源
+  - 所有 18 个 DevBooks skills 可在 Factory 中原生使用
+  - 符合 Factory Skills 标准（YAML frontmatter + Markdown）
+
+- **Cursor 原生 Skills 支持**：添加 `.cursor/skills/` 目录，支持 Cursor Agent
+  - 使用符号链接指向现有 `skills/` 目录，保持单一数据源
+  - 所有 18 个 DevBooks skills 可在 Cursor 中原生使用
+  - 符合 Cursor Agent Skills 标准
+
+### Changed
+
+- **README 优化**：
+  - 移除"30秒电梯演讲"章节，简化文档结构
+  - 更新"支持的 AI 工具"表格，添加 Factory 和 Cursor 原生支持
+  - 明确标注各工具的 Skills 目录位置
+
+- **package.json 更新**：
+  - 添加 `.factory/` 和 `.cursor/` 到 npm 发布文件列表
+  - 确保 Skills 目录随包一起发布
+
+### Technical Details
+
+- 使用符号链接（symlinks）而非复制文件，确保：
+  - 单一数据源（Single Source of Truth）
+  - 自动同步更新
+  - 减少维护成本
+  - 避免文件不一致
+
+---
+
 ## [2.3.0] - 2026-01-23
 
 ### Added
