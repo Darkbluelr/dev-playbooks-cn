@@ -170,33 +170,6 @@
 
 ---
 
-### devbooks-design-backport
-
-**角色**：Design Backport（设计回写）
-
-**特色**：
-- 把实现过程中发现的新约束/冲突/缺口回写到 design.md
-- 保持设计为黄金真理
-- 标注决策与影响
-
-**使用场景**：
-- 实现过程中发现设计遗漏
-- 需要澄清约束
-- 设计与实现不一致
-
-**调用方式**：
-```bash
-/devbooks-design-backport
-```
-
-**输出**：
-- 更新后的 `design.md`
-- 决策记录
-
-**关键约束**：
-- 只回写约束和决策，不写实现细节
-
----
 
 ## 规格阶段
 
@@ -486,14 +459,14 @@
 **角色**：Convergence Auditor（收敛性审计者）
 
 **特色**：
-- 以证据优先、声明存疑的原则评估 DevBooks 工作流收敛性
-- 检测"西西弗斯反模式"和"假完成"
-- 主动验证而非信任文档声明
+- 评估多个变更包闭环后是否有效推进
+- 检测"边修边破"和"循环打转"反模式
+- 以证据优先、声明存疑的原则审计
 
 **使用场景**：
-- 评估工作流健康度
-- 检测反模式
-- 工作流审计
+- 跑了几个变更包闭环后，评估是否真正推进
+- 检测是否陷入"修复一个 Bug 引入两个 Bug"的循环
+- 工作流健康度审计
 
 **调用方式**：
 ```bash
@@ -507,6 +480,7 @@
 
 **关键约束**：
 - 以证据为准，不信任声明
+- 需要至少 2-3 个变更包的历史数据
 
 ---
 
@@ -609,7 +583,6 @@
 | devbooks-proposal-challenger | Proposal | Challenger | 否 | 质疑报告 |
 | devbooks-proposal-judge | Proposal | Judge | 否 | Decision Log |
 | devbooks-design-doc | Design | Design Owner | 否 | design.md |
-| devbooks-design-backport | Design | Backport | 否 | 更新 design.md |
 | devbooks-spec-contract | Spec | Spec Owner | 否 | spec.md |
 | devbooks-implementation-plan | Plan | Planner | 否 | tasks.md |
 | devbooks-test-owner | Test | Test Owner | 是 | tests/ + verification.md |

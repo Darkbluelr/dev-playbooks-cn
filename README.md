@@ -1,8 +1,6 @@
 # DevBooks
 
-**面向 Claude Code / Codex CLI 的代理式 AI 开发工作流**
-
-> 把大型变更变成可控、可追溯、可验证的闭环：Skills + 质量闸门 + 角色隔离。
+**AI 编程的质量闸门：让 AI 助手从"不可预测"变成"可验证"**
 
 [![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -11,104 +9,74 @@
 
 ---
 
-## 为什么选择 DevBooks？
+## 30 秒电梯演讲
 
-AI 编码助手很强大，但往往**不可预测**：
+AI 编程助手很强大，但有个致命问题：**你无法确定它是真的完成了，还是只是看起来完成了。**
 
-| 痛点 | 后果 |
-|------|------|
-| **AI 自评"已完成"** | 实际测试不过、边界条件遗漏 |
-| **同一对话写测试又写代码** | 测试沦为"通过性测试"，而非验证规格 |
-| **无验证闸门** | 伪完成悄悄进入生产环境 |
-| **只支持 0→1 项目** | 存量代码库无从下手 |
-| **命令太少** | 复杂变更不只是"spec/apply/archive" |
+DevBooks 通过三个核心机制解决这个问题：
 
-**DevBooks 的解决方案**：
-- **基于证据的完成**：完成由测试/构建/证据定义，而非 AI 自我评估
-- **强制角色隔离**：Test Owner 与 Coder 必须在独立对话中工作
-- **多重质量闸门**：Green 证据检查、任务完成率、角色边界检查
-- **18 个 Skills**：覆盖提案、设计、评审、熵度量等完整工作流
+1. **角色隔离** - Test Owner 与 Coder 必须在独立对话中工作，测试不会沦为"通过性测试"
+2. **证据驱动** - 完成由测试通过 + 构建成功定义，而非 AI 自评
+3. **质量闸门** - 多重检查确保每个变更都是真正可交付的
+
+**结果**：从"边修边破"变成"稳定推进"。
 
 ---
 
-## ✨ v2.0.0 新特性：人类友好的文档模板
+## 最佳实践：一键跑完整闭环
 
-**核心理念**：AI 时代，人类需要简洁的信息来做决策，而不是阅读 AI 生成的上千行文档。
-
-### 结论先行（30秒快速理解）
-
-每个文档（proposal、design、tasks、verification）顶部都有简短摘要：
-- ✅ **会导致什么**：用大白话列出变化
-- ❌ **不会导致什么**：明确说明不变的事情
-- 📝 **一句话总结**：让非技术人员也能理解
-
-### 需求对齐（挖掘隐藏需求）
-
-在 proposal 阶段，通过问题引导用户思考：
-- 👤 **你是谁？**：快速上手者 / 平台构建者 / 快速验证者
-- 🎯 **你要什么？**：显性需求 + 隐藏需求
-- 💡 **多视角推荐**：基于不同角色给出不同方案
-
-### 默认批准机制（减少决策疲劳）
-
-- ⏰ **用户不说话 = 同意**：超时后自动批准
-- 🎛️ **可配置超时**：proposal 48h / design 24h / tasks 24h / verification 12h
-- 🔒 **保留控制权**：用户可以随时拒绝或自定义
-
-### 项目级文档（知识沉淀）
-
-- 📋 **用户画像**（project-profile.md）：记录角色、需求、约束、偏好
-- 📝 **决策日志**（decision-log.md）：记录所有重要决策，方便回溯
-
-**详见**：`docs/v2.0.0-修改总结.md`
-
----
-
-## 工作原理
-
-**核心约束**：Test Owner 与 Coder **必须在独立对话**中工作。这是硬性约束，不是建议。Coder 不能修改 `tests/**`，完成由测试/构建验证，而非 AI 自评。
-
----
-
-## 快速开始
-
-**不知道怎么用？** 查看 [使用指南](docs/使用指南.md) 或直接运行：
+不知道怎么用？直接运行：
 
 ```bash
 /devbooks-delivery-workflow
 ```
 
-这个 skill 会自动编排完整的开发闭环，从提案到归档。
+这个 skill 会自动编排完整的开发闭环：Proposal → Design → Spec → Plan → Test → Implement → Review → Archive
 
-### 文档
-
-- [使用指南](docs/使用指南.md) - 最佳实践和推荐工作流程
-- [Skill 详解](docs/Skill详解.md) - 19 个 Skills 的特色和功能
-- [配置指南](dev-playbooks/docs/DevBooks配置指南.md) - 配置说明
-- [推荐 MCP](dev-playbooks/docs/推荐MCP.md) - MCP 服务器推荐
+**适用场景**：新功能开发、重大重构、不熟悉 DevBooks 工作流
 
 ---
 
-### 支持的 AI 工具
+## 我们解决的核心问题
 
-| 工具 | 支持级别 | 配置文件 |
-|------|----------|----------|
-| **Claude Code** | 完整 Skills | `CLAUDE.md` |
-| **Codex CLI** | 完整 Skills | `AGENTS.md` |
-| **Qoder** | 完整 Skills | `AGENTS.md` |
-| **OpenCode** | 完整 Skills | `AGENTS.md` |
-| **Every Code** | 完整 Skills | `AGENTS.md` |
-| **Cursor** | Rules 系统 | `.cursor/rules/` |
-| **Windsurf** | Rules 系统 | `.windsurf/rules/` |
-| **Gemini CLI** | Rules 系统 | `GEMINI.md` |
-| **Continue** | Rules 系统 | `.continue/rules/` |
-| **GitHub Copilot** | 自定义指令 | `.github/copilot-instructions.md` |
+### 问题 1：逻辑幻觉与事实捏造
 
-> **提示**：使用自然语言调用 Skills，例如："运行 devbooks-proposal-author skill..."
+**痛点**：AI 在缺乏知识时倾向于自信地编造代码或库，而非承认无知。
 
-### 安装与初始化
+**DevBooks 方案**：
+- 规格驱动开发：所有代码必须追溯到 AC-xxx（验收标准）
+- Contract Tests：验证对外契约，防止 API 幻觉
 
-**npm 安装（推荐）：**
+### 问题 2：非收敛性调试
+
+**痛点**：修复一个 Bug 引入两个新 Bug，陷入"打地鼠"循环。
+
+**DevBooks 方案**：
+- 角色隔离：Test Owner 先跑出 Red 基线，Coder 不能修改测试
+- 收敛性审计：`devbooks-convergence-audit` 评估变更包是否有效推进
+
+### 问题 3：局部最优与全局短视
+
+**痛点**：AI 倾向于生成"能跑通"的独立代码块，缺乏对整体架构的考量。
+
+**DevBooks 方案**：
+- 设计先行：Design Doc 定义 What/Constraints，不写 How
+- 架构约束：Fitness Rules 验证架构规则
+- 影响分析：变更前评估跨模块影响
+
+### 问题 4：验证疲劳
+
+**痛点**：AI 生成速度极快，人类审查代码的警觉性随时间呈指数下降。
+
+**DevBooks 方案**：
+- 自动化质量闸门：Green 证据检查、任务完成率、角色边界检查
+- 强制评审：Reviewer 只审查可维护性，业务正确性由测试保证
+
+---
+
+## 快速开始
+
+### 安装
 
 ```bash
 # 全局安装
@@ -118,454 +86,155 @@ npm install -g dev-playbooks-cn
 dev-playbooks-cn init
 ```
 
-**一次性使用：**
-
-```bash
-npx dev-playbooks-cn@latest init
-```
-
-**从源码安装（贡献者）：**
-
-```bash
-./scripts/install-skills.sh
-```
-
-### 安装落点
-
-初始化时可选择 Skills 安装位置：
-
-| 安装范围 | 说明 | 路径示例 |
-|----------|------|----------|
-| **项目级**（默认） | 仅当前项目可用 | `.claude/skills/devbooks-*` |
-| **全局** | 所有项目共享 | `~/.claude/skills/devbooks-*` |
-
-```bash
-# 交互式选择
-dev-playbooks-cn init
-
-# 非交互式指定
-dev-playbooks-cn init --tools claude --scope project  # 项目级
-dev-playbooks-cn init --tools claude --scope global   # 全局
-```
-
 ### 更新
-
-使用 `update` 命令同时更新 CLI 和项目中的 Skills：
 
 ```bash
 dev-playbooks-cn update
 ```
 
-更新命令会：
-1. **检查 CLI 新版本**：自动检测 npm 上是否有新版本，交互式询问是否更新
-2. **更新项目文件**：更新 Skills、规则文件、指令文件等
+### 支持的 AI 工具
 
-> **提示**：不再需要手动运行 `npm install -g dev-playbooks-cn`，`update` 命令会自动处理。
-
-### 快速集成
-
-DevBooks 使用两个目录根：
-
-| 目录 | 用途 | 默认值 |
-|------|------|--------|
-| `<truth-root>` | 当前规格（只读真理） | `dev-playbooks/specs/` |
-| `<change-root>` | 变更包（工作区） | `dev-playbooks/changes/` |
-
-详见 `docs/DevBooks配置指南.md`。
-
----
-
-## 日常变更工作流
-
-### 使用 Router（推荐）
-
-告诉 AI 你的需求，让 Router 分析并输出执行计划：
-
-```
-请运行 devbooks-router skill，分析需求：<你的需求>
-```
-
-### Skills 直达
-
-熟悉流程后，直接调用 Skill：
-
-**1. Proposal 阶段（禁止编码）**
-
-```
-请运行 devbooks-proposal-author skill，创建提案：添加 OAuth2 用户认证
-```
-
-产物：`proposal.md`（必需）、`design.md`、`tasks.md`
-
-**2. Apply 阶段（强制角色隔离）**
-
-必须开 **2 个独立对话**：
-
-```
-# 对话 A - Test Owner
-请运行 devbooks-test-owner skill，变更 ID：add-oauth2
-
-# 对话 B - Coder
-请运行 devbooks-coder skill，变更 ID：add-oauth2
-```
-
-- Test Owner：写 `verification.md` + 测试，先跑 **Red**
-- Coder：按 `tasks.md` 实现，让闸门 **Green**（禁止改测试）
-
-**3. Review 阶段**
-
-```
-请运行 devbooks-reviewer skill，变更 ID：add-oauth2
-```
-
-**4. Archive 阶段**
-
-```
-请运行 devbooks-archiver skill，变更 ID：add-oauth2
-```
-
----
-
-## Skills 参考
-
-### Proposal 阶段
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-router` | 智能路由到合适的 Skill |
-| `devbooks-proposal-author` | 创建变更提案 |
-| `devbooks-impact-analysis` | 跨模块影响分析 |
-| `devbooks-proposal-challenger` | 质疑和挑战提案 |
-| `devbooks-proposal-judge` | 裁决提案 |
-| `devbooks-design-doc` | 创建设计文档 |
-| `devbooks-spec-contract` | 定义规格与契约 |
-| `devbooks-implementation-plan` | 创建实现计划 |
-
-### Apply 阶段
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-test-owner` | Test Owner 角色（必须独立对话） |
-| `devbooks-coder` | Coder 角色（必须独立对话） |
-| `devbooks-design-backport` | 回写发现到设计文档 |
-
-### Review 阶段
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-reviewer` | 代码评审（可读性/一致性） |
-| `devbooks-test-reviewer` | 测试质量与覆盖率评审 |
-| `devbooks-docs-consistency` | 文档一致性检查（原 devbooks-docs-sync） |
-
-### Archive 阶段
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-archiver` | 规格维护与去重 |
-
-### 独立技能
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-entropy-monitor` | 系统熵度量 |
-| `devbooks-brownfield-bootstrap` | 存量项目初始化 |
-| `devbooks-convergence-audit` | 收敛性审计（反迷惑设计） |
-
-### 编排层（支持子 Agent 的工具专用）
-
-| Skill | 说明 |
-|-------|------|
-| `devbooks-delivery-workflow` | 完整闭环编排器，自动编排 Proposal→Design→Spec→Plan→Test→Code→Review→Archive 全流程 |
-
-> **注意**：`devbooks-delivery-workflow` 是编排层 Skill，专为支持子 Agent 的 AI 编程工具（如 Claude Code with Task tool）设计。它会调用子 Agent 执行各阶段 Skill，完成完整的变更闭环。
-
----
-
-## DevBooks 对比
-
-### vs. OpenSpec
-
-[OpenSpec](https://github.com/Fission-AI/OpenSpec) 是轻量级规格驱动框架，用三个核心命令（proposal/apply/archive）对齐人与 AI。
-
-**OpenSpec 的局限**：
-- 缺乏角色隔离，AI 可能自我验证"已完成"
-- 无质量闸门，伪完成难以拦截
-- 只有 3 个命令，复杂变更覆盖不足
-
-**DevBooks 解决方案**：
-- **强制角色隔离**：Test Owner 与 Coder 必须独立对话，杜绝自我验证
-- **5+ 质量闸门**：Green 证据检查、任务完成率、角色边界检查
-- **18 个 Skills**：覆盖提案→实现→归档完整闭环
-
-### vs. spec-kit
-
-[GitHub spec-kit](https://github.com/github/spec-kit) 提供规格驱动开发工具包，有 constitution 文件和结构化规划。
-
-**spec-kit 的局限**：
-- 偏向 0→1 绿地项目，存量项目支持有限
-- 无强制角色隔离，测试与实现可能混淆
-- 依赖人工检查，缺乏运行时验证
-
-**DevBooks 解决方案**：
-- **存量优先**：`devbooks-brownfield-bootstrap` 自动生成基线规格
-- **强制角色隔离**：测试编写与实现物理分离
-- **运行时闸门**：自动验证，不依赖人工检查
-
-### vs. Kiro.dev
-
-[Kiro](https://kiro.dev/) 是 AWS 的代理式 IDE，用三阶段工作流（需求、设计、任务）。
-
-**Kiro 的局限**：
-- 规格与实现产物分开存储，追溯困难
-- 无强制角色隔离
-- 依赖特定 IDE 环境
-
-**DevBooks 解决方案**：
-- **变更包**：proposal/design/spec/plan/verification/evidence 集中存储，完整追溯
-- **强制角色隔离**：Test Owner 与 Coder 硬边界
-- **工具无关**：支持 Claude Code、Codex CLI、Cursor 等多种工具
-
-### vs. 无规格
-
-没有规格时，AI 从模糊提示生成代码，导致不可预测的输出、范围蔓延和"幻觉式完成"。
-
-**DevBooks 带来：**
-- 实现前商定规格，范围清晰可控
-- 质量闸门验证真实完成
-- 角色隔离防止自我验证
-- 每个变更的完整证据链
-
----
-
-## 核心原则
-
-| 原则 | 说明 |
-|------|------|
-| **协议优先** | 真理/变更/归档写进项目，不只存在聊天记录里 |
-| **锚点优先** | 完成由测试、静态分析、构建和证据定义 |
-| **角色隔离** | Test Owner 与 Coder 必须在独立对话中工作 |
-| **真理源分离** | `<truth-root>` 是只读真理；`<change-root>` 是临时工作区 |
-| **结构闸门** | 优先关注复杂度/耦合/测试质量，而非代理指标 |
-
----
-
-## 高级功能
-
-<details>
-<summary><strong>质量闸门</strong></summary>
-
-DevBooks 提供质量闸门拦截"伪完成"：
-
-| 闸门 | 触发模式 | 检查内容 |
-|------|----------|----------|
-| Green 证据检查 | archive, strict | `evidence/green-final/` 存在且非空 |
-| 任务完成检查 | strict | tasks.md 中所有任务完成或 SKIP-APPROVED |
-| 测试失败拦截 | archive, strict | Green 证据中无失败模式 |
-| P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
-| 角色边界检查 | apply --role | Coder 不能改 tests/，Test Owner 不能改 src/ |
-
-核心脚本（位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`）：
-- `change-check.sh --mode proposal|apply|archive|strict`
-- `handoff-check.sh` - 角色交接验证
-- `audit-scope.sh` - 全量审计扫描
-- `progress-dashboard.sh` - 进度可视化
-
-</details>
-
-<details>
-<summary><strong>原型模式</strong></summary>
-
-技术方案不确定时：
-
-1. 创建原型：`change-scaffold.sh <change-id> --prototype`
-2. Test Owner 用 `--prototype`：表征测试（无需 Red 基线）
-3. Coder 用 `--prototype`：输出到 `prototype/src/`（隔离主 src）
-4. 提升或丢弃：`prototype-promote.sh <change-id>`
-
-原型模式防止实验代码污染主源码树。
-
-脚本位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`。
-
-</details>
-
-<details>
-<summary><strong>熵度量监控</strong></summary>
-
-DevBooks 跟踪四维系统熵：
-
-| 指标 | 测量内容 |
+| 工具 | 支持级别 |
 |------|----------|
-| 结构熵 | 模块复杂度和耦合 |
-| 变更熵 | 变动和波动模式 |
-| 测试熵 | 测试覆盖率和质量衰减 |
-| 依赖熵 | 外部依赖健康度 |
-
-用 `devbooks-entropy-monitor` 生成报告，识别重构机会。
-
-脚本（位于 `~/.claude/skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
-
-</details>
-
-<details>
-<summary><strong>存量项目初始化</strong></summary>
-
-当 `<truth-root>` 为空时，使用 `devbooks-brownfield-bootstrap` 生成：
-
-- 项目画像和术语表
-- 从现有代码生成基线规格
-- 最小验证锚点
-- 模块依赖图
-- 技术债热点
-
-</details>
-
-
-<details>
-<summary><strong>MCP 自动检测</strong></summary>
-
-DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 MCP/CKB 的环境也能跑完整工作流；一旦检测到 CKB（Code Knowledge Base）可用，就自动启用图基能力，把"范围/引用/调用链"分析做得更准。
-
-### 它有什么用？
-
-- **影响分析更精确**：从"文件级猜测"升级到"符号级引用 + 调用图"，降低漏改风险
-- **审查更有重点**：自动拉取热点文件，优先关注高风险区域（技术债/高变动）
-- **大仓库更省心**：减少手动 Grep 的噪音与反复确认
-
-### MCP 状态与行为
-
-| MCP 状态 | 行为 |
-|----------|------|
-| CKB 可用 | 增强模式：符号级影响分析/引用查找/调用图/热点 |
-| CKB 不可用 | 基础模式：Grep + Glob 文本搜索（功能完整，精度降低） |
-
-### 自动检测
-
-- 需要 MCP 的 Skills 会先探测可用性（2s 超时）
-- 超时/失败 → 静默降级到基础模式，不阻塞执行
-- 无需手动选择"基础/增强"模式
-
-如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并手动生成 `index.scip`。
-
-</details>
-
-<details>
-<summary><strong>提案审查流程</strong></summary>
-
-严格提案审查使用独立对话的 Challenger 和 Judge：
-
-三个角色（必须独立对话）：
-1. **Author**：创建并捍卫提案（使用 `devbooks-proposal-author`）
-2. **Challenger**：质疑假设、发现缺口、识别风险（使用 `devbooks-proposal-challenger`）
-3. **Judge**：做最终决定、记录理由（使用 `devbooks-proposal-judge`）
-
-**重要**：三个角色必须在**独立对话**中工作，以避免角色混淆和自我验证。
-
-决定结果：`Approved`、`Revise`、`Rejected`
-
-</details>
-
----
-
-## 从其他框架迁移
-
-DevBooks 提供迁移脚本帮助从其他规格驱动开发工具迁移。
-
-### 从 OpenSpec 迁移
-
-如果你当前使用 [OpenSpec](https://github.com/Fission-AI/OpenSpec)，有 `openspec/` 目录：
-
-```bash
-# 使用 CLI（推荐）
-dev-playbooks-cn migrate --from openspec
-
-# 先预览变更
-dev-playbooks-cn migrate --from openspec --dry-run
-
-# 迁移后保留原目录
-dev-playbooks-cn migrate --from openspec --keep-old
-```
-
-**迁移内容：**
-- `openspec/specs/` → `dev-playbooks/specs/`
-- `openspec/changes/` → `dev-playbooks/changes/`
-- `openspec/project.md` → `dev-playbooks/project.md`
-- 所有路径引用自动更新
-
-### 从 GitHub spec-kit 迁移
-
-如果你使用 [GitHub spec-kit](https://github.com/github/spec-kit)，有 `specs/` 和 `memory/` 目录：
-
-```bash
-# 使用 CLI（推荐）
-dev-playbooks-cn migrate --from speckit
-
-# 先预览变更
-dev-playbooks-cn migrate --from speckit --dry-run
-
-# 迁移后保留原目录
-dev-playbooks-cn migrate --from speckit --keep-old
-```
-
-**映射规则：**
-
-| Spec-Kit | DevBooks |
-|----------|----------|
-| `memory/constitution.md` | `dev-playbooks/specs/_meta/constitution.md` |
-| `specs/[feature]/spec.md` | `changes/[feature]/design.md` |
-| `specs/[feature]/plan.md` | `changes/[feature]/proposal.md` |
-| `specs/[feature]/tasks.md` | `changes/[feature]/tasks.md` |
-| `specs/[feature]/quickstart.md` | `changes/[feature]/verification.md` |
-| `specs/[feature]/contracts/` | `changes/[feature]/specs/` |
-
-### 迁移功能
-
-两个迁移脚本都支持：
-
-- **幂等执行**：可安全多次运行
-- **断点续传**：中断后可从断点恢复
-- **试运行模式**：预览变更再执行
-- **自动备份**：原文件备份到 `.devbooks/backup/`
-- **引用更新**：文档中的路径引用自动更新
-
-### 迁移后步骤
-
-迁移后：
-
-1. 运行 `dev-playbooks-cn init` 设置 DevBooks Skills
-2. 检查 `dev-playbooks/` 中的迁移文件
-3. 更新 `verification.md` 文件的 AC 映射
-4. 如需基线规格，运行 `devbooks-brownfield-bootstrap`
-
----
-
-## 目录结构
-
-```
-dev-playbooks/
-├── README.md              # 本文档
-├── constitution.md        # 项目宪法（GIP 原则）
-├── project.md             # 项目上下文（技术栈/约定）
-├── specs/                 # 当前规格（只读真理）
-│   ├── _meta/             # 元数据（术语表、项目画像）
-│   └── architecture/      # 架构规格（fitness-rules）
-├── changes/               # 变更包（工作区）
-├── scripts/               # 辅助脚本
-└── docs/                  # 文档
-    ├── workflow-diagram.svg   # 工作流程图
-    ├── 推荐MCP.md             # MCP 配置建议
-    └── DevBooks配置指南.md    # 配置指南
-```
+| Claude Code | 完整 Skills |
+| Codex CLI | 完整 Skills |
+| Qoder | 完整 Skills |
+| OpenCode | 完整 Skills |
+| Every Code | 完整 Skills |
+| Cursor | Rules 系统 |
+| Windsurf | Rules 系统 |
+| Gemini CLI | Rules 系统 |
 
 ---
 
 ## 文档
 
-- [工作流程图](docs/workflow-diagram.svg)
-- [MCP 配置建议](docs/推荐MCP.md)
-- [配置指南](docs/DevBooks配置指南.md)
+- [使用指南](docs/使用指南.md) - 完整工作流程和最佳实践
+- [Skill 详解](docs/Skill详解.md) - 18 个 Skills 的特色和功能
+- [配置指南](dev-playbooks/docs/DevBooks配置指南.md) - 配置说明
+- [推荐 MCP](dev-playbooks/docs/推荐MCP.md) - MCP 服务器推荐
 
 ---
 
-## License
+## 核心理念
 
-MIT
+### 1. 角色隔离（Role Isolation）
+
+Test Owner 与 Coder **必须在独立对话**中工作。这不是建议，是硬性约束。
+
+**为什么？**
+- 同一对话中写测试又写代码 → 测试沦为"通过性测试"
+- 独立对话 → 测试真正验证规格
+
+### 2. 规格驱动（Spec-Driven）
+
+所有代码必须追溯到 AC-xxx（验收标准）。
+
+```
+需求 → Proposal → Design (AC-001, AC-002) → Spec → Tasks → Tests → Code
+```
+
+### 3. 证据优先（Evidence-First）
+
+完成由证据定义，而非 AI 声明。
+
+必需的证据：
+- 测试通过（Green 证据）
+- 构建成功
+- 静态检查通过
+- 任务完成率 100%
+
+---
+
+## 工作流程
+
+```
+1. Proposal（提案）- 分析需求，评估影响
+   ↓
+2. Design（设计）- 定义 What/Constraints + AC-xxx
+   ↓
+3. Spec（规格）- 定义对外行为契约
+   ↓
+4. Plan（计划）- 制定实现计划和任务拆解
+   ↓
+5. Test（测试）- 编写验收测试（独立对话）
+   ↓
+6. Implement（实现）- 实现功能（独立对话）
+   ↓
+7. Review（评审）- 代码评审
+   ↓
+8. Archive（归档）- 归档变更包
+```
+
+---
+
+## 18 个 Skills
+
+| Skill | 阶段 | 作用 |
+|-------|------|------|
+| devbooks-router | 入口 | 工作流引导 |
+| devbooks-proposal-author | Proposal | 撰写提案 |
+| devbooks-proposal-challenger | Proposal | 质疑提案 |
+| devbooks-proposal-judge | Proposal | 裁决提案 |
+| devbooks-design-doc | Design | 编写设计文档 |
+| devbooks-spec-contract | Spec | 定义规格契约 |
+| devbooks-implementation-plan | Plan | 制定实现计划 |
+| devbooks-test-owner | Test | 编写验收测试 |
+| devbooks-test-reviewer | Review | 测试评审 |
+| devbooks-coder | Implement | 实现功能 |
+| devbooks-reviewer | Review | 代码评审 |
+| devbooks-archiver | Archive | 归档变更包 |
+| devbooks-docs-consistency | Quality | 文档一致性检查 |
+| devbooks-impact-analysis | Quality | 影响分析 |
+| devbooks-convergence-audit | Quality | 收敛性审计 |
+| devbooks-entropy-monitor | Quality | 熵度量监控 |
+| devbooks-brownfield-bootstrap | Init | 存量项目初始化 |
+| devbooks-delivery-workflow | Full | 完整闭环编排 |
+
+详见 [Skill 详解](docs/Skill详解.md)
+
+---
+
+## 为什么选择 DevBooks？
+
+### 对比传统 AI 编程
+
+| 传统 AI 编程 | DevBooks |
+|-------------|----------|
+| AI 自评"已完成" | 测试通过 + 构建成功 |
+| 同一对话写测试又写代码 | 角色隔离，独立对话 |
+| 无验证闸门 | 多重质量闸门 |
+| 边修边破 | 稳定推进 |
+| 只支持 0→1 项目 | 支持存量项目 |
+
+### 适用场景
+
+- 新功能开发
+- 重大重构
+- Bug 修复
+- 存量项目接入
+- 需要高质量保证的项目
+
+---
+
+## 贡献
+
+欢迎贡献！请查看 [贡献指南](CONTRIBUTING.md)。
+
+---
+
+## 许可证
+
+MIT License - 详见 [LICENSE](LICENSE)
+
+---
+
+## 联系方式
+
+- GitHub: https://github.com/Darkbluelr/dev-playbooks-cn
+- npm: https://www.npmjs.com/package/dev-playbooks-cn
+- Issues: https://github.com/Darkbluelr/dev-playbooks-cn/issues
+
+---
+
+**记住**：DevBooks 不是工具，而是一套工作流程。遵循约束，质量自然提升。

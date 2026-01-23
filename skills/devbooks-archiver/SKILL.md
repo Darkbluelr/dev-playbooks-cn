@@ -65,11 +65,13 @@ proposal → design → test-owner(P1) → coder → test-owner(P2) → code-rev
 
 | 阶段 | 职责 | 说明 |
 |------|------|------|
-| 1 | 自动回写检测与处理 | 检测 deviation-log.md，自动回写设计文档 |
+| 1 | 设计回写（Design Backport） | 检测实现过程中的新约束/冲突/缺口，回写到 design.md |
 | 2 | 规格合并 | 将 specs/contracts 合并到 truth-root |
 | 3 | 架构合并 | 将 design.md 的 Architecture Impact 合并到 c4.md |
 | 4 | 文档同步检查 | 检查 design.md 的 Documentation Impact 是否已处理 |
 | 5 | 变更包归档移动 | 将变更包移动到 `<change-root>/archive/` |
+
+**注意**：Archiver 现在承担了原 `devbooks-design-backport` skill 的职责，作为归档闭环的一部分自动执行。
 
 ---
 
