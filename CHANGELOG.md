@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-01-23
+
+### Fixed
+
+- 修复 `dev-playbooks-cn update` 命令的 changelog 显示功能
+  - 添加完整的 2.5.0 版本变更记录
+  - 确保用户可以看到最新版本的详细变更信息
+
+---
+
 ## [2.5.0] - 2026-01-23
 
 ### Added
