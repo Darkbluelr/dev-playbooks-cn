@@ -50,6 +50,7 @@ dev-playbooks/
 .devbooks/
 
 # AI 工具配置目录
+.factory/
 .claude/
 .cursor/
 .windsurf/

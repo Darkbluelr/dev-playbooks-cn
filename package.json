@@ -31,9 +31,7 @@
     "bin/",
     "templates/",
     "skills/",
-    "scripts/",
-    ".factory/",
-    ".cursor/"
+    "scripts/"
   ],
   "engines": {
     "node": ">=18"
