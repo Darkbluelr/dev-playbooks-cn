@@ -11,6 +11,25 @@ allowed-tools:
 
 # DevBooks：代码评审（Reviewer）
 
+## 渐进披露
+### 基础层（必读）
+目标：明确本 Skill 的核心产出与使用范围。
+输入：用户目标、现有文档、变更包上下文或项目路径。
+输出：可执行产物、下一步指引或记录路径。
+边界：不替代其他角色职责，不触碰 tests/。
+证据：引用产出物路径或执行记录。
+
+### 进阶层（可选）
+适用：需要细化策略、边界或风险提示时补充。
+
+### 扩展层（可选）
+适用：需要与外部系统或可选工具协同时补充。
+
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）
+
 ## 工作流位置感知（Workflow Position Awareness）
 
 > **核心原则**：Code Review 在 Test Owner 阶段 2 验证之后执行，是归档前的最后一个评审步骤。
@@ -143,7 +162,7 @@ override dispose() {
 
 1. 检测变更包是否存在
 2. 检测是否有代码变更（git diff）
-3. 检测热点文件（通过 CKB getHotspots）
+3. 检测热点文件（基于变更历史与复杂度分析）
 
 ### 本 Skill 支持的模式
 
@@ -204,9 +223,3 @@ Review 通过后，Reviewer 必须执行：
 运行 devbooks-archiver skill 处理变更 <change-id>
 ```
 ```
-
----
-
-## MCP 说明
-
-本 Skill 不依赖 MCP 服务，无需运行时检测。

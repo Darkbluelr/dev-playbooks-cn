@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-01-25
+
+### Added
+
+- **MCP 增强功能**：
+  - 新增 MCP 检测脚本 `scripts/detect-mcp.sh`
+  - 增强所有 skill 的 MCP 集成模板
+  - 新增 MCP 相关规格文档和指导
+
+- **长期指导和参考文档**：
+  - 新增 `skills/_shared/references/人类建议校准提示词.md`
+  - 新增 `skills/devbooks-archiver/references/归档流程与规则.md`
+  - 新增 `skills/devbooks-convergence-audit/references/` 目录
+  - 新增 `skills/devbooks-delivery-workflow/references/编排禁令与阶段表.md`
+  - 新增 `skills/devbooks-router/references/` 目录
+
+- **规格文档完善**：
+  - 新增 `dev-playbooks/specs/README.md` 规格索引
+  - 完善 MCP、共享方法论、样式清理等规格文档
+
+### Changed
+
+- **文档结构优化**：
+  - 更新所有 skill 的 SKILL.md 文档
+  - 优化 README.md 和使用指南
+  - 清理过时的文档文件
+
+- **归档变更包**：
+  - 归档 `20260124-0636-enhance-devbooks-longterm-guidance` 变更包
+
+---
+
 ## [2.5.4] - 2026-01-23
 
 ### Fixed
@@ -233,7 +265,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Documentation
 
-- Added `docs/v2.0.0-修改总结.md`: Comprehensive summary of v2.0.0 changes
 - Updated README.md with v2.0.0 features section (both Chinese and English versions)
 
 ### Changed

@@ -13,6 +13,25 @@ allowed-tools:
 
 # DevBooks：存量项目初始化（Brownfield Bootstrap）
 
+## 渐进披露
+### 基础层（必读）
+目标：明确本 Skill 的核心产出与使用范围。
+输入：用户目标、现有文档、变更包上下文或项目路径。
+输出：可执行产物、下一步指引或记录路径。
+边界：不替代其他角色职责，不触碰 tests/。
+证据：引用产出物路径或执行记录。
+
+### 进阶层（可选）
+适用：需要细化策略、边界或风险提示时补充。
+
+### 扩展层（可选）
+适用：需要与外部系统或可选工具协同时补充。
+
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）
+
 ## 前置：配置发现（协议无关）
 
 - `<truth-root>`：当前真理目录根
@@ -63,7 +82,7 @@ allowed-tools:
 | 项目画像 | `_meta/project-profile.md` | 三层架构的详细技术画像 |
 | 术语表 | `_meta/glossary.md` | 统一语言表（可选但推荐） |
 | 文档维护元数据 | `_meta/docs-maintenance.md` | 文档风格与维护配置 |
-| 领域概念 | `_meta/key-concepts.md` | CKB 提取的概念（增强模式） |
+| 领域概念 | `_meta/key-concepts.md` | 基于代码语义的概念提取（可选） |
 
 ### 3. 架构分析产物
 
@@ -71,9 +90,9 @@ allowed-tools:
 
 | 产物 | 路径 | 数据来源 |
 |------|------|----------|
-| **C4 架构地图** | `architecture/c4.md` | 综合分析 + CKB（增强模式） |
-| 模块依赖图 | `architecture/module-graph.md` | `mcp__ckb__getArchitecture` |
-| 技术债热点 | `architecture/hotspots.md` | `mcp__ckb__getHotspots` |
+| **C4 架构地图** | `architecture/c4.md` | 综合分析（可选结合结构化能力） |
+| 模块依赖图 | `architecture/module-graph.md` | 结构化依赖分析（可选） |
+| 技术债热点 | `architecture/hotspots.md` | 变更历史 + 复杂度分析（可选） |
 | 分层约束 | `architecture/layering-constraints.md` | 代码分析（可选） |
 
 > **设计决策**：C4 架构地图现在由 brownfield-bootstrap 在初始化时生成，后续架构变更通过 design.md 的 Architecture Impact 章节记录，由 archiver 在归档时合并。
@@ -93,16 +112,16 @@ allowed-tools:
 
 ## COD 模型生成（Code Overview & Dependencies）
 
-在初始化时自动生成项目的"代码地图"（需要 CKB MCP Server 可用，否则跳过）：
+在初始化时可选生成项目的“代码地图”（取决于可用的结构化代码分析能力）：
 
 ### 自动生成产物
 
 | 产物 | 路径 | 数据来源 |
 |------|------|----------|
 | **C4 架构地图** | `<truth-root>/architecture/c4.md` | 综合分析 |
-| 模块依赖图 | `<truth-root>/architecture/module-graph.md` | `mcp__ckb__getArchitecture` |
-| 技术债热点 | `<truth-root>/architecture/hotspots.md` | `mcp__ckb__getHotspots` |
-| 领域概念 | `<truth-root>/_meta/key-concepts.md` | `mcp__ckb__listKeyConcepts` |
+| 模块依赖图 | `<truth-root>/architecture/module-graph.md` | 结构化依赖分析（可选） |
+| 技术债热点 | `<truth-root>/architecture/hotspots.md` | 变更历史 + 复杂度分析（可选） |
+| 领域概念 | `<truth-root>/_meta/key-concepts.md` | 代码语义概念提取（可选） |
 | 项目画像 | `<truth-root>/_meta/project-profile.md` | 综合分析 |
 
 ### C4 架构地图生成规则
@@ -164,22 +183,8 @@ allowed-tools:
 
 ### 执行流程
 
-1) **检查图索引**：调用 `mcp__ckb__getStatus`
-   - 若 SCIP 可用 → 使用图基分析
-   - 若不可用 → 提示生成索引或使用 Git 历史分析
-
-2) **生成 COD 产物**：
-   ```bash
-   # 获取模块架构
-   mcp__ckb__getArchitecture(depth=2, includeExternalDeps=false)
-
-   # 获取热点（近 30 天）
-   mcp__ckb__getHotspots(limit=20)
-
-   # 获取领域概念
-   mcp__ckb__listKeyConcepts(limit=12)
-   ```
-
+1) **检查可用能力**：确认是否具备结构化代码分析能力（如依赖关系或引用追踪）。
+2) **生成 COD 产物**：基于可用的代码检索、引用追踪与变更历史分析生成模块依赖、热点与概念。
 3) **生成项目画像**：整合以上数据 + 传统分析
 
 ## 参考骨架与模板
@@ -203,7 +208,7 @@ allowed-tools:
 1. 检测 `<devbooks-root>/constitution.md` 是否存在
 2. 检测 `<devbooks-root>/project.md` 是否存在
 3. 检测 `<truth-root>/` 是否为空或基本为空
-4. 检测 CKB 索引是否可用
+4. 检测结构化代码分析能力是否可用
 5. 检测项目规模和语言栈
 
 ### 本 Skill 支持的模式
@@ -214,8 +219,8 @@ allowed-tools:
 | **补充配置** | constitution/project 缺失 | 只补充缺失的配置文件 |
 | **完整初始化** | truth-root 为空 | 生成所有基础产物（画像/基线/验证） |
 | **增量初始化** | truth-root 部分存在 | 只补充缺失产物 |
-| **增强模式** | CKB 索引可用 | 使用图分析生成更精确的画像 |
-| **基础模式** | CKB 索引不可用 | 使用传统分析方法 |
+| **结构化分析** | 结构化能力可用 | 使用依赖关系与引用追踪增强画像 |
+| **文本分析** | 仅文本检索可用 | 使用传统分析方法 |
 
 ### 检测输出示例
 
@@ -225,13 +230,7 @@ allowed-tools:
 - constitution.md：不存在 → 将创建
 - project.md：不存在 → 将创建
 - truth-root：为空
-- CKB 索引：可用
+- 结构化能力：可用
 - 项目规模：中型（~50K LOC）
-- 运行模式：补充配置 + 完整初始化 + 增强模式
+- 运行模式：补充配置 + 完整初始化 + 结构化分析
 ```
-
----
-
-## MCP 说明
-
-本 Skill 不依赖 MCP 服务，无需运行时检测。

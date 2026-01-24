@@ -14,228 +14,34 @@ allowed-tools:
 
 # DevBooks：交付验收工作流（完整闭环编排器）
 
-> **定位**：本 Skill 是**纯编排层**，不是执行层。它只负责**调用子 Agent**，绝不自己执行任何变更工作。
+## 渐进披露
+### 基础层（必读）
+目标：以主 Agent 纯编排方式完成 12 阶段闭环交付。
+输入：用户目标、配置映射、已有变更包产物与阶段状态。
+输出：子 Agent 调用序列、阶段进度与结果汇总。
+边界：主 Agent 不直接改文件；必须通过 Task 调用子 Agent；遵守角色隔离与闸门规则。
+证据：各阶段产物路径、脚本输出与评审结果记录。
 
----
+### 进阶层（可选）
+适用：需要禁令细则、阶段表或断点续跑规则时。
 
-## 🚨 绝对禁令（ABSOLUTE RULES）
+### 扩展层（可选）
+适用：需要闸门处理、追溯模板或脚本工具指引时。
 
-> **这些规则没有例外，违反即失败。**
+## 核心要点
+- 只负责编排，不直接产出提案/设计/测试/代码。
+- 12 阶段强制闭环，任一阶段失败必须回退修复。
+- 先完成配置发现（优先读取 `.devbooks/config.yaml`），再执行子 Agent 调用。
 
-### 禁令 1：禁止主 Agent 直接工作
+## 参考资料
+- `skills/devbooks-delivery-workflow/references/编排禁令与阶段表.md`：绝对禁令、12 阶段流程与断点续跑。
+- `skills/devbooks-delivery-workflow/references/子Agent调用规范.md`：子 Agent 调用格式与隔离要求。
+- `skills/devbooks-delivery-workflow/references/编排逻辑伪代码.md`：编排主逻辑。
+- `skills/devbooks-delivery-workflow/references/闸门检查与错误处理.md`：闸门检查点与回退策略。
+- `skills/devbooks-delivery-workflow/references/交付验收工作流.md`：完整交付流程说明。
+- `skills/devbooks-delivery-workflow/references/变更验证与追溯模板.md`：验证与追溯模板。
 
-```
-❌ 禁止：主 Agent 自己写 proposal.md / design.md / tests/ / src/
-❌ 禁止：主 Agent 直接修改任何变更包内容
-❌ 禁止：主 Agent 跳过子 Agent 调用
-
-✅ 必须：所有工作通过 Task 工具调用子 Agent 完成
-✅ 必须：每个阶段都有对应的子 Agent 调用
-✅ 必须：主 Agent 只做编排、等待、验证
-```
-
-### 禁令 2：禁止跳过任何强制阶段
-
-```
-❌ 禁止：跳过 Challenger/Judge 阶段
-❌ 禁止：跳过 Test-Reviewer 阶段
-❌ 禁止：跳过 Code-Review 阶段
-❌ 禁止：跳过 Green-Verify 阶段
-❌ 禁止：未通过 strict 检查就归档
-
-✅ 必须：完整执行 12 个强制阶段
-✅ 必须：每个阶段的子 Agent 返回成功才能继续
-```
-
-### 禁令 3：禁止假完成归档
-
-```
-❌ 禁止：evidence/green-final/ 不存在或为空时归档
-❌ 禁止：verification.md AC 覆盖率 < 100% 时归档
-❌ 禁止：tasks.md 存在未完成任务时归档
-❌ 禁止：change-check.sh --mode strict 失败时归档
-
-✅ 必须：Archiver 子 Agent 先运行检查脚本
-✅ 必须：所有检查通过后才执行归档
-```
-
-### 禁令 4：禁止演示模式（NO DEMO MODE）
-
-```
-❌ 禁止：将工作流当作"演示"或"展示"
-❌ 禁止：输出"演示已完成"、"工作流演示"等措辞
-❌ 禁止：声称完成但实际产物不存在或为空
-❌ 禁止：用"模拟"、"假设"、"如果"代替实际执行
-
-✅ 必须：每个阶段都要产出真实的、可验证的产物
-✅ 必须：产物必须写入文件系统（可通过 ls/cat 验证）
-✅ 必须：使用"执行"、"完成"、"已创建"等真实动作词汇
-✅ 必须：如果无法真实执行，立即停止并告知用户
-```
-
-**检测演示模式的信号**：
-- 使用"演示"、"展示"、"模拟"等词汇
-- 声称完成但没有实际文件写入
-- 提供"选项 A/B"而非执行下一步
-- 输出"后续建议"而非继续执行
-
-### 禁令 5：禁止忽略 REVISE REQUIRED
-
-```
-❌ 禁止：收到 REVISE REQUIRED 后继续下一阶段
-❌ 禁止：收到 REVISE REQUIRED 后声称"已完成"
-❌ 禁止：收到 REVISE REQUIRED 后提供"选项"让用户选择
-❌ 禁止：收到 REJECTED 后继续执行
-
-✅ 必须：Judge 返回 REVISE → 回到阶段 1 重写提案
-✅ 必须：Judge 返回 REJECTED → 停止流程，告知用户
-✅ 必须：Test-Review 返回 REVISE REQUIRED → 回到阶段 7 修复测试
-✅ 必须：Code-Review 返回 REVISE REQUIRED → 回到阶段 8 修复代码
-✅ 必须：修复后重新执行评审阶段，直到通过
-```
-
-### 禁令 6：禁止部分完成前进
-
-```
-❌ 禁止：tasks.md 任务完成率 < 100% 时进入下一阶段
-❌ 禁止：测试覆盖率 < AC 要求时进入下一阶段
-❌ 禁止：存在空壳测试（skip/todo/not_implemented）时进入 Code 阶段
-❌ 禁止：存在未实现函数（raise NotImplementedError）时进入 Review 阶段
-
-✅ 必须：阶段 7 完成时，所有测试必须是真实的、可执行的
-✅ 必须：阶段 8 完成时，tasks.md 所有任务 100% 完成
-✅ 必须：如果发现范围过大，必须拆分变更包，不能部分完成
-```
-
----
-
-## 前置：配置发现
-
-执行前**必须**按以下顺序查找配置：
-1. `.devbooks/config.yaml`（如存在）→ 解析并使用其中的映射
-2. `dev-playbooks/project.md`（如存在）→ Dev-Playbooks 协议
-3. `project.md`（如存在）→ template 协议
-4. 若仍无法确定 → **停止并询问用户**
-
----
-
-## 完整闭环流程（12 个强制阶段）
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                         强制流程（无可选阶段）                              │
-├──────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  ┌─────────┐   ┌───────────┐   ┌─────────┐   ┌─────────┐                │
-│  │1.Propose│──▶│2.Challenge│──▶│ 3.Judge │──▶│4.Design │                │
-│  └─────────┘   └───────────┘   └─────────┘   └─────────┘                │
-│       │                                            │                     │
-│       │              ┌─────────────────────────────┘                     │
-│       │              ▼                                                   │
-│       │        ┌─────────┐   ┌─────────┐   ┌─────────┐                  │
-│       │        │ 5.Spec  │──▶│ 6.Plan  │──▶│7.Test-R │                  │
-│       │        └─────────┘   └─────────┘   └─────────┘                  │
-│       │                                          │                       │
-│       │              ┌───────────────────────────┘                       │
-│       │              ▼                                                   │
-│       │        ┌─────────┐   ┌──────────┐   ┌──────────┐                │
-│       │        │ 8.Code  │──▶│9.TestRev │──▶│10.CodeRev│                │
-│       │        └─────────┘   └──────────┘   └──────────┘                │
-│       │                                            │                     │
-│       │              ┌─────────────────────────────┘                     │
-│       │              ▼                                                   │
-│       │        ┌───────────┐   ┌─────────┐                              │
-│       └───────▶│11.GreenV  │──▶│12.Archive│                              │
-│                └───────────┘   └─────────┘                              │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-
-### 阶段详解与子 Agent 调用
-
-| # | 阶段 | 子 Agent | Skill | 产物 | 强制 |
-|---|------|----------|-------|------|------|
-| 1 | Propose | `devbooks-proposal-author` | devbooks-proposal-author | proposal.md | ✅ |
-| 2 | Challenge | `devbooks-challenger` | devbooks-proposal-challenger | 质疑意见 | ✅ |
-| 3 | Judge | `devbooks-judge` | devbooks-proposal-judge | Decision Log | ✅ |
-| 4 | Design | `devbooks-designer` | devbooks-design-doc | design.md | ✅ |
-| 5 | Spec | `devbooks-spec-owner` | devbooks-spec-contract | specs/*.md | ✅ |
-| 6 | Plan | `devbooks-planner` | devbooks-implementation-plan | tasks.md | ✅ |
-| 7 | Test-Red | `devbooks-test-owner` | devbooks-test-owner | verification.md + tests/ | ✅ |
-| 8 | Code | `devbooks-coder` | devbooks-coder | src/ 实现 | ✅ |
-| 9 | Test-Review | `devbooks-reviewer` | devbooks-test-reviewer | 测试评审意见 | ✅ |
-| 10 | Code-Review | `devbooks-reviewer` | devbooks-reviewer | 代码评审意见 | ✅ |
-| 11 | Green-Verify | `devbooks-test-owner` | devbooks-test-owner | evidence/green-final/ | ✅ |
-| 12 | Archive | `devbooks-archiver` | devbooks-archiver | 归档到 archive/ | ✅ |
-
----
-
-## 📚 参考文档
-
-### 必读（立即阅读）
-
-1. **子 Agent 调用规范**：`references/子Agent调用规范.md`
-   - 调用格式和示例
-   - 角色隔离约束
-   - 何时阅读：开始编排前
-
-2. **编排逻辑伪代码**：`references/编排逻辑伪代码.md`
-   - 完整的编排逻辑
-   - 12 个阶段的详细实现
-   - 何时阅读：需要理解编排逻辑时
-
-### 按需阅读
-
-3. **闸门检查与错误处理**：`references/闸门检查与错误处理.md`
-   - 阶段闸门检查点
-   - 错误处理流程
-   - 回退执行规则
-   - 何时阅读：遇到错误或需要回退时
-
-4. **交付验收工作流**：`references/交付验收工作流.md`
-   - 完整的工作流说明
-   - 何时阅读：需要详细了解工作流时
-
-5. **变更验证与追溯模板**：`references/变更验证与追溯模板.md`
-   - 验证模板
-   - 何时阅读：需要模板参考时
-
----
-
-## 上下文感知
-
-### 检测流程
-
-1. 检测变更包是否存在
-2. 检测当前阶段（哪些阶段已完成）
-3. 从断点继续执行
-
-### 断点续跑
-
-若变更包已存在部分产物，从最近完成的阶段继续：
-
-```
-检测结果：
-- 变更包：存在
-- 已完成阶段：1-6（proposal, challenge, judge, design, spec, plan）
-- 下一阶段：7（Test-Red）
-- 运行模式：断点续跑
-```
-
----
-
-## MCP 说明
-
-本 Skill 不依赖 MCP 服务，无需运行时检测。
-
----
-
-## 可选检查脚本
-
-脚本位于本 Skill 的 `scripts/` 目录：
-
-- 初始化变更包骨架：`change-scaffold.sh`
-- 一键校验变更包：`change-check.sh`
-- 结构守门决策校验：`guardrail-check.sh`
-- 证据采集：`change-evidence.sh`
-- 进度仪表板：`progress-dashboard.sh`
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）

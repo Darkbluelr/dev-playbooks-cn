@@ -110,8 +110,6 @@ DevBooks 使用两个目录根：
 | `<truth-root>` | 当前规格（只读真理） | `dev-playbooks/specs/` |
 | `<change-root>` | 变更包（工作区） | `dev-playbooks/changes/` |
 
-详见 `docs/DevBooks配置指南.md`。
-
 ---
 
 ## 日常变更工作流
@@ -372,8 +370,6 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 - 超时/失败 → 静默降级到基础模式，不阻塞执行
 - 无需手动选择"基础/增强"模式
 
-如需启用增强能力：按 `docs/推荐MCP.md` 配置 CKB，并手动生成 `index.scip`。
-
 </details>
 
 <details>
@@ -477,9 +473,7 @@ dev-playbooks/
 ├── changes/               # 变更包（工作区）
 ├── scripts/               # 辅助脚本
 └── docs/                  # 文档
-    ├── workflow-diagram.svg   # 工作流程图
-    ├── 推荐MCP.md             # MCP 配置建议
-    └── DevBooks配置指南.md    # 配置指南
+    └── workflow-diagram.svg   # 工作流程图
 ```
 
 ---
@@ -487,8 +481,6 @@ dev-playbooks/
 ## 文档
 
 - [工作流程图](docs/workflow-diagram.svg)
-- [MCP 配置建议](docs/推荐MCP.md)
-- [配置指南](docs/DevBooks配置指南.md)
 
 ---
 

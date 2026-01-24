@@ -181,8 +181,6 @@ EOF
 
     echo "" >> "$temp_file"
     echo "---" >> "$temp_file"
-    echo "" >> "$temp_file"
-    echo "> 提示：手动生成 SCIP 索引以获得更精确的依赖分析（参考 docs/推荐MCP.md）" >> "$temp_file"
 
     # 只在内容变化时更新
     if [ -f "$output" ]; then

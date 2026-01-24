@@ -404,9 +404,7 @@ DevBooks Skills support graceful MCP (Model Context Protocol) degradation: you c
 
 - Skills that depend on MCP call `mcp__ckb__getStatus` first (2s timeout)
 - Timeout/failure → silently falls back to basic mode (non-blocking)
-- No manual “basic/enhanced” switch required
-
-To enable enhanced mode: configure CKB per `../docs/推荐MCP.md` and run `/devbooks:index` to generate `index.scip`.
+- No manual "basic/enhanced" switch required
 
 </details>
 
@@ -447,7 +445,6 @@ bin/                       # CLI entry
 
 - [Slash command guide](../docs/Slash 命令使用指南.md)
 - [Skills guide](../skills/Skills使用说明.md)
-- [MCP configuration recommendations](../docs/推荐MCP.md)
 - [Integration template (protocol-agnostic)](../docs/DevBooks集成模板（协议无关）.md)
 - [Installation prompt](../docs/DevBooks安装提示词.md)
 

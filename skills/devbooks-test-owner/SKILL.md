@@ -13,35 +13,42 @@ allowed-tools:
 
 # DevBooks：测试负责人（Test Owner）
 
+## 渐进披露
+### 基础层（必读）
+目标：明确本 Skill 的核心产出与使用范围。
+输入：用户目标、现有文档、变更包上下文或项目路径。
+输出：可执行产物、下一步指引或记录路径。
+边界：不替代其他角色职责，可编写/修改 tests/ 与 verification.md，不修改实现代码。
+证据：引用产出物路径或执行记录。
+
+### 进阶层（可选）
+适用：需要细化策略、边界或风险提示时补充。
+
+### 扩展层（可选）
+适用：需要与外部系统或可选工具协同时补充。
+
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）
+
 ## 快速开始
 
 我的职责：
 1. **阶段 1（Red 基线）**：编写测试 → 产出失败证据
 2. **阶段 2（Green 验证）**：审计证据 → 勾选 AC 矩阵
 
-## 工作流位置
-
-```
-proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-review → archive
-                         ↓              ↓           ↓
-                    Red 基线      实现+快轨     证据审计+打勾
-                   (增量测试)    (@smoke)     (不重跑@full)
-```
-
 ## 双阶段职责
 
 | 阶段 | 触发时机 | 核心职责 | 测试运行方式 | 产出 |
 |------|----------|----------|--------------|------|
-| **阶段 1：Red 基线** | design.md 完成后 | 编写测试、产出失败证据 | 只跑**增量测试**（新写的/P0） | verification.md (Status=Ready)、Red 基线 |
-| **阶段 2：Green 验证** | Coder 完成 + @full 通过后 | **审计证据**、勾选 AC 覆盖矩阵 | 默认不重跑，可选抽样 | AC 矩阵打勾、Status=Verified |
+| **阶段 1：Red 基线** | design.md 完成后 | 编写测试、产出失败证据 | 运行本次新增/变更的验收锚点 | verification.md（含追溯矩阵）、Red 基线 |
+| **阶段 2：Green 验证** | Coder 完成后 | 审计 Green 证据、更新追溯矩阵勾选 | 默认不重跑；必要时抽样重跑 | 追溯矩阵更新、Green 证据引用 |
 
-### AI 时代优化
+## 角色隔离（强制）
 
-| 旧设计 | 新设计 | 原因 |
-|--------|--------|------|
-| Test Owner 和 Coder 必须单独会话 | 同一会话，用 `[TEST-OWNER]` / `[CODER]` 模式标签切换 | 减少上下文重建成本 |
-| 阶段2 重跑完整测试 | 阶段2 默认**审计证据**，可选抽样重跑 | 避免慢测试多次运行 |
-| 测试无分层要求 | 强制测试分层：`@smoke`/`@critical`/`@full` | 快速反馈循环 |
+- Test Owner 与 Coder 必须独立对话/独立实例。
+- 本 Skill 只产出 tests/ 与 verification.md，不修改实现代码。
 
 ---
 
@@ -213,7 +220,7 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 | **首次编写** | `verification.md` 不存在 | 创建完整验收测试套件 |
 | **补充测试** | `verification.md` 存在但有 `[TODO]` | 补充缺失的测试用例 |
 | **Red 基线验证** | 测试存在，需要确认 Red 状态 | 运行测试并记录失败日志 |
-| **证据审计** | 用户说"验证/打勾"且 @full 通过 | 审计证据并勾选 AC 矩阵 |
+| **证据审计** | 用户说"验证/打勾"且 Green 证据已产出 | 审计证据并勾选 AC 矩阵 |
 
 ---
 
@@ -223,7 +230,7 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
-| ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | 切换到 `[CODER]` 模式 |
+| ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | 交接给 Coder（新对话/独立实例） |
 | ⚠️ | PHASE1_COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
 | ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
 | 💥 | FAILED | 测试框架问题等 | 修复后重试 |
@@ -233,8 +240,8 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
 | ✅ | PHASE2_VERIFIED | 证据审计通过，AC 矩阵已打勾 | `devbooks-reviewer` |
-| ⏳ | PHASE2_WAITING | @full 测试仍在运行 | 等待 CI 完成 |
-| ❌ | PHASE2_FAILED | @full 测试未通过 | 通知 Coder 修复 |
+| ⏳ | PHASE2_WAITING | 全量测试仍在运行或 Green 证据未完备 | 等待 CI 完成 |
+| ❌ | PHASE2_FAILED | 全量测试未通过或 Green 证据存在失败 | 通知 Coder 修复 |
 | 🔄 | PHASE2_HANDOFF | 发现测试本身有问题 | 修复测试后重新验证 |
 
 ### 路由输出模板（必须使用）
@@ -248,7 +255,7 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 **Red 基线**：已产出 / 未完成（仅阶段 1）
 
-**@full 测试**：已通过 / 运行中 / 失败（仅阶段 2）
+**全量测试（如 CI）**：已通过 / 运行中 / 失败（仅阶段 2）
 
 **证据审计**：已完成 / 待审计（仅阶段 2）
 
@@ -258,7 +265,7 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 
 ## 下一步
 
-**推荐**：切换到 `[CODER]` 模式 / `devbooks-xxx skill`
+**推荐**：`devbooks-coder`（新对话/独立实例）/ `devbooks-xxx skill`
 
 **原因**：[具体原因]
 ```
@@ -277,9 +284,3 @@ proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-revie
 | 发现需要额外的约束 | CONSTRAINT_CHANGE | 需要添加参数校验 |
 | 发现接口需要调整 | API_CHANGE | 需要增加返回字段 |
 | 发现配置项需要变更 | CONSTRAINT_CHANGE | 需要新的配置参数 |
-
----
-
-## MCP 说明
-
-本 Skill 不依赖 MCP 服务，无需运行时检测。

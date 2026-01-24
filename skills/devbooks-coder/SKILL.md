@@ -13,30 +13,37 @@ allowed-tools:
 
 # DevBooks：实现负责人（Coder）
 
+## 渐进披露
+### 基础层（必读）
+目标：明确本 Skill 的核心产出与使用范围。
+输入：用户目标、现有文档、变更包上下文或项目路径。
+输出：可执行产物、下一步指引或记录路径。
+边界：不替代其他角色职责，不触碰 tests/。
+证据：引用产出物路径或执行记录。
+
+### 进阶层（可选）
+适用：需要细化策略、边界或风险提示时补充。
+
+### 扩展层（可选）
+适用：需要与外部系统或可选工具协同时补充。
+
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）
+
 ## 快速开始
 
 我的职责：
 1. **严格按 tasks.md 实现功能**
-2. **运行快轨测试**（@smoke + @critical）
-3. **触发 @full 测试**（CI 异步）
-4. **禁止修改 tests/**
+2. **运行验证计划中的验收锚点**（tests/、静态检查、构建等）
+3. **保存 Green 证据**到变更包 `evidence/green-final/`
+4. **禁止修改 tests/**（如需改测试交还 Test Owner）
 
-## 工作流位置
+## 角色隔离（强制）
 
-```
-proposal → design → [TEST-OWNER] → [CODER] → [TEST-OWNER] → code-review → archive
-                                      ↓              ↓
-                               实现+快轨测试    证据审计+打勾
-                              (@smoke/@critical)  (不重跑@full)
-```
-
-## AI 时代优化
-
-| 旧设计 | 新设计 | 原因 |
-|--------|--------|------|
-| Test Owner 和 Coder 必须单独会话 | 同一会话，用 `[TEST-OWNER]` / `[CODER]` 模式标签切换 | 减少上下文重建成本 |
-| Coder 跑完整测试等待结果 | Coder 跑快轨（`@smoke`/`@critical`），`@full` 异步触发 | 快速迭代 |
-| 完成后直接交给 Test Owner | 完成后状态为 `Implementation Done`，等 @full 通过 | 异步不阻塞，归档同步 |
+- Coder 与 Test Owner 必须独立对话/独立实例。
+- 本 Skill 仅以 Coder 角色执行，不切换到其他角色。
 
 ---
 

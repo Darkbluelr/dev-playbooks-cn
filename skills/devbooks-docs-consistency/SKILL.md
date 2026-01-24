@@ -13,6 +13,25 @@ allowed-tools:
 
 # DevBooks：文档一致性（Docs Consistency）
 
+## 渐进披露
+### 基础层（必读）
+目标：明确本 Skill 的核心产出与使用范围。
+输入：用户目标、现有文档、变更包上下文或项目路径。
+输出：可执行产物、下一步指引或记录路径。
+边界：不替代其他角色职责，不触碰 tests/。
+证据：引用产出物路径或执行记录。
+
+### 进阶层（可选）
+适用：需要细化策略、边界或风险提示时补充。
+
+### 扩展层（可选）
+适用：需要与外部系统或可选工具协同时补充。
+
+## 推荐 MCP 能力类型
+- 代码检索（code-search）
+- 引用追踪（reference-tracking）
+- 影响分析（impact-analysis）
+
 ## 前置：配置发现（协议无关）
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
@@ -132,12 +151,6 @@ bash scripts/completeness-checker.sh --input README.md --config references/compl
 ## 与工作流的集成
 
 在归档阶段由 `devbooks-archiver` 触发，在存量初始化时由 `devbooks-brownfield-bootstrap` 生成文档维护元数据。
-
----
-
-## MCP 说明
-
-本 Skill 不依赖 MCP 服务，无需运行时检测。
 
 ---
 

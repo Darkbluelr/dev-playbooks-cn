@@ -1,5 +1,5 @@
 #!/bin/bash
-# scripts/config-discovery.sh
+# scripts/config-discovery.sh (devbooks)
 # DevBooks Protocol Discovery Layer - 配置发现脚本
 #
 # 用途：发现并输出当前项目的 DevBooks 配置
