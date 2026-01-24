@@ -213,24 +213,6 @@ Test Owner 与 Coder **必须在独立对话**中工作。这不是建议，是�
 
 ---
 
-## 贡献
-
-欢迎贡献！请查看 [贡献指南](CONTRIBUTING.md)。
-
----
-
 ## 许可证
 
 MIT License - 详见 [LICENSE](LICENSE)
-
----
-
-## 联系方式
-
-- GitHub: https://github.com/Darkbluelr/dev-playbooks-cn
-- npm: https://www.npmjs.com/package/dev-playbooks-cn
-- Issues: https://github.com/Darkbluelr/dev-playbooks-cn/issues
-
----
-
-**记住**：DevBooks 不是工具，而是一套工作流程。遵循约束，质量自然提升。
