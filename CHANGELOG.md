@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-01-26
+
+### Added
+
+- **AI 原生工作流与协议升级**：
+  - 补齐 Start/Router 入口与阶段路由规范
+  - 新增变更包模板与协议合同（RUNBOOK、验证/合规/回滚、Knife Plan、合同 schema）
+  - 完整化质量闸门与证据结构（G0–G6、风险与审计要求）
+  - 新增依赖审计脚本与发布校验入口
+  - 更新架构/文件系统视图与工作流示意图模板
+
+### Changed
+
+- **CLI 入口补齐**：
+  - 新增 `start` 与 `router` 命令，用于入口指引（不执行 AI）
+  - 帮助信息指向模板与工作流文档入口
+
+---
+
 ## [2.6.0] - 2026-01-25
 
 ### Added

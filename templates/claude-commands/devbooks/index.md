@@ -1,10 +1,10 @@
 ---
-skill: devbooks-index-bootstrap
+skill: devbooks-router
 ---
 
-# DevBooks: 索引初始化
+# DevBooks: 命令索引
 
-使用 devbooks-index-bootstrap 初始化代码索引。
+DevBooks 常用命令索引入口。
 
 ## 用法
 
@@ -16,7 +16,6 @@ $ARGUMENTS
 
 ## 说明
 
-为项目建立代码索引：
-- 生成 SCIP 索引
-- 配置符号导航
-- 启用代码智能功能
+- 默认入口：/devbooks:start
+- 路由与阶段判断：/devbooks:router
+- 完整闭环：/devbooks:delivery

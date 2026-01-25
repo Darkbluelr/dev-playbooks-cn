@@ -58,9 +58,9 @@ report_line() {
   local ok="$2"
   local msg="$3"
   if [[ "$ok" == "1" ]]; then
-    printf "- %s: ✓ %s\n" "$name" "$msg"
+    printf -- "- %s: ✓ %s\n" "$name" "$msg"
   else
-    printf "- %s: ✗ %s\n" "$name" "$msg"
+    printf -- "- %s: ✗ %s\n" "$name" "$msg"
   fi
 }
 

@@ -1,10 +1,10 @@
 ---
-skill: devbooks-design-backport
+skill: devbooks-design-doc
 ---
 
 # DevBooks: 设计回写
 
-使用 devbooks-design-backport 把实现过程中发现的新约束/冲突/缺口回写到 design.md。
+使用 devbooks-design-doc 把实现过程中发现的新约束/冲突/缺口回写到 design.md。
 
 ## 用法
 

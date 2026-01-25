@@ -19,6 +19,12 @@
 
 这个 skill 会自动编排完整的开发闭环：Proposal → Design → Spec → Plan → Test → Implement → Review → Archive
 
+不确定入口时，也可以先运行：
+
+```bash
+/devbooks:start
+```
+
 **适用场景**：新功能开发、重大重构、不熟悉 DevBooks 工作流
 
 ---

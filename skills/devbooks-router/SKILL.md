@@ -29,6 +29,7 @@ allowed-tools:
 - 先做配置发现（优先读取 `.devbooks/config.yaml`）与规则文档读取，再进入路由判断。
 - 输出 2 个最小关键问题 + 3–6 条路由结果（含路径与理由）。
 - 用户要求“直接开始产出”时，切换到目标 Skill 的输出模式。
+- Start 为默认入口，使用 Router 输出阶段建议与路径。
 
 ## 参考资料
 - `skills/devbooks-router/references/路由规则与模板.md`：入口定位、配置发现、Impact 画像、路由规则、原型模式与上下文检测。

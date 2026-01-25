@@ -1,10 +1,14 @@
 ---
-skill: devbooks-proposal-debate-workflow
+skill: multi-skill-combo
+skills:
+  - devbooks-proposal-author
+  - devbooks-proposal-challenger
+  - devbooks-proposal-judge
 ---
 
-# DevBooks: 提案辩论
+# DevBooks: 提案辩论（向后兼容）
 
-使用 devbooks-proposal-debate-workflow 执行完整的提案辩论流程。
+编排 Author → Challenger → Judge 的完整辩论流程。
 
 ## 用法
 
@@ -16,7 +20,9 @@ $ARGUMENTS
 
 ## 说明
 
-编排 Author → Challenger → Judge 的完整辩论流程：
-- 自动协调多角色交互
-- 记录辩论过程
-- 产出最终裁决
+这是一个向后兼容命令，触发多 Skill 组合。
+
+也可使用更精确的直达命令：
+- /devbooks:proposal
+- /devbooks:challenger
+- /devbooks:judge

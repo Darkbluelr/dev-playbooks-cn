@@ -9,6 +9,8 @@
  *   dev-playbooks-cn init [path] [options]
  *   dev-playbooks-cn update [path]           # 更新 CLI 和已配置的工具
  *   dev-playbooks-cn migrate --from <framework> [options]
+ *   dev-playbooks-cn start [options]         # 入口指引（不执行 AI）
+ *   dev-playbooks-cn router [options]        # 路由与阶段判断（不执行 AI）
  *
  * 选项：
  *   --tools <tools>    非交互式指定 AI 工具：all, none, 或逗号分隔的列表
@@ -32,6 +34,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const CLI_COMMAND = 'dev-playbooks-cn';
+const ENTRY_DOC = 'docs/ai-native-workflow.md';
+const ENTRY_TEMPLATES = {
+  start: 'templates/claude-commands/devbooks/start.md',
+  router: 'templates/claude-commands/devbooks/router.md',
+  index: 'templates/claude-commands/devbooks/index.md'
+};
 const XDG_CONFIG_HOME = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
 
 // 版本检查缓存配置
@@ -1842,6 +1850,48 @@ async function migrateCommand(projectDir, options) {
 // 帮助信息
 // ============================================================================
 
+function showStartHelp() {
+  console.log();
+  console.log(chalk.bold('DevBooks Start') + ' - 默认入口与阶段指引');
+  console.log();
+  console.log(chalk.cyan('用法:'));
+  console.log(`  ${CLI_COMMAND} start [options]`);
+  console.log();
+  console.log(chalk.cyan('说明:'));
+  console.log('  本命令仅提供入口指引，不执行 AI 或调用 Skills。');
+  console.log('  不确定下一步时，先用 Start 获取路由建议。');
+  console.log();
+  console.log(chalk.cyan('入口模板:'));
+  console.log(`  ${ENTRY_TEMPLATES.start}`);
+  console.log();
+  console.log(chalk.cyan('入口文档:'));
+  console.log(`  ${ENTRY_DOC}`);
+  console.log();
+  console.log(chalk.cyan('相关命令:'));
+  console.log(`  ${CLI_COMMAND} router --help`);
+}
+
+function showRouterHelp() {
+  console.log();
+  console.log(chalk.bold('DevBooks Router') + ' - 路由与阶段判断');
+  console.log();
+  console.log(chalk.cyan('用法:'));
+  console.log(`  ${CLI_COMMAND} router [options]`);
+  console.log();
+  console.log(chalk.cyan('说明:'));
+  console.log('  本命令仅提供路由指引，不执行 AI 或调用 Skills。');
+  console.log('  需要阶段判断与最短闭环路径时使用 Router。');
+  console.log();
+  console.log(chalk.cyan('入口模板:'));
+  console.log(`  ${ENTRY_TEMPLATES.router}`);
+  console.log();
+  console.log(chalk.cyan('入口文档:'));
+  console.log(`  ${ENTRY_DOC}`);
+  console.log();
+  console.log(chalk.cyan('相关命令:'));
+  console.log(`  ${CLI_COMMAND} start --help`);
+}
+
 function showHelp() {
   console.log();
   console.log(chalk.bold('DevBooks') + ' - AI-agnostic spec-driven development workflow');
@@ -1850,6 +1900,8 @@ function showHelp() {
   console.log(`  ${CLI_COMMAND} init [path] [options]              初始化 DevBooks`);
   console.log(`  ${CLI_COMMAND} update [path]                      更新 CLI 和已配置的工具`);
   console.log(`  ${CLI_COMMAND} migrate --from <framework> [opts]  从其他框架迁移`);
+  console.log(`  ${CLI_COMMAND} start [options]                   入口指引（不执行 AI）`);
+  console.log(`  ${CLI_COMMAND} router [options]                  路由与阶段判断（不执行 AI）`);
   console.log();
   console.log(chalk.cyan('选项:'));
   console.log('  --tools <tools>    非交互式指定 AI 工具');
@@ -1862,6 +1914,11 @@ function showHelp() {
   console.log('  --force            强制重新执行所有步骤');
   console.log('  -h, --help         显示此帮助信息');
   console.log('  -v, --version      显示版本号');
+  console.log();
+  console.log(chalk.cyan('入口模板与文档:'));
+  console.log(`  Start 模板:  ${ENTRY_TEMPLATES.start}`);
+  console.log(`  Router 模板: ${ENTRY_TEMPLATES.router}`);
+  console.log(`  文档入口:    ${ENTRY_DOC}`);
   console.log();
   console.log(chalk.cyan('支持的 AI 工具:'));
 
@@ -1906,11 +1963,21 @@ function showHelp() {
   console.log(`  ${CLI_COMMAND} migrate --from openspec     # 从 OpenSpec 迁移`);
   console.log(`  ${CLI_COMMAND} migrate --from speckit      # 从 spec-kit 迁移`);
   console.log(`  ${CLI_COMMAND} migrate --from openspec --dry-run  # 模拟迁移`);
+  console.log(`  ${CLI_COMMAND} start                       # 查看默认入口指引`);
+  console.log(`  ${CLI_COMMAND} router                      # 查看路由与阶段判断`);
 }
 
 // ============================================================================
 // 主入口
 // ============================================================================
+
+async function startCommand() {
+  showStartHelp();
+}
+
+async function routerCommand() {
+  showRouterHelp();
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -1918,14 +1985,13 @@ async function main() {
   // 解析参数
   let command = null;
   let projectPath = null;
-  const options = {};
+  const options = { help: false };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
     if (arg === '-h' || arg === '--help') {
-      showHelp();
-      process.exit(0);
+      options.help = true;
     } else if (arg === '-v' || arg === '--version') {
       showVersion();
       process.exit(0);
@@ -1955,12 +2021,28 @@ async function main() {
 
   // 执行命令
   try {
+    if (options.help) {
+      if (command === 'start') {
+        showStartHelp();
+        return;
+      }
+      if (command === 'router') {
+        showRouterHelp();
+        return;
+      }
+      showHelp();
+      return;
+    }
     if (command === 'init' || !command) {
       await initCommand(projectDir, options);
     } else if (command === 'update') {
       await updateCommand(projectDir);
     } else if (command === 'migrate') {
       await migrateCommand(projectDir, options);
+    } else if (command === 'start') {
+      await startCommand();
+    } else if (command === 'router') {
+      await routerCommand();
     } else {
       console.log(chalk.red(`未知命令: ${command}`));
       showHelp();
