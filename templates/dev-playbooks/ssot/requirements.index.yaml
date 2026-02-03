@@ -1,0 +1,22 @@
+schema_version: 1.0.0
+set_id: PROJECT_ID
+source_ref: truth://ssot/SSOT.md
+
+# Requirements Index
+#
+# 本文件是 SSOT.md 的机读索引，用于：
+# - upstream_claims 验证
+# - 归档裁判
+# - 进度追踪
+#
+# 维护方式：
+# - 手动编辑后运行 ssot-index-sync.sh --validate
+# - 或通过 ssot-maintainer skill 的 delta 机制更新
+
+requirements:
+  # - id: R-001
+  #   severity: must
+  #   anchor: "## R-001"
+  #   statement: "需求描述（单行）"
+  #   confidence: medium  # low | medium | high
+  #   source: ai-inferred  # manual | ai-inferred | imported

@@ -5,16 +5,16 @@ usage() {
   cat <<'EOF' >&2
 usage: ssot-scaffold.sh [options]
 
-Scaffold a minimal Project SSOT pack under truth_root when upstream SSOT is absent.
+Scaffold a minimal Project SSOT pack under devbooks_root when upstream SSOT is absent.
 
 Creates (default):
-  <truth-root>/ssot/SSOT.md
-  <truth-root>/ssot/requirements.index.yaml
+  <devbooks-root>/ssot/SSOT.md
+  <devbooks-root>/ssot/requirements.index.yaml
 
 Options:
   --project-root <dir>    Project root directory (default: pwd)
-  --truth-root <dir>      Truth root directory (default: specs)
-  --ssot-dir <dir>        SSOT dir under truth_root (default: ssot)
+  --devbooks-root <dir>   DevBooks root directory (default: dev-playbooks)
+  --ssot-dir <dir>        SSOT dir under devbooks_root (default: ssot)
   --set-id <id>           requirements.index set_id (default: derived from project dir)
   --source-ref <ref>      requirements.index source_ref (default: truth://<ssot-dir>/SSOT.md)
   --force                 Overwrite existing files
@@ -24,6 +24,7 @@ Notes:
 - This script is intentionally deterministic and does not "discover" external SSOT.
   Use it when your project does not have an upstream SSOT, or you want an internal pointer file.
 - requirements.index.yaml schema_version is fixed to 1.0.0 (required by upstream_claims checks).
+- For full SSOT initialization with AI-assisted content extraction, use brownfield-bootstrap skill.
 EOF
 }
 
@@ -34,7 +35,7 @@ die_usage() {
 }
 
 project_root="${DEVBOOKS_PROJECT_ROOT:-$(pwd)}"
-truth_root="${DEVBOOKS_TRUTH_ROOT:-specs}"
+devbooks_root="${DEVBOOKS_ROOT:-dev-playbooks}"
 ssot_dir="ssot"
 set_id=""
 source_ref=""
@@ -50,8 +51,8 @@ while [[ $# -gt 0 ]]; do
       project_root="${2:-}"
       shift 2
       ;;
-    --truth-root)
-      truth_root="${2:-}"
+    --devbooks-root|--truth-root)
+      devbooks_root="${2:-}"
       shift 2
       ;;
     --ssot-dir)
@@ -77,20 +78,20 @@ while [[ $# -gt 0 ]]; do
 done
 
 project_root="${project_root%/}"
-truth_root="${truth_root%/}"
+devbooks_root="${devbooks_root%/}"
 ssot_dir="${ssot_dir%/}"
 
-if [[ -z "$project_root" || -z "$truth_root" || -z "$ssot_dir" ]]; then
+if [[ -z "$project_root" || -z "$devbooks_root" || -z "$ssot_dir" ]]; then
   die_usage "missing required paths"
 fi
 
-if [[ "$truth_root" = /* ]]; then
-  truth_dir="$truth_root"
+if [[ "$devbooks_root" = /* ]]; then
+  devbooks_dir="$devbooks_root"
 else
-  truth_dir="${project_root}/${truth_root}"
+  devbooks_dir="${project_root}/${devbooks_root}"
 fi
 
-ssot_pack_dir="${truth_dir}/${ssot_dir}"
+ssot_pack_dir="${devbooks_dir}/${ssot_dir}"
 
 if [[ -z "$set_id" ]]; then
   base="$(basename "$project_root")"

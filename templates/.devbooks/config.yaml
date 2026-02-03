@@ -17,6 +17,7 @@ project: project.md
 
 # 路径配置
 paths:
+  ssot: ssot/
   specs: specs/
   changes: changes/
   scripts: scripts/

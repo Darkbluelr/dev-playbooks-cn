@@ -1,6 +1,6 @@
 ---
 name: devbooks-brownfield-bootstrap
-description: devbooks-brownfield-bootstrap：存量项目初始化：在当前真理目录为空时生成项目画像、术语表、基线规格与最小验证锚点，避免"边补 specs 边改行为"。用户说"存量初始化/基线 specs/项目画像/建立 glossary/把老项目接入上下文协议"等时使用。
+description: devbooks-brownfield-bootstrap：存量项目初始化：在当前真理目录为空时生成项目画像、术语表、SSOT、基线规格与最小验证锚点，避免"边补 specs 边改行为"。用户说"存量初始化/基线 specs/项目画像/建立 glossary/初始化 SSOT/把老项目接入上下文协议"等时使用。
 recommended_experts: ["System Architect", "Technical Writer"]
 allowed-tools:
   - Glob
@@ -27,6 +27,29 @@ allowed-tools:
 ### 扩展层（可选）
 适用：需要与外部系统或可选工具协同时补充。
 
+## 与 ssot-maintainer 的职责边界
+
+| Skill | 职责 | 类比 |
+|-------|------|------|
+| **brownfield-bootstrap** | **创建** SSOT/Spec 骨架（从无到有） | `git init` |
+| **ssot-maintainer** | **维护** SSOT（增删改已有条目） | `git commit` |
+
+**关键区分**：
+- 本 Skill 负责**初始化**：当 `ssot/` 目录不存在或为空时，生成骨架
+- `ssot-maintainer` 负责**维护**：当 SSOT 已存在后，处理 delta、同步索引、刷新 ledger
+- 初始化完成后，后续 SSOT 变更应使用 `ssot-maintainer`
+
+## SSOT 与 Spec 的区别
+
+| 维度 | SSOT | Spec |
+|------|------|------|
+| **抽象层次** | 需求层（What） | 设计层（How） |
+| **粒度** | 项目级 | 模块级 |
+| **位置** | `<devbooks-root>/ssot/` | `<truth-root>/` |
+| **内容** | 系统必须做什么 | 模块如何工作 |
+
+详见 `docs/SSOT与Spec边界说明.md`
+
 ## 推荐 MCP 能力类型
 - 代码检索（code-search）
 - 引用追踪（reference-tracking）
@@ -34,8 +57,8 @@ allowed-tools:
 
 ## 前置：配置发现（协议无关）
 
-- `<truth-root>`：当前真理目录根
-- `<change-root>`：变更包目录根
+- `<truth-root>`：当前真理目录根（通常是 `dev-playbooks/specs/`）
+- `<change-root>`：变更包目录根（通常是 `dev-playbooks/changes/`）
 - `<devbooks-root>`：DevBooks 管理目录（通常是 `dev-playbooks/`）
 
 执行前**必须**按以下顺序查找配置（找到后停止）：
@@ -55,7 +78,7 @@ allowed-tools:
 
 存量项目初始化包含以下职责：
 
-### 1. 基础配置文件初始化（新增）
+### 1. 基础配置文件初始化
 
 在 `<devbooks-root>/`（通常是 `dev-playbooks/`）下检查并创建：
 
@@ -84,19 +107,39 @@ allowed-tools:
 | 文档维护元数据 | `_meta/docs-maintenance.md` | 文档风格与维护配置 |
 | 领域概念 | `_meta/key-concepts.md` | 基于代码语义的概念提取（可选） |
 
-### 2.5 项目级 SSOT（当无上游 SSOT 时必须创建）
+### 3. 项目级 SSOT 初始化（核心职责）
 
-为解决“SSOT 巨大且频繁变动时，无法判定哪些已交付/未交付”的问题，本 Skill 在缺少上游 SSOT 时必须先落盘**最小可寻址 SSOT 包**（不复制长文档，只写索引与可裁判条目）：
+在 `<devbooks-root>/ssot/` 下生成 SSOT 骨架：
 
-| 产物 | 路径（相对 `<truth-root>`） | 说明 |
-|------|---------------------------|------|
-| Project SSOT | `ssot/SSOT.md` | 人类可读的系统级真相骨架（需求/契约/运行约束/开放问题） |
-| Requirements Set（机读） | `ssot/requirements.index.yaml` | 稳定 ID → 锚点 → statement；供 `upstream_claims` 与归档裁判使用 |
-| Requirements Ledger（派生缓存） | `ssot/requirements.ledger.yaml` | 进度视图，可丢弃可重建；由脚本从归档变更包派生 |
+| 产物 | 路径 | 说明 |
+|------|------|------|
+| SSOT 文档 | `ssot/SSOT.md` | 人类可读的需求/约束文档 |
+| 需求索引 | `ssot/requirements.index.yaml` | 机读索引（稳定 ID → 锚点 → statement） |
 
-若项目已存在上游 SSOT（例如独立 `SSOT docs/`），该 Skill 不复制原文，而是在 `ssot/SSOT.md` 中写入指针/链接，并以 `requirements.index.yaml` 建立稳定 ID 与锚点索引。
+**生成策略：骨架优先 + 渐进补全**
 
-### 3. 架构分析产物
+1. **核心契约提取**（AI 主导）
+   - 扫描 API 定义（OpenAPI/GraphQL/RPC）
+   - 扫描数据模型（Schema/Entity）
+   - 扫描配置约束（env vars/feature flags）
+   - 扫描关键业务规则（从代码注释/测试用例推断）
+
+2. **置信度标记**
+   - 每条 requirement 标记 `confidence: low|medium|high`
+   - AI 生成默认为 `medium`
+   - 人类确认后升级为 `high`
+
+3. **最小可行 SSOT**
+   - 初始目标：5-15 条核心需求
+   - 不追求完整，追求可寻址
+   - 后续通过 `ssot-maintainer` 渐进补全
+
+**上游 SSOT 处理**：
+- 若项目已存在上游 SSOT（例如独立 `SSOT docs/`）
+- 本 Skill 不复制原文，而是在 `ssot/SSOT.md` 中写入指针/链接
+- 并以 `requirements.index.yaml` 建立稳定 ID 与锚点索引
+
+### 4. 架构分析产物
 
 在 `<truth-root>/architecture/` 下生成：
 
@@ -109,7 +152,7 @@ allowed-tools:
 
 > **设计决策**：C4 架构地图现在由 brownfield-bootstrap 在初始化时生成，后续架构变更通过 design.md 的 Architecture Impact 章节记录，由 archiver 在归档时合并。
 
-### 4. 基线变更包
+### 5. 基线变更包（可选）
 
 在 `<change-root>/<baseline-id>/` 下生成：
 
