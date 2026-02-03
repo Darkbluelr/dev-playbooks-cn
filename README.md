@@ -162,7 +162,7 @@ project/
 ## 下一步
 
 - [快速开始](docs/使用指南.md)
-- [设计原理](dev-playbooks/docs/AI软件工程开发框架设计.md)
+- [设计原理](docs/AI软件工程开发框架设计.md)
 - [Skill 详解](docs/Skill详解.md)
 
 ---

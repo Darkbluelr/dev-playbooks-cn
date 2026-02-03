@@ -35,7 +35,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const CLI_COMMAND = 'dev-playbooks-cn';
-const ENTRY_DOC = 'docs/ai-native-workflow.md';
+const ENTRY_DOC = 'docs/使用指南.md';
 const ENTRY_TEMPLATES = {
   delivery: 'templates/claude-commands/devbooks/delivery.md',
   index: 'templates/claude-commands/devbooks/index.md'
