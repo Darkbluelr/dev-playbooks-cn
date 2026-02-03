@@ -1,0 +1,7 @@
+schema_version: 1.0.0
+change_id: <change-id>
+state_transitions:
+  - from_state: null
+    to_state: pending
+    reason: "scaffolded"
+    evidence_refs: []

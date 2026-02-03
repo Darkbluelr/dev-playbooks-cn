@@ -116,6 +116,10 @@ bash scripts/doc-classifier.sh README.md
 
 # 完备性检查
 bash scripts/completeness-checker.sh --input README.md --config references/completeness-dimensions.yaml --output evidence/completeness-report.md
+
+# 作为 G6 Scope Evidence 的机读报告（固定落点）
+skills/devbooks-delivery-workflow/scripts/docs-consistency-check.sh <change-id> \
+  --project-root . --change-root dev-playbooks/changes --truth-root dev-playbooks/specs
 ```
 
 ---
@@ -142,6 +146,7 @@ bash scripts/completeness-checker.sh --input README.md --config references/compl
 
 默认输出以下报告（变更包上下文）：
 
+- `evidence/gates/docs-consistency.report.json`（机读；供 G6 / archive-decider 消费）
 - `evidence/completeness-report.md`
 - `evidence/token-usage.log`
 - `evidence/scan-performance.log`
@@ -151,6 +156,10 @@ bash scripts/completeness-checker.sh --input README.md --config references/compl
 ## 与工作流的集成
 
 在归档阶段由 `devbooks-archiver` 触发，在存量初始化时由 `devbooks-brownfield-bootstrap` 生成文档维护元数据。
+
+当 G6 触发 Scope Evidence Bundle 且判定“docs 一致性为必需项”时（例如 deliverables 涉及 `README.md/docs/**/templates/**`，或存在 `weak_link+docs` 的 `severity=must` 义务）：
+- 必须生成 `evidence/gates/docs-consistency.report.json` 且 `status=pass`
+- 缺失或 `status!=pass` 将被 `archive-decider.sh` 判定为 fail，从而阻断归档
 
 ---
 

@@ -1,32 +1,130 @@
-# Changelog
+# 变更日志
 
-All notable changes to this project will be documented in this file.
+本项目的所有重要变更都会记录在本文件中。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，并遵循 [语义化版本](https://semver.org/spec/v2.0.0.html)。
+
+## [4.0.0] - 2026-02-03
+
+### 新增
+
+- **完成合同（Completion Contract）**：把用户意图编译为机读合同，锁定“义务→检查→证据”链条，防止交付标准被静默弱化
+- **7 道闸门（G0-G6）**：从输入就绪到归档裁决，全链路可裁判检查点，任何一道失败都会阻断
+- **上游 SSOT 支持**：自动索引项目已有的需求文档，提取可裁判约束；缺失时自动创建最小 SSOT 包
+- **Knife 切片协议**：大需求强制切片，每片有复杂度预算，超预算必须再切
+- **Void 研究协议**：高熵问题先研究再决策，产出可追溯的决策记录（ADR）
+- **证据新鲜度校验**：证据文件必须比被覆盖的交付物更新，防止用旧证据糊弄
+- **弱连接义务**：文档、配置、发布说明等“代码外契约”也被编译为可裁判义务
+
+### 修复
+
+- **忽略规则补齐**：补齐 `.ci-index/`（本地索引数据库目录）到忽略清单，避免误提交/误发布
+- **文档示例一致性**：安装后命令示例对齐为 `dev-playbooks-cn`
+
+## [3.1.0] - 2026-01-31
+
+> ⚠️ 重要：`3.0.0` 存在“错误发布/叙事漂移”风险（版本/变更记录与能力集不一致）。本版本用于收敛并提供可复验的发布与同步证据。建议跳过 `3.0.0`，直接使用 `3.1.0`。
+
+### 新增
+
+- **发布边界证据锚点**：
+  - 将 `npm pack --dry-run` 作为发布边界的客观证据（packlist），用于复验“包内包含/不包含”的最终口径
+  - 补齐 CLI 入口一致性自检锚点（bin 映射与入口可执行性）
+
+### 变更
+
+- **版本收敛**：
+  - CN/EN 用户侧版本统一推进到 `3.1.0`，并对齐 Release notes 叙事（语言不同但要点一致）
+
+### 修复
+
+- **发布与同步闭环可裁判性**：
+  - 将“发布包范围”和“跨仓同步边界”从口头约定收敛为脚本可复验证据（packlist + parity 报告）
+
+---
+
+## [3.0.3] - 2026-01-29
+
+### 新增
+
+- **协议 v1.1 覆盖与强制校验**：
+  - 新增 v1.1 coverage mapping，并强制产出覆盖报告（映射 + 证据驱动；要求 `uncovered=0`）
+- **闸门报告与风险证据约定**：
+  - 新增 Gate Report 证据约定与风险证据落点（`evidence/gates/`、`evidence/risks/`）
+- **依赖审计输出格式化**：
+  - 新增格式化的依赖审计输出（最小字段 + 原始 audit JSON）
+
+### 变更
+
+- **强化 `change-check.sh`**：
+  - 加固元数据合同、状态机、change-type 矩阵，以及 Knife/Bootstrap 的闸门校验
+- **对齐文档与模板**：
+  - 对齐 Gate Report、覆盖报告与依赖审计的约定（docs + templates）
+
+---
+
+## [3.0.2] - 2026-01-28
+
+### 新增
+
+- **协议层 CN↔EN 同步工具**：
+  - 新增针对 `dev-playbooks/**` 的协议层同步脚本（带可审计报告与回滚锚点）：`scripts/english-sync-protocol.sh`
+- **v1.1 覆盖报告生成器**：
+  - 新增用于 strict/archive 闸门的 v1.1 覆盖报告生成脚本：`scripts/generate-protocol-v1.1-coverage-report.sh`
+
+### 变更
+
+- **加固 strict/archive 闸门**：
+  - strict/archive 需要协议同步报告、parity 报告与 v1.1 覆盖报告（`skills/devbooks-delivery-workflow/scripts/change-check.sh`）
+- **高风险审批加固**：
+  - strict 模式下 `risk_level=high` 需要有人类审批记录（闸门强制）
+
+---
+
+## [3.0.1] - 2026-01-27
+
+### 新增
+
+- **新增 `/devbooks:delivery`（基于 `devbooks-delivery-workflow`）**：
+  - 统一入口：产物化变更包骨架（RUNBOOK/inputs index + evidence + completion contract）并路由 `request_kind`
+- **新增验证入口**：
+  - 新增 legacy 清理、slash commands、npm 打包与总结校验等验证入口
+- **新增工具脚本**：
+  - `tools/devbooks-embedding.sh`、`tools/devbooks-complexity.sh`、`tools/devbooks-entropy-viz.sh`
+
+### 变更
+
+- **完善 strict 闸门**：
+  - 完成 `change-check.sh` strict 校验：G0–G6 报告、风险/追溯/handoff 阻断，以及 registry 一致性检查
+- **加固 `scripts/english-sync.sh`**：
+  - 增加发布规格报告与加强 `dev-playbooks/**` deny 边界
+- **统一 CLI 入口脚本**：
+  - `bin/devbooks.mjs`
+
+---
 
 ## [3.0.0] - 2026-01-26
 
-### Added
+### 新增
 
 - **AI 原生工作流与协议升级**：
-  - 补齐 Start/Router 入口与阶段路由规范
+  - 补齐 Delivery 入口与 request_kind 路由规范
   - 新增变更包模板与协议合同（RUNBOOK、验证/合规/回滚、Knife Plan、合同 schema）
   - 完整化质量闸门与证据结构（G0–G6、风险与审计要求）
   - 新增依赖审计脚本与发布校验入口
   - 更新架构/文件系统视图与工作流示意图模板
 
-### Changed
+### 变更
 
 - **CLI 入口补齐**：
-  - 新增 `start` 与 `router` 命令，用于入口指引（不执行 AI）
+  - 新增 `delivery` 命令，用于入口指引（不执行 AI）
   - 帮助信息指向模板与工作流文档入口
 
 ---
 
 ## [2.6.0] - 2026-01-25
 
-### Added
+### 新增
 
 - **MCP 增强功能**：
   - 新增 MCP 检测脚本 `scripts/detect-mcp.sh`
@@ -38,13 +136,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 新增 `skills/devbooks-archiver/references/归档流程与规则.md`
   - 新增 `skills/devbooks-convergence-audit/references/` 目录
   - 新增 `skills/devbooks-delivery-workflow/references/编排禁令与阶段表.md`
-  - 新增 `skills/devbooks-router/references/` 目录
 
 - **规格文档完善**：
   - 新增 `dev-playbooks/specs/README.md` 规格索引
   - 完善 MCP、共享方法论、样式清理等规格文档
 
-### Changed
+### 变更
 
 - **文档结构优化**：
   - 更新所有 skill 的 SKILL.md 文档
@@ -58,13 +155,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.4] - 2026-01-23
 
-### Fixed
+### 修复
 
 - **修正 ignore 规则**：
   - 移除 `.ckb/` - 这是外部工具 CKB 的缓存，不属于 DevBooks
   - 将 `dev-playbooks/changes/*/evidence/` 改为 `dev-playbooks/` - 整个工作目录都应该被 ignore
 
-### Changed
+### 变更
 
 - **更准确的 ignore 范围**：
   - `dev-playbooks/` - DevBooks 工作目录（包含所有运行时产生的内容）
@@ -76,7 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.3] - 2026-01-23
 
-### Added
+### 新增
 
 - **智能 ignore 功能增强**：
   - 自动识别并 ignore DevBooks 工作流产生的临时文件
@@ -86,7 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 新增 `.ckb/` - CKB 代码知识库缓存
   - 自动识别项目级 skills 目录（`.factory/`, `.cursor/` 等）
 
-### Changed
+### 变更
 
 - **更智能的 ignore 规则生成**：
   - 根据选择的 AI 工具自动添加对应的目录
@@ -97,7 +194,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.2] - 2026-01-23
 
-### Fixed
+### 修复
 
 - **init 命令支持 Factory 和 Cursor**：
   - 将 Factory 添加为完整 Skills 支持的工具
@@ -114,7 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.1] - 2026-01-23
 
-### Fixed
+### 修复
 
 - 修复 `dev-playbooks-cn update` 命令的 changelog 显示功能
   - 添加完整的 2.5.0 版本变更记录
@@ -124,7 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.0] - 2026-01-23
 
-### Added
+### 新增
 
 - **Factory 原生 Skills 支持**：添加 `.factory/skills/` 目录，支持 Factory Droid
   - 使用符号链接指向现有 `skills/` 目录，保持单一数据源
@@ -136,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 所有 18 个 DevBooks skills 可在 Cursor 中原生使用
   - 符合 Cursor Agent Skills 标准
 
-### Changed
+### 变更
 
 - **README 优化**：
   - 移除"30秒电梯演讲"章节，简化文档结构
@@ -159,7 +256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.0] - 2026-01-23
 
-### Added
+### 新增
 
 - 新增 `devbooks-docs-consistency`：文档一致性检查技能（原 `devbooks-docs-sync` 的改名与增强）
   - 支持自定义规则引擎（持续规则 + 一次性任务）
@@ -174,7 +271,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `scripts/benchmark-scan.sh`：扫描性能基准测试
   - `scripts/detect-fancy-words.sh`：浮夸词语检测
 
-### Changed
+### 变更
 
 - `devbooks-docs-sync` 改名为 `devbooks-docs-consistency`，旧名称作为别名保留（6 个月弃用期）
 - 更新所有 skills 的 AI 行为规范，添加专家角色声明协议
@@ -225,7 +322,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0] - 2025-01-19
 
-### Added
+### 新增
 
 - **Version Changelog Display**: When running `dev-playbooks-cn update`, the CLI now displays a formatted changelog summary showing all changes between the current version and the latest version
   - ✅ Automatic fetch from GitHub: Retrieves CHANGELOG.md from the repository
@@ -242,7 +339,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2026-01-19
 
-### Added
+### 新增
 
 #### 🎯 Human-Friendly Document Templates
 
@@ -286,7 +383,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated README.md with v2.0.0 features section (both Chinese and English versions)
 
-### Changed
+### 变更
 
 - **proposal-author skill**: Updated to use new document templates
   - Now generates documents with "Bottom Line Up Front" section
@@ -382,14 +479,14 @@ New projects will automatically use the new document templates. No migration nee
 
 ## [1.7.4] - 2026-01-18
 
-### Changed
+### 变更
 - Various bug fixes and improvements
 
 ---
 
 ## [1.7.0] - 2026-01-15
 
-### Added
+### 新增
 - Initial release with 18 skills
 - Support for Claude Code, Codex CLI, and other AI tools
 - Quality gates and role isolation

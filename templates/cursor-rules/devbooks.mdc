@@ -1,0 +1,11 @@
+---
+description: DevBooks 项目规则（Cursor）
+globs:
+  - "**/*"
+---
+
+当请求涉及 proposal/spec/change/plan 或架构/对外契约变更时：
+
+1) 先阅读 `AGENTS.md` 并遵循 DevBooks 协议发现与约束。
+2) 默认使用中文输出。
+3) 遵守角色隔离：Test Owner 与 Coder 不在同一会话；Coder 禁止修改 `tests/`。

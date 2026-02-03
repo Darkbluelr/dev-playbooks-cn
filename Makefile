@@ -1,25 +1,25 @@
-# DevBooks 测试入口
-# Phase 0: 最小测试框架
+# DevBooks test entrypoint
+# Phase 0: minimal test framework
 
 .PHONY: test lint lint-all help-check all clean check-deps
 
-# 默认目标
+# Default target
 all: lint test
 
-# 查找 ripgrep 路径（支持 Homebrew 和 Claude Code 内置）
-# 注意：使用 POSIX 兼容的权限检查，避免 BSD vs GNU find 差异
+# Locate ripgrep (supports Homebrew and Claude Code bundled installs)
+# Note: Use POSIX-compatible permission checks to avoid BSD vs GNU find differences
 RG_PATH := $(shell command -v rg 2>/dev/null || \
 	(test -x /opt/homebrew/bin/rg && echo /opt/homebrew/bin/rg) || \
 	(test -x /usr/local/bin/rg && echo /usr/local/bin/rg) || \
 	(find ~/.cli-versions -name rg -type f \( -perm -u=x -o -perm -g=x -o -perm -o=x \) 2>/dev/null | head -1))
 
-# 如果找到 rg，将其目录加入 PATH
+# If rg is found, add its directory to PATH
 ifneq ($(RG_PATH),)
   RG_DIR := $(dir $(RG_PATH))
   export PATH := $(RG_DIR):$(PATH)
 endif
 
-# 检查依赖
+# Check dependencies
 check-deps:
 	@echo "=== Checking dependencies ==="
 	@if [ -z "$(RG_PATH)" ]; then \
@@ -39,27 +39,40 @@ check-deps:
 	@echo "  shellcheck: $$(command -v shellcheck)"
 	@echo "All dependencies found."
 
-# 运行所有 BATS 测试
+# Run all BATS tests
 test: check-deps
 	@echo "=== Running BATS tests ==="
 	@bats tests/harden-devbooks-quality-gates/*.bats
 
-# 运行 shellcheck 静态检查（本变更包的脚本）
-# 注意：完整 lint 使用 lint-all 目标
+# Run shellcheck (change package scripts)
+# Note: Full lint runs via lint-all target
 SCRIPTS_DIR := skills/devbooks-delivery-workflow/scripts
 CHANGE_SCRIPTS := $(SCRIPTS_DIR)/change-check.sh \
+                  $(SCRIPTS_DIR)/archive-decider.sh \
+                  $(SCRIPTS_DIR)/runbook-derive.sh \
                   $(SCRIPTS_DIR)/handoff-check.sh \
                   $(SCRIPTS_DIR)/env-match-check.sh \
                   $(SCRIPTS_DIR)/audit-scope.sh \
                   $(SCRIPTS_DIR)/progress-dashboard.sh \
-                  $(SCRIPTS_DIR)/migrate-to-v2-gates.sh
+                  $(SCRIPTS_DIR)/migrate-to-v2-gates.sh \
+                  $(SCRIPTS_DIR)/change-metadata-check.sh \
+                  $(SCRIPTS_DIR)/reference-integrity-check.sh \
+                  $(SCRIPTS_DIR)/check-completion-contract.sh \
+                  $(SCRIPTS_DIR)/extension-pack-integrity-check.sh \
+                  $(SCRIPTS_DIR)/required-gates-derive.sh \
+                  $(SCRIPTS_DIR)/required-gates-check.sh \
+                  $(SCRIPTS_DIR)/verification-anchors-check.sh \
+                  $(SCRIPTS_DIR)/state-audit-check.sh \
+                  $(SCRIPTS_DIR)/void-protocol-check.sh \
+                  $(SCRIPTS_DIR)/knife-correctness-check.sh \
+                  $(SCRIPTS_DIR)/epic-alignment-check.sh
 
 lint: check-deps
 	@echo "=== Running shellcheck (change package scripts) ==="
 	@shellcheck -x $(CHANGE_SCRIPTS)
 	@echo "All change package scripts pass shellcheck."
 
-# 完整 lint（所有脚本，包含预先存在的警告）
+# Full lint (all scripts, including pre-existing warnings)
 lint-all:
 	@echo "=== Running shellcheck (all scripts) ==="
 	@if command -v shellcheck >/dev/null 2>&1; then \
@@ -69,7 +82,7 @@ lint-all:
 		exit 1; \
 	fi
 
-# 检查所有脚本是否支持 --help
+# Check whether all scripts support --help
 help-check:
 	@echo "=== Checking --help support ==="
 	@failed=0; \
@@ -83,7 +96,7 @@ help-check:
 	done; \
 	if [ "$$failed" -eq 1 ]; then exit 1; fi
 
-# 清理测试产物
+# Clean test artifacts
 clean:
 	@echo "=== Cleaning test artifacts ==="
 	@rm -rf tests/harden-devbooks-quality-gates/tmp/

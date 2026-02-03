@@ -1,0 +1,10 @@
+# Legacy migration scripts live here; ignore for legacy trace scans.
+scripts/legacy/**
+
+# Legacy scan should not flag npm metadata for bin entry strings.
+package.json
+package-lock.json
+
+# Keep legacy migration entry shims out of rg-based legacy scans.
+skills/devbooks-delivery-workflow/scripts/migrate-from-openspec.sh
+skills/devbooks-delivery-workflow/scripts/migrate-from-speckit.sh

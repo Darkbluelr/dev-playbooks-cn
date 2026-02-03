@@ -231,7 +231,7 @@ allowed-tools:
 | 状态码 | 状态 | 判定条件 | 下一步 |
 |:------:|------|----------|--------|
 | ✅ | PHASE1_COMPLETED | Red 基线产出，无偏离 | 交接给 Coder（新对话/独立实例） |
-| ⚠️ | PHASE1_COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-backport` |
+| ⚠️ | PHASE1_COMPLETED_WITH_DEVIATION | Red 基线产出，deviation-log 有未回写记录 | `devbooks-design-doc` |
 | ❌ | BLOCKED | 需要外部输入/决策 | 记录断点，等待用户 |
 | 💥 | FAILED | 测试框架问题等 | 修复后重试 |
 

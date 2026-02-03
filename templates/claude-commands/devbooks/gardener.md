@@ -1,10 +1,10 @@
 ---
-skill: devbooks-spec-gardener
+skill: devbooks-docs-consistency
 ---
 
-# DevBooks: 规格园丁
+# DevBooks: 文档一致性（园丁）
 
-使用 devbooks-spec-gardener 进行规格合并与维护。
+使用 devbooks-docs-consistency 检查并维护项目文档与代码的一致性。
 
 ## 用法
 
@@ -16,7 +16,7 @@ $ARGUMENTS
 
 ## 说明
 
-负责规格的日常维护：
-- 合并变更包规格到真理源
-- 清理过期规格
-- 维护规格一致性
+适用场景：
+- 变更后需要检查 README/docs 与代码是否一致
+- 需要增量扫描（只扫本次改动）或全量扫描（全局检查）
+- 需要输出结构化差异报告与可执行修复建议

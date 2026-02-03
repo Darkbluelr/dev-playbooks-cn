@@ -1,224 +1,172 @@
 # DevBooks
 
-**AI 编程的质量闸门：让 AI 助手从"不可预测"变成"可验证"**
-
 [![npm](https://img.shields.io/npm/v/dev-playbooks-cn)](https://www.npmjs.com/package/dev-playbooks-cn)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-![DevBooks 工作流](docs/workflow-diagram.svg)
+## v4.0 新特性
+
+- **完成合同（Completion Contract）**：把用户意图编译为机读合同，锁定"义务→检查→证据"链条，防止 AI 偷偷降低交付标准
+- **7 道闸门（G0-G6）**：从输入就绪到归档裁决，全链路可裁判检查点，任何一道失败都会阻断
+- **上游 SSOT 支持**：自动索引项目已有的需求文档，提取可裁判约束；没有需求文档时自动创建最小 SSOT 包
+- **Knife 切片协议**：大需求强制切片，每片有复杂度预算，超预算必须再切
+- **Void 研究协议**：高熵问题先研究再决策，产出可追溯的决策记录（ADR）
+- **证据新鲜度校验**：证据文件必须比被覆盖的交付物更新，防止用旧证据糊弄
+- **弱连接义务**：文档、配置、发布说明等"代码外契约"也被编译为可裁判义务
 
 ---
 
-## 最佳实践：一键跑完整闭环
+## 你用 AI 写代码时，是不是经常遇到这些问题？
 
-不知道怎么用？直接运行：
+**"说改好了，结果没改好"**
+AI 说"已修复"，你问它确定吗，它说"确定"。上线后炸了。回头看，它写的测试恰好能通过它自己的 Bug。
+
+**"改着改着就忘了之前说的"**
+对话开头你说"不要改 X 模块"，三十轮对话后它把 X 模块改了。你提醒它，它道歉，然后下一轮又改了。
+
+**"需求大了就乱套"**
+小功能还行，稍微复杂一点就开始胡说八道。改了 A 忘了 B，修了 B 又破坏了 C。
+
+**"不知道它到底做没做完"**
+它说"完成了"，但你不敢信。你让它再检查一遍，它说"检查过了，没问题"。你还是不敢信。
+
+**"每次都要从头教"**
+上次对话里建立的约定，这次对话全忘了。项目的术语、边界、约束，每次都要重新解释。
+
+**"改完不知道改了什么"**
+它改了一堆文件，你问它改了什么，它给你一个摘要。但这个摘要对不对？你不知道。
+
+---
+
+## 这些不是 AI 不够聪明，是结构性问题
+
+提示词写得再好也没用。这是 LLM 的工作方式决定的：
+
+| 问题 | 根本原因 |
+|-----|---------|
+| 说改好了没改好 | 自己写测试验证自己的代码，当然能过 |
+| 改着改着就忘了 | 上下文窗口有限，早期信息被挤出去 |
+| 需求大了就乱 | 复杂度超过单次对话能处理的极限 |
+| 不知道做没做完 | 没有客观证据，只有它的口头声明 |
+| 每次从头教 | 对话是临时的，知识没有持久化 |
+| 不知道改了什么 | 没有可审计的变更记录 |
+
+---
+
+## DevBooks：用工程约束解决这些问题
 
 ```bash
-/devbooks-delivery-workflow
-```
-
-这个 skill 会自动编排完整的开发闭环：Proposal → Design → Spec → Plan → Test → Implement → Review → Archive
-
-不确定入口时，也可以先运行：
-
-```bash
-/devbooks:start
-```
-
-**适用场景**：新功能开发、重大重构、不熟悉 DevBooks 工作流
-
----
-
-## 定位与文本规范
-
-DevBooks 本体是非 MCP 工具，但提供 MCP 可选集成点，便于按需接入外部能力，同时保留少量自检脚本作为护栏。
-DevBooks 是一套围绕协议、工作流、文本规范的协作体系，强调可追溯与可验证。
-
-约束：核心流程必须保持可追溯与可审计。
-取舍：更重视一致性检查，接受部分自动化效率降低。
-影响：文档可扫描性提高，协作成本下降。
-
----
-
-## 我们解决的核心问题
-
-### 问题 1：逻辑幻觉与事实捏造
-
-**痛点**：AI 在缺乏知识时倾向于自信地编造代码或库，而非承认无知。
-
-**DevBooks 方案**：
-- 规格驱动开发：所有代码必须追溯到 AC-xxx（验收标准）
-- Contract Tests：验证对外契约，防止 API 幻觉
-
-### 问题 2：非收敛性调试
-
-**痛点**：修复一个 Bug 引入两个新 Bug，陷入"打地鼠"循环。
-
-**DevBooks 方案**：
-- 角色隔离：Test Owner 先跑出 Red 基线，Coder 不能修改测试
-- 收敛性审计：`devbooks-convergence-audit` 评估变更包是否有效推进
-
-### 问题 3：局部最优与全局短视
-
-**痛点**：AI 倾向于生成"能跑通"的独立代码块，缺乏对整体架构的考量。
-
-**DevBooks 方案**：
-- 设计先行：Design Doc 定义 What/Constraints，不写 How
-- 架构约束：Fitness Rules 验证架构规则
-- 影响分析：变更前评估跨模块影响
-
-### 问题 4：验证疲劳
-
-**痛点**：AI 生成速度极快，人类审查代码的警觉性随时间呈指数下降。
-
-**DevBooks 方案**：
-- 自动化质量闸门：Green 证据检查、任务完成率、角色边界检查
-- 强制评审：Reviewer 只审查可维护性，业务正确性由测试保证
-
----
-
-## 快速开始
-
-### 安装
-
-```bash
-# 全局安装
 npm install -g dev-playbooks-cn
-
-# 在项目中初始化
 dev-playbooks-cn init
+dev-playbooks-cn delivery
 ```
 
-### 更新
+| 问题 | DevBooks 怎么解决 |
+|-----|------------------|
+| 自己验证自己 | **角色隔离**：写测试的 Agent 和写代码的 Agent 必须分开，互相看不到对方的思路 |
+| 上下文遗忘 | **真理落盘**：术语、边界、约束写在文件里，不依赖对话记忆 |
+| 需求太大 | **切片预算**：大需求必须切成小块，每块有复杂度上限，超了就再切 |
+| 口头完成 | **证据定义完成**：测试日志、构建输出必须真的存在于磁盘上 |
+| 每次从头教 | **SSOT（单一真理源）**：项目知识持久化在 specs/，跨对话、跨变更稳定 |
+| 不知道改了什么 | **变更包**：每次变更有完整记录——提案、设计、任务、证据 |
+
+---
+
+## 它是怎么工作的
+
+你只需要记住一个命令：
 
 ```bash
-dev-playbooks-cn update
+dev-playbooks-cn delivery
 ```
 
-### 支持的 AI 工具
-
-| 工具 | 支持级别 |
-|------|----------|
-| Claude Code | 完整 Skills（`.claude/skills/`）|
-| Codex CLI | 完整 Skills（`.codex/skills/`）|
-| Qoder | 完整 Skills |
-| OpenCode | 完整 Skills |
-| Every Code | 完整 Skills |
-| Factory | 原生 Skills（`.factory/skills/`）|
-| Cursor | 原生 Skills（`.cursor/skills/`）|
-| Windsurf | Rules 系统 |
-| Gemini CLI | Rules 系统 |
-
----
-
-## 文档
-
-- [使用指南](docs/使用指南.md) - 完整工作流程和最佳实践
-- [Skill 详解](docs/Skill详解.md) - 18 个 Skills 的特色和功能
-
----
-
-## 核心理念
-
-### 1. 角色隔离（Role Isolation）
-
-Test Owner 与 Coder **必须在独立对话**中工作。这不是建议，是硬性约束。
-
-**隔离执行基线：**
-- 同一对话不同时编写测试与实现
-- 测试用于验证规格
-
-### 2. 规格驱动（Spec-Driven）
-
-所有代码必须追溯到 AC-xxx（验收标准）。
+系统会问你几个问题，然后生成一份 `RUNBOOK.md`——这是你这次任务的操作手册。照着做就行。
 
 ```
-需求 → Proposal → Design (AC-001, AC-002) → Spec → Tasks → Tests → Code
-```
-
-### 3. 证据优先（Evidence-First）
-
-完成由证据定义，而非 AI 声明。
-
-必需的证据：
-- 测试通过（Green 证据）
-- 构建成功
-- 静态检查通过
-- 任务完成率 100%
-
----
-
-## 工作流程
-
-```
-1. Proposal（提案）- 分析需求，评估影响
-   ↓
-2. Design（设计）- 定义 What/Constraints + AC-xxx
-   ↓
-3. Spec（规格）- 定义对外行为契约
-   ↓
-4. Plan（计划）- 制定实现计划和任务拆解
-   ↓
-5. Test（测试）- 编写验收测试（独立对话）
-   ↓
-6. Implement（实现）- 实现功能（独立对话）
-   ↓
-7. Review（评审）- 代码评审
-   ↓
-8. Archive（归档）- 归档变更包
+你的需求
+    ↓
+Delivery（判断类型、生成 RUNBOOK）
+    ↓
+┌─────────────────────────────────┐
+│ 小改动 → 直接执行                │
+│ 大需求 → 先切片再执行            │
+│ 不确定 → 先研究再决策            │
+└─────────────────────────────────┘
+    ↓
+闸门检查（7 道关卡，任何一道失败都会阻断）
+    ↓
+证据归档（测试日志、构建输出、审批记录）
 ```
 
 ---
 
-## 18 个 Skills
+## 核心机制
 
-| Skill | 阶段 | 作用 |
-|-------|------|------|
-| devbooks-router | 入口 | 工作流引导 |
-| devbooks-proposal-author | Proposal | 撰写提案 |
-| devbooks-proposal-challenger | Proposal | 质疑提案 |
-| devbooks-proposal-judge | Proposal | 裁决提案 |
-| devbooks-design-doc | Design | 编写设计文档 |
-| devbooks-spec-contract | Spec | 定义规格契约 |
-| devbooks-implementation-plan | Plan | 制定实现计划 |
-| devbooks-test-owner | Test | 编写验收测试 |
-| devbooks-test-reviewer | Review | 测试评审 |
-| devbooks-coder | Implement | 实现功能 |
-| devbooks-reviewer | Review | 代码评审 |
-| devbooks-archiver | Archive | 归档变更包 |
-| devbooks-docs-consistency | Quality | 文档一致性检查 |
-| devbooks-impact-analysis | Quality | 影响分析 |
-| devbooks-convergence-audit | Quality | 收敛性审计 |
-| devbooks-entropy-monitor | Quality | 熵度量监控 |
-| devbooks-brownfield-bootstrap | Init | 存量项目初始化 |
-| devbooks-delivery-workflow | Full | 完整闭环编排 |
+**真理源（SSOT）**
 
-详见 [Skill 详解](docs/Skill详解.md)
+```
+你的需求文档（如果有）
+    ↓ 提取约束
+specs/（术语、边界、决策）← 跨变更稳定的"项目记忆"
+    ↓
+changes/<id>/（本次变更的提案、设计、任务、证据）
+    ↓ 归档
+specs/（更新真理）
+```
+
+如果你没有需求文档，DevBooks 会帮你创建一个最小的。这反而是好事——逼你把模糊的想法写清楚。
+
+**完成合同**
+
+把"我要什么"编译成机器可检查的清单：
+- 5 条义务
+- 每条有对应的检查项
+- 每条有对应的证据文件
+
+不是"大概做完了"，而是"这 5 条都有证据"。
+
+**7 道闸门（G0-G6）**
+
+| 闸门 | 检查什么 |
+|-----|---------|
+| G0 | 输入就绪了吗？需求清楚吗？ |
+| G1 | 该有的文件都有吗？ |
+| G2 | 任务都完成了吗？ |
+| G3 | 切片正确吗？（大需求） |
+| G4 | 文档同步了吗？ |
+| G5 | 风险覆盖了吗？（高风险变更） |
+| G6 | 证据完整吗？可以归档吗？ |
+
+任何一道失败，流程阻断。不是警告，是阻断。
 
 ---
 
-## 传统 AI 编程对照
+## 目录结构
 
-### 对比传统 AI 编程
+```
+project/
+├── .devbooks/config.yaml     # 配置
+└── dev-playbooks/
+    ├── constitution.md       # 硬约束（不可绕过的规则）
+    ├── specs/                # 真理源（跨变更稳定）
+    └── changes/              # 变更包（每次变更一个目录）
+        └── <change-id>/
+            ├── proposal.md   # 为什么做、做什么
+            ├── design.md     # 怎么做、验收标准
+            ├── tasks.md      # 拆成可执行的步骤
+            ├── verification.md # 怎么证明做对了
+            └── evidence/     # 测试日志、构建输出
+```
 
-| 传统 AI 编程 | DevBooks |
-|-------------|----------|
-| AI 自评"已完成" | 测试通过 + 构建成功 |
-| 同一对话写测试又写代码 | 角色隔离，独立对话 |
-| 无验证闸门 | 多重质量闸门 |
-| 边修边破 | 稳定推进 |
-| 只支持 0→1 项目 | 支持存量项目 |
+---
 
-### 适用场景
+## 下一步
 
-- 新功能开发
-- 重大重构
-- Bug 修复
-- 存量项目接入
-- 需要高质量保证的项目
+- [快速开始](docs/使用指南.md)
+- [设计原理](dev-playbooks/docs/AI软件工程开发框架设计.md)
+- [Skill 详解](docs/Skill详解.md)
 
 ---
 
 ## 许可证
 
-MIT License - 详见 [LICENSE](LICENSE)
+MIT

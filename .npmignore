@@ -4,10 +4,10 @@
 .DS_Store
 
 # 仓库内部 DevBooks playbooks（不要发布）
-dev-playbooks/
+/dev-playbooks/
 
 # 变更包目录
-dev-playbooks/changes/
+/dev-playbooks/changes/
 
 # 备份目录
 .devbooks/backup/
@@ -19,6 +19,7 @@ tests/
 *.log
 
 # 本地配置
+.ci-index/
 .claude/
 .git/
 .gitignore
@@ -26,8 +27,7 @@ tests/
 # MCP 相关
 mcp/
 
-# 文档（仅保留 README）
-docs/
+# 文档（随 npm 包发布）
 
 # 工具脚本（非必要）
 tools/
@@ -46,7 +46,7 @@ templates/AGENTS.md
 
 # DevBooks managed - DO NOT EDIT
 # DevBooks 开发文档（运行时不需要）
-dev-playbooks/
+/dev-playbooks/
 .devbooks/
 
 # AI 工具配置目录

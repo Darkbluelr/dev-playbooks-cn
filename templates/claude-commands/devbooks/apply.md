@@ -6,7 +6,7 @@ skills:
   - devbooks-reviewer
 ---
 
-# DevBooks: 应用变更（向后兼容）
+# DevBooks: 应用变更
 
 使用多 Skill 组合执行实现阶段（Test Owner -> Coder -> Code Review）。
 
@@ -20,7 +20,7 @@ $ARGUMENTS
 
 ## 说明
 
-这是一个向后兼容命令，触发多 Skill 组合：
+这是一个组合命令，触发多 Skill 组合：
 1. devbooks-test-owner：创建验收测试
 2. devbooks-coder：实现功能代码
 3. devbooks-reviewer：代码评审

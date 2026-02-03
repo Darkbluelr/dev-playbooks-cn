@@ -134,7 +134,7 @@ validate_change_id_format() {
 
   # Validate description starts with a verb (common verbs)
   # 常用动词：add, fix, update, refactor, remove, improve, migrate, implement, ...
-  local verb_pattern="^(add|fix|update|refactor|remove|improve|migrate|implement|enable|disable|change|create|delete|modify|optimize|resolve|setup|init|configure|introduce|extract|merge|split|move|rename|deprecate|upgrade|downgrade|revert|sync|integrate|unify|standardize|simplify|extend|reduce|enhance|support|handle|validate|test|document|cleanup|prepare|finalize|complete|release|publish|deploy|hotfix|patch|bump)-"
+  local verb_pattern="^(feat|add|fix|update|refactor|remove|improve|migrate|implement|enable|disable|change|create|delete|modify|optimize|resolve|setup|init|configure|introduce|extract|merge|split|move|rename|deprecate|upgrade|downgrade|revert|sync|integrate|unify|standardize|simplify|extend|reduce|enhance|support|handle|validate|test|document|cleanup|prepare|finalize|complete|release|publish|deploy|hotfix|patch|bump)-"
 
   if [[ ! "$desc_part" =~ $verb_pattern ]]; then
     return 1
@@ -167,13 +167,25 @@ change_root="${change_root%/}"
 truth_root="${truth_root%/}"
 project_root="${project_root%/}"
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# change-scaffold.sh 可以在任意 --project-root 下创建变更包，因此模板应相对脚本所在仓库定位。
+repo_root="$(cd "${script_dir}/../../.." && pwd)"
+templates_dir="${repo_root}/templates/dev-playbooks/changes"
+
 if [[ "$change_root" = /* ]]; then
   change_dir="${change_root}/${change_id}"
 else
   change_dir="${project_root}/${change_root}/${change_id}"
 fi
 
-mkdir -p "${change_dir}/specs" "${change_dir}/evidence"
+mkdir -p "${change_dir}/specs" "${change_dir}/evidence" "${change_dir}/inputs"
+
+# P1: evidence 目录结构（必需）
+mkdir -p \
+  "${change_dir}/evidence/red-baseline" \
+  "${change_dir}/evidence/green-final" \
+  "${change_dir}/evidence/gates" \
+  "${change_dir}/evidence/risks"
 
 write_file() {
   local path="$1"
@@ -205,10 +217,168 @@ render_template() {
     -e "s|__TRUTH_ROOT__|${esc_truth_root}|g"
 }
 
-cat <<'EOF' | render_template | write_file "${change_dir}/proposal.md"
-# Proposal: __CHANGE_ID__
+render_productized_template() {
+  # 支持 templates/dev-playbooks/changes 的两种占位符：
+  # - <change-id> (Markdown)
+  # - CHANGE_ID (YAML)
+  sed \
+    -e "s|<change-id>|${esc_change_id}|g" \
+    -e "s|CHANGE_ID|${esc_change_id}|g"
+}
 
-> Output location: `__CHANGE_ROOT__/__CHANGE_ID__/proposal.md`
+write_from_repo_template() {
+  local rel="$1"
+  local out="$2"
+
+  if [[ -f "$out" && "$force" != true ]]; then
+    echo "skip: $out"
+    return 0
+  fi
+
+  local src="${templates_dir}/${rel}"
+  if [[ ! -f "$src" ]]; then
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$out")"
+  render_productized_template <"$src" >"$out"
+  echo "wrote: $out"
+  return 0
+}
+
+# P1: Delivery 入口产物化（RUNBOOK/inputs/index/completion.contract）
+# 说明：优先使用仓库模板；若缺失则继续使用旧模板生成最小可用文件。
+write_from_repo_template "RUNBOOK.md" "${change_dir}/RUNBOOK.md" || true
+if [[ ! -f "${change_dir}/RUNBOOK.md" ]]; then
+  cat <<'EOF' | render_productized_template | write_file "${change_dir}/RUNBOOK.md"
+# RUNBOOK：<change-id>
+
+## 0) 快速开始
+1. 先填写 `proposal.md` 的元数据（至少 risk_level / request_kind / intervention_level）。
+2. 运行严格校验：`skills/devbooks-delivery-workflow/scripts/change-check.sh <change-id> --mode strict`
+
+## Cover View（派生缓存，可丢弃可重建）
+
+> NOTE：在 `risk_level=medium|high` 或 `request_kind=epic|governance` 或 `intervention_level=team|org` 的变更中，G6（`archive|strict`）会强制校验本 RUNBOOK 仍包含 `## Cover View` 与 `## Context Capsule` 两个小节标题；不要删除。
+
+<!-- DEVBOOKS_DERIVED_COVER_VIEW:START -->
+> 运行 `skills/devbooks-delivery-workflow/scripts/runbook-derive.sh <change-id> ...` 自动生成（可丢弃可重建）
+<!-- DEVBOOKS_DERIVED_COVER_VIEW:END -->
+
+## Context Capsule（≤2 页；只写索引与约束，禁止贴长日志/长输出）
+
+<!-- DEVBOOKS_DERIVED_CONTEXT_CAPSULE:START -->
+> 运行 `skills/devbooks-delivery-workflow/scripts/runbook-derive.sh <change-id> ...` 自动生成（可丢弃可重建）
+<!-- DEVBOOKS_DERIVED_CONTEXT_CAPSULE:END -->
+
+### 1) 本变更一句话目标（对齐 `completion.contract.yaml: intent.summary`）
+- summary: <一句话，语义与 intent.summary 一致>
+
+### 2) 必跑验证锚点（只列 invocation_ref；不贴输出）
+- <C-xxx> <invocation_ref>
+
+## 输入索引
+
+- `inputs/index.md`
+EOF
+fi
+
+write_from_repo_template "inputs/index.md" "${change_dir}/inputs/index.md" || true
+if [[ ! -f "${change_dir}/inputs/index.md" ]]; then
+  cat <<'EOF' | render_productized_template | write_file "${change_dir}/inputs/index.md"
+# Input Index: <change-id>
+
+> Goal: record references + metadata only; do not copy long documents; used for audit and traceability.
+
+## Provided Inputs (Index)
+
+- Request text:
+- Docs/links:
+- File paths:
+EOF
+fi
+
+write_from_repo_template "completion.contract.yaml" "${change_dir}/completion.contract.yaml" || true
+if [[ ! -f "${change_dir}/completion.contract.yaml" ]]; then
+  cat <<'EOF' | render_productized_template | write_file "${change_dir}/completion.contract.yaml"
+schema_version: 1.0.0
+change_id: CHANGE_ID
+intent:
+  summary: "用一句话描述本变更的目标"
+  deliverable_quality: outline
+deliverables:
+  - id: D-001
+    kind: other
+    path: path/to/deliverable
+    quality: inherit
+obligations:
+  - id: O-001
+    describes: "可验证的义务描述（可判定 Pass/Fail）"
+    applies_to:
+      - D-001
+    severity: must
+checks:
+  - id: C-001
+    type: custom
+    invocation_ref: "描述如何执行该检查（例如脚本路径/命令/配置键/运行手册）"
+    covers:
+      - O-001
+    artifacts:
+      - evidence/gates/C-001.log
+decision_locks:
+  forbid_weakening_without_decision: true
+EOF
+fi
+
+write_from_repo_template "state.audit.yaml" "${change_dir}/state.audit.yaml" || true
+if [[ ! -f "${change_dir}/state.audit.yaml" ]]; then
+  cat <<'EOF' | render_productized_template | write_file "${change_dir}/state.audit.yaml"
+schema_version: 1.0.0
+change_id: CHANGE_ID
+state_transitions:
+  - from_state: null
+    to_state: pending
+    reason: "scaffolded"
+    evidence_refs: []
+EOF
+fi
+
+write_from_repo_template "proposal.md" "${change_dir}/proposal.md" || true
+if [[ ! -f "${change_dir}/proposal.md" ]]; then
+  cat <<'EOF' | render_productized_template | write_file "${change_dir}/proposal.md"
+---
+schema_version: 1.0.0
+change_id: <change-id>
+request_kind: change
+change_type: docs
+risk_level: low
+intervention_level: local
+state: pending
+state_reason: ""
+next_action: DevBooks
+epic_id: ""
+slice_id: ""
+ac_ids: []
+truth_refs: {}
+risk_flags: {}
+required_gates:
+  - G0
+  - G1
+  - G2
+  - G4
+  - G6
+completion_contract: completion.contract.yaml
+deliverable_quality: outline
+approvals:
+  security: ""
+  compliance: ""
+  devops: ""
+escape_hatch: null
+---
+
+# Proposal: <change-id>
+
+> Output location: `dev-playbooks/changes/<change-id>/proposal.md`
 >
 > Note: Proposal phase prohibits implementation code; only define Why/What/Impact/Risks/Validation + debate points.
 
@@ -229,10 +399,10 @@ cat <<'EOF' | render_template | write_file "${change_dir}/proposal.md"
 - Data and migration:
 - Affected modules and dependencies:
 - Testing and quality gates:
-- Value Signal and Observation: <fill "none" or specify metrics/dashboard/logs/business events>
-- Value Stream Bottleneck Hypothesis (where will it block: PR review / tests / release / manual acceptance): <fill "none" or specify hypothesis and mitigation strategy>
+- Value Signal and Observation: none
+- Value Stream Bottleneck Hypothesis: none
 
-## Risks & Rollback
+## Risks
 
 - Risks:
 - Degradation strategy:
@@ -241,7 +411,7 @@ cat <<'EOF' | render_template | write_file "${change_dir}/proposal.md"
 ## Validation
 
 - Candidate acceptance anchors (tests/static checks/build/manual evidence):
-- Evidence location: `__CHANGE_ROOT__/__CHANGE_ID__/evidence/` (recommend using `change-evidence.sh <change-id> -- <command>` to collect)
+- Evidence location: `dev-playbooks/changes/<change-id>/evidence/` (recommend using `change-evidence.sh <change-id> -- <command>` to collect)
 
 ## Debate Packet
 
@@ -253,8 +423,9 @@ cat <<'EOF' | render_template | write_file "${change_dir}/proposal.md"
 - Decision summary:
 - Questions requiring decision:
 EOF
+fi
 
-cat <<'EOF' | render_template | write_file "${change_dir}/design.md"
+ cat <<'EOF' | render_template | write_file "${change_dir}/design.md"
 # Design: __CHANGE_ID__
 
 > Output location: `__CHANGE_ROOT__/__CHANGE_ID__/design.md`
@@ -265,6 +436,12 @@ cat <<'EOF' | render_template | write_file "${change_dir}/design.md"
 
 - Current behavior (observable facts):
 - Main constraints (performance/security/compatibility/dependency direction):
+
+## Problem Context
+
+- What is broken today (observable symptoms)?
+- Why this matters (impact on workflow/quality/velocity)?
+- Constraints that cannot be violated:
 
 ## Goals / Non-goals
 
@@ -285,6 +462,26 @@ cat <<'EOF' | render_template | write_file "${change_dir}/design.md"
 
 - Artifacts / Events / Schema:
 - Compatibility strategy (versioning/migration/replay):
+
+## Design Rationale
+
+- Why this design (compared to alternatives)?
+- Key decisions and justifications:
+
+## Trade-offs
+
+- Trade-offs accepted:
+- Trade-offs rejected:
+
+## Variation Points (Future Change Hotspots)
+
+- Where do we expect change?
+- What is intentionally left as an extension point?
+
+## Documentation Impact
+
+- Docs that must be updated:
+- Docs explicitly confirmed as not needing updates:
 
 ## Observability and Acceptance (as needed)
 
@@ -448,7 +645,7 @@ F) Structural Quality Gate Record
 - Conflict points:
 - Impact assessment (cohesion/coupling/testability):
 - Alternative gates (complexity/coupling/dependency direction/test quality):
-- Decision and authorization: <fill "none" or specify authorizer/conclusion>
+- Decision and Authorization: <fill "none" or specify authorizer/conclusion>
 
 ========================
 G) Value Stream and Metrics (optional, but must explicitly fill "none")
@@ -520,6 +717,18 @@ prototype/
 EOF
 
   echo "ok: created prototype track at ${change_dir}/prototype/"
+fi
+
+# Delivery hook: Platform Sync (optional)
+# If the project provides scripts/platform-sync.sh and platform_targets[] is configured,
+# run it to keep platform artifacts in sync and write an auditable summary into RUNBOOK.md.
+platform_sync_script="${project_root}/scripts/platform-sync.sh"
+if [[ -x "$platform_sync_script" ]]; then
+  echo "info: platform sync (if enabled)..."
+  "$platform_sync_script" "$change_id" --project-root "$project_root" --change-root "$change_root" >/dev/null 2>&1 || {
+    echo "error: platform-sync failed (see ${change_dir}/evidence/gates/platform-sync.json)" >&2
+    exit 1
+  }
 fi
 
 echo "ok: scaffolded ${change_dir}"

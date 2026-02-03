@@ -121,7 +121,7 @@ change_root: dev-playbooks/changes/ # 变更包目录根
 
 | 角色 | Skill | 产物落点 |
 |------|-------|----------|
-| Router | `devbooks-router` | 路由与下一步建议 |
+| Delivery | `devbooks-delivery-workflow` | 路由 request_kind 与下一步建议 |
 | Proposal Author | `devbooks-proposal-author` | `proposal.md` |
 | Proposal Challenger | `devbooks-proposal-challenger` | 质疑报告 |
 | Proposal Judge | `devbooks-proposal-judge` | 裁决回写 |
@@ -133,7 +133,8 @@ change_root: dev-playbooks/changes/ # 变更包目录根
 | Coder | `devbooks-coder` | 按 tasks 实现（禁止改 tests） |
 | Reviewer | `devbooks-reviewer` | 评审意见 |
 | Archiver | `devbooks-archiver` | 归档修剪 + C4 合并 |
-| Design Backport | `devbooks-design-backport` | 回写设计缺口 |
+
+注意：`devbooks-archiver` 会在归档阶段自动执行设计回写；如需在归档前回写，请使用 `devbooks-design-doc`。旧名称（已废弃）：`devbooks-design-backport`。
 
 ### 按工作流
 
@@ -186,5 +187,5 @@ AI 可以根据用户意图自动选择 Skills：
 |----------|----------|
 | "修 bug"、"定位问题" | `devbooks-impact-analysis` → `devbooks-coder` |
 | "重构"、"优化代码" | `devbooks-reviewer` → `devbooks-coder` |
-| "新功能"、"实现 XX" | `devbooks-router` → 输出闭环路线 |
+| "新功能"、"实现 XX" | `devbooks-delivery-workflow` → 输出闭环路线 |
 | "写测试"、"补测试" | `devbooks-test-owner` |

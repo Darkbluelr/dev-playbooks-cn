@@ -86,3 +86,40 @@ proposal:
 
   # 是否需要 Impact Analysis（跨模块变更）
   require_impact_analysis: true
+
+# ==================== AI Native Framework 扩展字段 ====================
+#
+# 说明：
+# - 本段为可选扩展字段，未配置时不得改变既有工作流行为。
+# - 这些字段由 `scripts/config-discovery.sh` 解析并输出（追加字段，不破坏 v2 固定字段顺序）。
+
+# 闸门强度配置：light | standard | strict
+gate_profile: standard
+
+# 模型能力画像 ID（用于 Knife budget/slice_limits 推导）
+model_profile: default
+
+# 容量乘子（环境/工具增强），仅影响阈值，不改变闸门原则
+model_capacity_factor: 1.0
+
+# Knife 切片预算阈值集合（可为空；若为空则由 model_profile 推导或不启用超限裁判）
+slice_limits: {}
+
+# Void 协议开关（启用后允许 Freeze/Thaw）
+void:
+  enabled: false
+
+# Extension Packs 配置（启用后将追加风险旗标/证据要求/附加检查项）
+extensions:
+  enabled_packs: []
+
+# Brownfield 导入映射（只索引，不复制长文档）
+# 可选：上游 SSOT 文档库根目录（只做索引与引用，禁止复制长文档原文进变更包）
+# 例：truth_mapping: { ssot_root: "SSOT docs/" }
+truth_mapping: {}
+
+# 策略库→能力注入映射（建议以 ID 引用，避免在此处嵌入长文档）
+skill_injection: []
+
+# 平台同步目标（为空不影响行为；非空时 Start/Scaffold 触发平台工件同步）
+platform_targets: []

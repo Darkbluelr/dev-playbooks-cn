@@ -1,0 +1,33 @@
+# Knife Plan Template (YAML)
+#
+# Goal: A machine-readable slicing contract and validation anchor list.
+# Note: This is a template. Replace placeholder values with real IDs.
+#
+# Recommended location in a DevBooks-enabled project:
+#   dev-playbooks/specs/_meta/epics/<epic_id>/knife-plan.yaml
+
+plan_id: KP-YYYYMMDD-HHMM-EXAMPLE
+last_verified: YYYY-MM-DD
+health: draft
+
+epic_id: EPIC-EXAMPLE
+slice_id: SLICE-EXAMPLE-001
+
+change_type: feature
+risk_level: low
+
+ac_ids:
+  - AC-001
+acceptance_ids:
+  - ACC-EXAMPLE
+
+dependencies: []
+assumptions:
+  - 写清楚关键假设（不可省略）
+
+anchors:
+  - anchor_id: ANCHOR-EXAMPLE
+    gate_id: G3
+    evidence_type: checklist
+    success_criteria: 所有字段齐备且与变更包元数据对齐
+    owner: planner

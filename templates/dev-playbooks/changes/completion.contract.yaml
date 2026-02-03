@@ -1,0 +1,84 @@
+# Completion Contract（完成合同）模板
+#
+# 目的：把“用户意图”编译为可枚举义务集合，并绑定检查与证据落点，避免“形式通过但语义未完成”。
+# 约束：
+# - 这是模板文件：请在具体变更包中把示例值改为真实值。
+# - 为避免严格占位符扫描误伤：本模板避免使用尖括号占位符；用注释 + 示例值表达必填点。
+#
+# 参考：Patch Doc §3.2（最小合同字段）
+
+schema_version: 1.0.0
+
+# 变更包 ID（必须与变更包目录名一致）
+change_id: CHANGE_ID
+
+intent:
+  # 一句话目标（必须填实值，禁止空泛）
+  summary: "用一句话描述本变更的目标"
+
+  # 交付质量级别（Delivery 必须显式冻结；在未明确前，脚手架默认 outline 以避免“骨架被误判为完成”）
+  # enum: outline | draft | complete | operational
+  deliverable_quality: outline
+
+deliverables:
+  # 每个交付物必须有稳定 ID，并指向 repo 相对路径
+  - id: D-001
+    # enum: markdown | code | config | data | spec | other
+    kind: other
+    # repo-relative path
+    path: path/to/deliverable
+    # enum: inherit | outline | draft | complete | operational
+    quality: inherit
+
+obligations:
+  # 每条义务必须可被检查覆盖（见 checks 的 covers 字段）
+  - id: O-001
+    describes: "可验证的义务描述（可判定 Pass/Fail）"
+    applies_to:
+      - D-001
+    # enum: must | should
+    severity: must
+
+checks:
+  # 检查条目必须可执行或可复验（invocation_ref 允许引用脚本/命令/配置键/运行手册）
+  - id: C-001
+    # enum: test | build | lint | security | perf | manual | custom
+    type: custom
+    # enum: local | ci | both
+    runner: local
+    invocation_ref: "描述如何执行该检查（例如脚本路径/命令/运行入口）"
+    # MUST: 超时即失败（数值必须为正）
+    timeout_seconds: 600
+    # MUST: 默认 false；为 true 时必须显式风险标注与替代策略
+    requires_network: false
+    covers:
+      - O-001
+    artifacts:
+      # 建议把输出落到 evidence/gates/，便于归档与审计
+      - evidence/gates/C-001.log
+    # MUST: 机器可判定的成功条件摘要
+    success_criteria: "exit code == 0 and required artifacts exist"
+    # MUST: 失败时回流（枚举）
+    # enum: Void | Bootstrap | Knife | DevBooks
+    failure_next_action: DevBooks
+
+# 可选：上游宣称（当你需要声明“完成上游义务集合”时再添加）
+#
+# upstream_claims:
+#   - set_ref: truth://ssot/requirements.index.yaml
+#     claim: complete
+#     covered:
+#       - R-001
+#       - R-002
+#
+#   - set_ref: truth://ssot/requirements.index.yaml
+#     claim: subset
+#     covered:
+#       - R-001
+#     deferred:
+#       - R-002
+#     next_action_ref: change://20260101-0000-next-change/proposal.md
+
+decision_locks:
+  # 防弱化：任何降低质量级别/移除义务/把语义验收移出验证范围的变更，都必须触发显式决策并复验。
+  forbid_weakening_without_decision: true

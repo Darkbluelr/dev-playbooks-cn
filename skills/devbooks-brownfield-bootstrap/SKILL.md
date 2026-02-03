@@ -84,6 +84,18 @@ allowed-tools:
 | 文档维护元数据 | `_meta/docs-maintenance.md` | 文档风格与维护配置 |
 | 领域概念 | `_meta/key-concepts.md` | 基于代码语义的概念提取（可选） |
 
+### 2.5 项目级 SSOT（当无上游 SSOT 时必须创建）
+
+为解决“SSOT 巨大且频繁变动时，无法判定哪些已交付/未交付”的问题，本 Skill 在缺少上游 SSOT 时必须先落盘**最小可寻址 SSOT 包**（不复制长文档，只写索引与可裁判条目）：
+
+| 产物 | 路径（相对 `<truth-root>`） | 说明 |
+|------|---------------------------|------|
+| Project SSOT | `ssot/SSOT.md` | 人类可读的系统级真相骨架（需求/契约/运行约束/开放问题） |
+| Requirements Set（机读） | `ssot/requirements.index.yaml` | 稳定 ID → 锚点 → statement；供 `upstream_claims` 与归档裁判使用 |
+| Requirements Ledger（派生缓存） | `ssot/requirements.ledger.yaml` | 进度视图，可丢弃可重建；由脚本从归档变更包派生 |
+
+若项目已存在上游 SSOT（例如独立 `SSOT docs/`），该 Skill 不复制原文，而是在 `ssot/SSOT.md` 中写入指针/链接，并以 `requirements.index.yaml` 建立稳定 ID 与锚点索引。
+
 ### 3. 架构分析产物
 
 在 `<truth-root>/architecture/` 下生成：

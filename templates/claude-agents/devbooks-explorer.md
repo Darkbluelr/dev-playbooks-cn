@@ -1,7 +1,7 @@
 ---
 name: devbooks-explorer
 description: DevBooks Explorer 子代理：探索代码库、分析影响范围、查找引用关系。
-skills: devbooks-impact-analysis, devbooks-router
+skills: devbooks-impact-analysis
 ---
 
 # DevBooks Explorer 子代理

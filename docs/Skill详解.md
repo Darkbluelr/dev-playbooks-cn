@@ -1,12 +1,12 @@
 # DevBooks Skill 详解
 
-> 本文档详细介绍 DevBooks 的 19 个 Skills，包括每个 Skill 的特色、功能和使用场景。
+> 本文档详细介绍 DevBooks 的 21 个 Skills，包括每个 Skill 的特色、功能和使用场景。
 
 ---
 
 ## 定位与文本规范
 
-DevBooks 本体是非 MCP 工具，但提供 MCP 可选集成点，便于按需接入外部能力，同时保留少量自检脚本作为护栏。
+DevBooks 本体是本地工作流工具，保留少量自检脚本作为护栏。
 DevBooks 以协议、工作流、文本规范为主线，确保技能说明可追溯与可验证。
 
 约束：技能描述需要稳定、可扫描、可复用。
@@ -34,29 +34,87 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 
 ## 工作流入口
 
-### devbooks-router
+### devbooks-delivery-workflow（/devbooks:delivery）
 
-**角色**：工作流引导
+**角色**：统一入口（Delivery / 路由 / 闭环编排器）
 
 **特色**：
-- 检测项目当前状态
-- 确定从哪个 skill 开始
-- 给出最短闭环路径
+- 生成/复用 `<change-id>` 变更包骨架（RUNBOOK + inputs/index + completion contract）
+- 路由 `request_kind`（debug/change/epic/void/bootstrap/governance）
+- 基于 `request_kind` 选择“最小充分闭环”，并编排调用后续 Skills
+- 必问并冻结 `deliverable_quality`，写入 `completion.contract.yaml#intent.deliverable_quality`，避免“骨架被误判为完成”
 
 **使用场景**：
-- 不确定下一步该做什么
-- 项目状态不清楚
-- 需要工作流指导
+- 你不知道从哪开始
+- 你要做 Debug / 新功能 / Epic / 存量初始化 / 流程治理，但不想自己拼流程
 
 **调用方式**：
 ```bash
-/devbooks-router
+/devbooks:delivery
 ```
 
 **输出**：
-- 当前项目状态分析
-- 推荐的下一步 skill
-- 完整闭环路径建议
+- `dev-playbooks/changes/<change-id>/RUNBOOK.md`
+- `dev-playbooks/changes/<change-id>/inputs/index.md`
+- `dev-playbooks/changes/<change-id>/completion.contract.yaml`
+- 1 份路由结果（request_kind + 最短闭环 + 升级条件）
+
+---
+
+### devbooks-knife
+
+**角色**：Epic 切片规划（Knife）
+
+**特色**：
+- 把 Epic 级需求切成可拓扑排序的 Slice 队列（可并行、可收敛）
+- 落盘机读 Knife Plan（用于高风险/史诗级变更的强制闸门）
+
+**使用场景**：
+- `risk_level=high` 的变更（必须）
+- `request_kind=epic` 的变更（必须）
+- 需求过大、需要拆包成多个变更包队列（建议）
+
+**调用方式**：
+```bash
+/devbooks:knife
+```
+
+**输出**：
+- Knife Plan（机读）：`dev-playbooks/specs/_meta/epics/<epic_id>/knife-plan.yaml`（或 `.json`）
+- Slice 队列（建议写入 Knife Plan 的 `slices[]`，绑定 `slice_id/change_id/anchors`）
+
+**关键约束**：
+- 必须显式绑定 `epic_id` / `slice_id`，并与后续变更包元数据对齐
+- 当为强制场景时，缺失 Knife Plan 会在严格闸门被阻断（G3）
+
+---
+
+### devbooks-void
+
+**角色**：Void 协议执行器（高熵问题）
+
+**特色**：
+- 把不确定性转成可审计工件（research_report + ADR + Freeze/Thaw 状态）
+- 只产出可机检的 Void 工件（不产出生产代码变更）
+- 通过 Freeze/Thaw 控制后续执行（阻塞问题清单与解锁条件落盘）
+
+**使用场景**：
+- 你卡住了/不确定/需要调研后再决策
+- 需要冻结当前变更，等待证据或关键输入（Freeze/Thaw）
+
+**调用方式**：
+```bash
+/devbooks:void
+```
+
+**输出**：
+- `void/research_report.md`
+- `void/ADR.md`
+- `void/void.yaml`
+
+**关键约束**：
+- Void 阶段不得修改 `tests/` 或生产代码（`src/`）
+- 工件必须通过 `void-protocol-check.sh` 校验
 
 ---
 
@@ -563,9 +621,10 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 **角色**：Delivery Workflow（完整交付工作流）
 
 **特色**：
-- 完整闭环编排器
+- 统一入口：路由 `request_kind`
+- 最小充分闭环编排器（不是固定阶段表）
 - 在支持子 Agent 的 AI 编程工具中调用
-- 自动编排 Proposal → Design → Spec → Plan → Test → Implement → Review → Archive 全流程
+- 按需编排 Proposal/Design/Spec/Plan/Test/Code/Review/Archive，以及 Knife/Void/Bootstrap 等节点
 
 **使用场景**：
 - 自动化完整工作流
@@ -573,7 +632,7 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 
 **调用方式**：
 ```bash
-/devbooks-delivery-workflow
+/devbooks:delivery
 ```
 
 **输出**：
@@ -582,6 +641,7 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 
 **关键约束**：
 - 需要 AI 工具支持子 Agent
+- 执行前建议通读：`skills/devbooks-delivery-workflow/references/编排禁令与阶段表.md`（含 P3-3 行动规范：产物落盘编号、多 change 防串线、跑完 Archiver 才算结束等）
 
 ---
 
@@ -589,7 +649,7 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 
 | Skill | 阶段 | 角色 | 独立对话 | 主要产物 |
 |-------|------|------|----------|----------|
-| devbooks-router | 入口 | 引导 | 否 | 路径建议 |
+| devbooks-delivery-workflow | 入口 | Orchestrator | 否 | 路由结果 + 变更包产物 |
 | devbooks-proposal-author | Proposal | Author | 否 | proposal.md |
 | devbooks-proposal-challenger | Proposal | Challenger | 否 | 质疑报告 |
 | devbooks-proposal-judge | Proposal | Judge | 否 | Decision Log |
@@ -606,39 +666,15 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 | devbooks-convergence-audit | Quality | Auditor | 否 | 收敛性报告 |
 | devbooks-entropy-monitor | Quality | Monitor | 否 | 熵度量报告 |
 | devbooks-brownfield-bootstrap | Init | Bootstrap | 否 | 项目画像 + 基线 |
-| devbooks-delivery-workflow | Full | Orchestrator | 否 | 完整变更包 |
 
 ---
 
 ## 使用建议
 
-### 最小工作流
+### 推荐用法
 
-如果只想快速开始，最小工作流是：
-
-```bash
-1. /devbooks-design-doc
-2. /devbooks-test-owner（独立对话）
-3. /devbooks-coder（独立对话）
-4. /devbooks-archiver
-```
-
-### 完整工作流
-
-如果要严格遵循 DevBooks 规范：
-
-```bash
-1. /devbooks-proposal-author
-2. /devbooks-proposal-challenger
-3. /devbooks-proposal-judge
-4. /devbooks-design-doc
-5. /devbooks-spec-contract
-6. /devbooks-implementation-plan
-7. /devbooks-test-owner（独立对话）
-8. /devbooks-coder（独立对话）
-9. /devbooks-reviewer
-10. /devbooks-archiver
-```
+- 默认从 `/devbooks:delivery` 进入，让 Delivery 路由 `request_kind` 并选择最小充分闭环。
+- 若你明确知道当前节点（例如只想做 Impact / Review / Archive），可直接调用对应命令，但不要绕过必要闸门与证据。
 
 ### 存量项目工作流
 
@@ -654,11 +690,12 @@ DevBooks 以协议、工作流、文本规范为主线，确保技能说明可�
 
 ## 总结
 
-DevBooks 提供 19 个 Skills，覆盖从提案到归档的完整工作流：
+DevBooks 提供 21 个 Skills，覆盖从提案到归档的完整工作流：
 
-- **入口引导**：router
+- **统一入口**：delivery（路由 `request_kind`，选择最小充分闭环）
+- **基础协议**：knife（切片规划）, void（高熵澄清）, brownfield-bootstrap（存量基线）
 - **提案阶段**：proposal-author, proposal-challenger, proposal-judge
-- **设计阶段**：design-doc, design-backport
+- **设计阶段**：design-doc（归档阶段由 Archiver 自动回写；需要提前回写时使用）
 - **规格阶段**：spec-contract
 - **计划阶段**：implementation-plan
 - **测试阶段**：test-owner, test-reviewer

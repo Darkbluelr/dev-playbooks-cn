@@ -21,7 +21,7 @@ AI 编码助手很强大，但往往**不可预测**：
 | **同一对话写测试又写代码** | 测试沦为"通过性测试"，而非验证规格 |
 | **无验证闸门** | 伪完成悄悄进入生产环境 |
 | **只支持 0→1 项目** | 存量代码库无从下手 |
-| **命令太少** | 复杂变更不只是"spec/apply/archive" |
+| **命令太少** | 复杂变更需要更细的阶段、角色与验证锚点 |
 
 **DevBooks 的解决方案**：
 - **基于证据的完成**：完成由测试/构建/证据定义，而非 AI 自我评估
@@ -33,7 +33,7 @@ AI 编码助手很强大，但往往**不可预测**：
 
 ## DevBooks 对比一览
 
-| 维度 | DevBooks | OpenSpec | spec-kit | 无规格 |
+| 维度 | DevBooks | 轻量三命令规格工作流 | 工具包式规格流程 | 无规格 |
 |------|----------|----------|----------|--------|
 | 规格驱动工作流 | 是 | 是 | 是 | 否 |
 | 变更产物的可追溯性 | 变更包集中存档（proposal/design/spec/tasks/verification/evidence） | 主要以变更目录/文件组织为主 | 以文档+任务编排为主 | 无 |
@@ -61,7 +61,7 @@ AI 编码助手很强大，但往往**不可预测**：
 | **Claude Code** | 完整 Skills | `CLAUDE.md` |
 | **Codex CLI** | 完整 Skills | `AGENTS.md` |
 | **Qoder** | 完整 Skills | `AGENTS.md` |
-| **OpenCode** | 完整 Skills | `AGENTS.md` |
+| **OpenCode（oh-my-opencode）** | 完整 Skills | `AGENTS.md` |
 | **Cursor** | Rules 系统 | `.cursor/rules/` |
 | **Windsurf** | Rules 系统 | `.windsurf/rules/` |
 | **Gemini CLI** | Rules 系统 | `GEMINI.md` |
@@ -91,7 +91,11 @@ npx dev-playbooks-cn@latest init
 **从源码安装（贡献者）：**
 
 ```bash
+# 在项目根目录执行：
 ./scripts/install-skills.sh
+
+# 或在 dev-playbooks/ 目录内执行：
+../scripts/install-skills.sh
 ```
 
 ### 安装落点
@@ -99,6 +103,7 @@ npx dev-playbooks-cn@latest init
 初始化后：
 - Claude Code：`~/.claude/skills/devbooks-*`
 - Codex CLI：`~/.codex/skills/devbooks-*`
+- Qoder：`~/.qoder/`（需要手动配置）
 - OpenCode：`~/.config/opencode/skill/devbooks-*`
 
 ### 快速集成
@@ -114,12 +119,12 @@ DevBooks 使用两个目录根：
 
 ## 日常变更工作流
 
-### 使用 Router（推荐）
+### 使用 Delivery（推荐）
 
-告诉 AI 你的需求，让 Router 分析并输出执行计划：
+告诉 AI 你的需求，让 Delivery 路由 `request_kind` 并输出执行计划：
 
 ```
-请运行 devbooks-router skill，分析需求：<你的需求>
+请运行 devbooks-delivery-workflow skill，分析需求：<你的需求>
 ```
 
 ### Skills 直达
@@ -169,7 +174,7 @@ DevBooks 使用两个目录根：
 
 | Skill | 说明 |
 |-------|------|
-| `devbooks-router` | 智能路由到合适的 Skill |
+| `devbooks-delivery-workflow` | 统一入口：路由 request_kind 并编排最小充分闭环 |
 | `devbooks-proposal-author` | 创建变更提案 |
 | `devbooks-impact-analysis` | 跨模块影响分析 |
 | `devbooks-proposal-challenger` | 质疑和挑战提案 |
@@ -184,7 +189,7 @@ DevBooks 使用两个目录根：
 |-------|------|
 | `devbooks-test-owner` | Test Owner 角色（必须独立对话） |
 | `devbooks-coder` | Coder 角色（必须独立对话） |
-| `devbooks-design-backport` | 回写发现到设计文档 |
+| `devbooks-design-doc` | 设计回写：归档阶段由 Archiver 自动回写；需要提前回写时使用 |
 
 ### Review 阶段
 
@@ -211,9 +216,9 @@ DevBooks 使用两个目录根：
 
 ## DevBooks 对比
 
-### vs. OpenSpec
+### vs. 轻量三命令规格工作流
 
-[OpenSpec](https://github.com/Fission-AI/OpenSpec) 是轻量级规格驱动框架，用三个核心命令（proposal/apply/archive）对齐人与 AI，按功能文件夹分组变更。
+轻量三命令规格工作流通常以少量固定阶段（例如提案/执行/归档）对齐人与 AI，适合小变更与低风险迭代。
 
 **DevBooks 新增：**
 - **角色隔离**：Test Owner 与 Coder 硬边界（必须独立对话）
@@ -221,13 +226,13 @@ DevBooks 使用两个目录根：
 - **21 个 Skills**：覆盖提案、对辩、评审、熵度量、联邦分析
 - **基于证据的完成**：测试/构建定义"完成"，而非 AI 自评
 
-**选择 OpenSpec**：简单规格驱动变更，需要轻量工作流。
+**选择轻量三命令工作流**：简单规格驱动变更，需要轻量流程。
 
 **选择 DevBooks**：大型变更、需要角色分离和质量验证。
 
-### vs. spec-kit
+### vs. 工具包式规格流程
 
-[GitHub spec-kit](https://github.com/github/spec-kit) 提供规格驱动开发工具包，有 constitution 文件、多步骤细化和结构化规划。
+工具包式规格流程通常提供更多模板与规范化文档（例如宪法、需求、设计、任务），适合从 0→1 搭建体系与规范化落地。
 
 **DevBooks 新增：**
 - **存量优先**：自动为现有代码库生成基线规格
@@ -235,7 +240,7 @@ DevBooks 使用两个目录根：
 - **质量闸门**：运行时验证，不只是工作流引导
 - **原型模式**：安全实验不污染主 src/
 
-**选择 spec-kit**：0→1 绿地项目，使用支持的 AI 工具。
+**选择工具包式流程**：0→1 绿地项目，优先规范化模板与多步骤引导。
 
 **选择 DevBooks**：存量项目或需要强制质量闸门。
 
@@ -290,8 +295,11 @@ DevBooks 提供质量闸门拦截"伪完成"：
 | 测试失败拦截 | archive, strict | Green 证据中无失败模式 |
 | P0 跳过审批 | strict | P0 任务跳过必须有审批记录 |
 | 角色边界检查 | apply --role | Coder 不能改 tests/，Test Owner 不能改 src/ |
+| 闸门报告落盘 | strict, archive | `evidence/gates/G0-<mode>.report.json`（G0–G6） |
+| 协议 v1.1 覆盖报告 | strict, archive | `evidence/gates/protocol-v1.1-coverage.report.json` 且 `uncovered=0` |
+| 风险证据阻断 | strict, archive | `evidence/risks/rollback-plan.md` + `evidence/risks/dependency-audit.log` |
 
-核心脚本（位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`）：
+核心脚本（随已安装的 `devbooks-delivery-workflow` Skill 提供，位于 `devbooks-delivery-workflow/scripts/`）：
 - `change-check.sh --mode proposal|apply|archive|strict`
 - `handoff-check.sh` - 角色交接验证
 - `audit-scope.sh` - 全量审计扫描
@@ -311,7 +319,7 @@ DevBooks 提供质量闸门拦截"伪完成"：
 
 原型模式防止实验代码污染主源码树。
 
-脚本位于 `~/.claude/skills/devbooks-delivery-workflow/scripts/`。
+脚本随已安装的 `devbooks-delivery-workflow` Skill 提供，位于 `devbooks-delivery-workflow/scripts/`。
 
 </details>
 
@@ -329,7 +337,7 @@ DevBooks 跟踪四维系统熵：
 
 用 `devbooks-entropy-monitor` 生成报告，识别重构机会。
 
-脚本（位于 `~/.claude/skills/devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
+脚本（随已安装的 `devbooks-entropy-monitor` Skill 提供，位于 `devbooks-entropy-monitor/scripts/`）：`entropy-measure.sh`、`entropy-report.sh`
 
 </details>
 
@@ -390,58 +398,28 @@ DevBooks Skills 支持 MCP（Model Context Protocol）优雅降级：在没有 M
 
 ## 从其他框架迁移
 
-DevBooks 提供迁移脚本帮助从其他规格驱动开发工具迁移。
+DevBooks 提供迁移脚本用于从旧目录结构迁移到 DevBooks。
 
-### 从 OpenSpec 迁移
-
-如果你当前使用 [OpenSpec](https://github.com/Fission-AI/OpenSpec)，有 `openspec/` 目录：
-
-```bash
-# 使用 CLI（推荐）
-dev-playbooks-cn migrate --from openspec
-
-# 先预览变更
-dev-playbooks-cn migrate --from openspec --dry-run
-
-# 迁移后保留原目录
-dev-playbooks-cn migrate --from openspec --keep-old
-```
-
-**迁移内容：**
-- `openspec/specs/` → `dev-playbooks/specs/`
-- `openspec/changes/` → `dev-playbooks/changes/`
-- `openspec/project.md` → `dev-playbooks/project.md`
-- 所有路径引用自动更新
-
-### 从 GitHub spec-kit 迁移
-
-如果你使用 [GitHub spec-kit](https://github.com/github/spec-kit)，有 `specs/` 和 `memory/` 目录：
+迁移来源使用一个 `legacy-id` 表示，对应 `scripts/legacy/migrate-from-<legacy-id>.sh` 脚本。
+（为了避免在用户向输出中枚举历史来源名，CLI 不会列出可用 id；请自行查看 `scripts/legacy/` 目录。）
 
 ```bash
 # 使用 CLI（推荐）
-dev-playbooks-cn migrate --from speckit
+dev-playbooks-cn migrate --from <legacy-id>
 
 # 先预览变更
-dev-playbooks-cn migrate --from speckit --dry-run
+dev-playbooks-cn migrate --from <legacy-id> --dry-run
 
 # 迁移后保留原目录
-dev-playbooks-cn migrate --from speckit --keep-old
+dev-playbooks-cn migrate --from <legacy-id> --keep-old
 ```
 
-**映射规则：**
-
-| Spec-Kit | DevBooks |
-|----------|----------|
-| `memory/constitution.md` | `dev-playbooks/specs/_meta/constitution.md` |
-| `specs/[feature]/spec.md` | `changes/[feature]/design.md` |
-| `specs/[feature]/plan.md` | `changes/[feature]/proposal.md` |
-| `specs/[feature]/tasks.md` | `changes/[feature]/tasks.md` |
-| `specs/[feature]/quickstart.md` | `changes/[feature]/verification.md` |
-| `specs/[feature]/contracts/` | `changes/[feature]/specs/` |
+**说明：**
+- 具体映射规则由对应迁移脚本定义；脚本会把旧结构中的规格/变更产物映射到 `dev-playbooks/specs/` 与 `dev-playbooks/changes/` 等目录，并更新文档引用（以脚本为准）。
 
 ### 迁移功能
 
-两个迁移脚本都支持：
+迁移脚本支持：
 
 - **幂等执行**：可安全多次运行
 - **断点续传**：中断后可从断点恢复

@@ -1,5 +1,5 @@
 ---
-skill: devbooks-router
+skill: devbooks-delivery-workflow
 ---
 
 # DevBooks: 命令索引
@@ -16,6 +16,5 @@ $ARGUMENTS
 
 ## 说明
 
-- 默认入口：/devbooks:start
-- 路由与阶段判断：/devbooks:router
-- 完整闭环：/devbooks:delivery
+- 唯一入口（路由 request_kind + 驱动闭环）：/devbooks:delivery
+- Epic 切片（高风险/史诗级变更）：/devbooks:knife

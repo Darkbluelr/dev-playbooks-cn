@@ -20,39 +20,99 @@ Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局�
 
 ---
 
-## `devbooks-router`（Router）
+## `devbooks-delivery-workflow`（Delivery / 唯一入口）
 
-- 作用：把你的自然语言请求路由成下一步该用哪些 `devbooks-*` skills + 每个产物落点路径。
-- **图索引健康检查**：路由前自动调用 `mcp__ckb__getStatus` 检查 SCIP 索引状态，若不可用会提示生成索引。
+- 作用：统一入口，把请求**产物化**为变更包骨架（`RUNBOOK.md` + `inputs/index.md` + completion contract），并路由 `request_kind` 后编排执行“最小充分闭环”。
+- `request_kind`（入口分流主轴）：`debug|change|epic|void|bootstrap|governance`
+- 关键约束：若用户未明确 `deliverable_quality`，Delivery 必追问并将最终选择写入 `completion.contract.yaml#intent.deliverable_quality`（避免“骨架被误判为完成”）。
 - 使用场景：
-  - 你不确定当前属于 proposal/apply/review/archive 哪个阶段
-  - 你不知道该先写 proposal / design / spec / tasks / tests 哪个
-  - 你想让 AI 给出"最短闭环"而不是堆步骤
-  - 你想使用 **Prototype 模式**（技术方案不确定，需要快速验证）
+  - 你不知道从哪开始
+  - 你要做 Debug / 新功能 / Epic / 存量初始化 / 流程治理，但不想自己拼流程
 - 使用话术（可直接复制）：
   ```text
-  你现在是 Router。请点名使用 `devbooks-router`。
+  你现在是 Delivery。请点名使用 `devbooks-delivery-workflow`。
   先读：`dev-playbooks/project.md`
-  先问我 2 个问题：`<change-id>` 是什么？`<truth-root>/<change-root>` 在本项目的取值是什么？
-  然后给出下一步要用的 Skills（按顺序）+ 每个产物应落到的文件路径。
+  若我未给出 `<change-id>`：请生成一个动词开头的 `<change-id>` 并重复 3 次让我确认。
+  先用脚手架产物化：
+  - 执行 `change-scaffold.sh <change-id> --project-root . --change-root dev-playbooks/changes --truth-root dev-playbooks/specs`
+  然后判定并写入 proposal front matter 的 `request_kind`（debug/change/epic/void/bootstrap/governance）。
+  最后输出：本次最短闭环 + 升级条件 + 下一步要调用的 Skills（按顺序）+ 每个产物落点路径。
 
   我的当前诉求是：
   <一句话描述你要做什么 + 约束/边界>
   ```
+
 - Prototype 模式话术（技术方案不确定时）：
   ```text
-  你现在是 Router。请点名使用 `devbooks-router`，并启用 **Prototype 模式**。
-  先读：`dev-playbooks/project.md`
+  你现在是 Delivery。请点名使用 `devbooks-delivery-workflow`，并启用 **Prototype 模式**（Plan to Throw One Away）。
+  先读：`dev-playbooks/project.md` 与 `skills/devbooks-delivery-workflow/references/原型-生产双轨模式.md`
 
-  我想做一个"扔掉式原型"来验证技术可行性（Plan to Throw One Away）。
+  我想做一个"扔掉式原型"来验证技术可行性。
   请按原型轨道路由：
   1) 创建原型骨架：`change-scaffold.sh <change-id> --prototype ...`
   2) Test Owner 产出表征测试（不需要 Red 基线）
-  3) Coder 在 `prototype/src/` 实现（允许绕过闸门，禁止落到仓库 src/）
+  3) Coder 在 `prototype/src/` 实现（禁止落到仓库 src/）
   4) 验证完成后告诉我：如何提升到生产（`prototype-promote.sh`）或如何丢弃
 
   我的当前诉求是：
   <一句话描述你要验证什么 + 技术疑问/假设>
+  ```
+
+---
+
+## `devbooks-ssot-maintainer`（SSOT Maintainer / 索引账本维护）
+
+- 作用：把“修改/同步 SSOT”变成可审计闭环：`ssot.delta.yaml → requirements.index.yaml →（可选）requirements.ledger.yaml`。
+- 适配两类项目：
+  - 有上游 SSOT：在 `.devbooks/config.yaml` 配置 `truth_mapping.ssot_root`，只索引引用不复制长文档原文。
+  - 无上游 SSOT：先用 `skills/devbooks-delivery-workflow/scripts/ssot-scaffold.sh` 生成最小 SSOT 包（`SSOT.md` + `requirements.index.yaml`）。
+- 使用场景：
+  - 你改了 SSOT（P0/P1/P2 任意阶段）但不确定索引/进度视图是否该更新
+  - 你希望 AI 帮你头脑风暴改 SSOT，同时自动维护索引账本
+- 使用话术（可直接复制）：
+  ```text
+  你现在是 SSOT Maintainer。请点名使用 `devbooks-ssot-maintainer`。
+  先读：`dev-playbooks/project.md` 与 `dev-playbooks/specs/ssot/spec.md`
+
+  我的目标是修改 SSOT，并同步 requirements.index.yaml（必要时刷新 requirements.ledger.yaml）。
+  约束：不要通读整本 SSOT；只用“delta → 索引同步”的方式落盘可审计输入。
+
+  请先检查配置：
+  - 若存在上游 SSOT：确保 `.devbooks/config.yaml` 配置 `truth_mapping.ssot_root`
+  - 若不存在：确保 `<truth-root>/ssot/SSOT.md` 与 `<truth-root>/ssot/requirements.index.yaml` 存在（可用 `skills/devbooks-delivery-workflow/scripts/ssot-scaffold.sh`）
+
+  然后请落盘：
+  - `dev-playbooks/changes/<change-id>/inputs/ssot.delta.yaml`
+  并运行：
+  - `skills/devbooks-ssot-maintainer/scripts/ssot-index-sync.sh --delta dev-playbooks/changes/<change-id>/inputs/ssot.delta.yaml --apply --refresh-ledger`
+  最后把输出日志落到 evidence/。
+  ```
+
+---
+
+## `devbooks-knife`（Knife / Epic 切片）
+
+- 作用：把 Epic 拆成可拓扑排序的 Slice 队列，并落盘机读 Knife Plan（作为高风险/史诗级变更的 G3 强制闸门输入）。
+- 使用场景：
+  - `risk_level=high`（必须）
+  - `request_kind=epic`（必须）
+  - 需求过大，需要拆成多个变更包队列（建议）
+- 使用话术：
+  ```text
+  你现在是 Knife Planner。请点名使用 `devbooks-knife`。
+  先读：`dev-playbooks/project.md`、`dev-playbooks/specs/knife/spec.md`、`dev-playbooks/specs/_meta/epics/README.md`
+
+  我的 Epic 是：
+  - epic_id: <EPIC-...>
+  - 目标/范围：<一句话>
+  - 风险等级 risk_level: <low|medium|high>
+  - request_kind: epic
+  - AC 清单（或验收标准集合）：<列出或给引用>
+
+  请输出并落盘：
+  - `dev-playbooks/specs/_meta/epics/<epic_id>/knife-plan.yaml`
+  其中必须包含：epic_id、slice_id（如已知）、slices[]（每个 slice 包含 change_id/ac_subset/verification_anchors/depends_on）。
+  最后给出下一步最短闭环路由 + 升级条件。
   ```
 
 ---
@@ -240,18 +300,21 @@ Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局�
 
 ---
 
-## `devbooks-design-backport`（Design Doc Editor / Backport）
+## `devbooks-design-doc`（设计文档更新 / 回写）
 
-- 作用：把实现中发现的新约束/冲突/缺口回写到 `design.md`（保持设计为黄金真理），并标注决策与影响。
+- 归档阶段：`devbooks-archiver` 会在归档闭环中自动执行设计回写（通常不需要手动回写）。
+- 如需在归档前回写：使用 `devbooks-design-doc` 更新 `dev-playbooks/changes/<change-id>/design.md`，并记录原因与影响。
+- 回写后：Planner 需要重跑 `tasks.md`；Test Owner 可能需要补测试/重跑 Red 基线。
+- 旧名称（已废弃）：`devbooks-design-backport`。
 - 使用场景：
-  - 发现“设计没覆盖/与实现冲突/临时决策影响范围”
-  - 需要停线回写设计再继续实现
+  - 发现“设计缺口/与实现冲突/临时决策影响范围”
+  - 需要停线回写设计后再继续实现
 - 使用话术：
   ```text
-  你现在是 Design Doc Editor。请点名使用 `devbooks-design-backport`。
+  你现在是 Design Owner。请点名使用 `devbooks-design-doc`。
   触发：实现中发现设计缺口/冲突/临时决策。
   请把需要上升到设计层的内容回写：`dev-playbooks/changes/<change-id>/design.md`（说明原因与影响），然后停止。
-  你必须明确提示我：需要回到 Planner 重跑 tasks；Test Owner 可能需要补测试/重跑 Red 基线。
+  你必须明确提示我：Planner 需要重跑 tasks；Test Owner 可能需要补测试/重跑 Red 基线。
   ```
 
 ---
