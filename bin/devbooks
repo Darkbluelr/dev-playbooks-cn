@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 解析符号链接以获取真实的脚本目录
+source="${BASH_SOURCE[0]}"
+while [ -L "$source" ]; do
+  dir="$(cd -P "$(dirname "$source")" && pwd)"
+  source="$(readlink "$source")"
+  [[ $source != /* ]] && source="$dir/$source"
+done
+script_dir="$(cd -P "$(dirname "$source")" && pwd)"
+
 exec node "${script_dir}/devbooks.mjs" "$@"
