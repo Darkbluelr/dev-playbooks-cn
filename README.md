@@ -107,6 +107,22 @@ Score = w₁·Files + w₂·Modules + w₃·RiskFlags + w₄·HotspotWeight
 3. **拓扑可排序**：依赖图必须无环，执行顺序必须为拓扑序
 4. **预算熔断**：超预算必须递归切分，或回流补信息
 
+### 并行执行调度
+
+当 Knife Plan 包含多个 Slice 时，可以生成并行执行清单：
+
+```bash
+knife-parallel-schedule.sh <epic-id> --format md --out parallel-schedule.md
+```
+
+输出内容：
+- **最大并行度**：可同时启动的最大 Agent 数量
+- **分层执行清单**：Layer 0（无依赖）→ Layer 1 → Layer N
+- **关键路径**：串行依赖深度
+- **启动命令模板**：每个 Slice 的 Agent 启动命令
+
+由于当前 AI 编程工具不支持二级子代理调用，Epic 拆分后需要人类协调多个独立 Agent 并行完成。
+
 ---
 
 ## 7 道闸门：全链路可裁判检查点

@@ -115,6 +115,30 @@ Skills 引用的共享资源（如 `_shared/references/`）位于 skills 全局�
   最后给出下一步最短闭环路由 + 升级条件。
   ```
 
+### 并行执行调度（多 Agent 并行）
+
+当 Knife Plan 包含多个 Slice 时，可以生成并行执行清单，让人类协调多个独立 Agent 并行完成：
+
+```bash
+# 生成并行调度清单
+knife-parallel-schedule.sh <epic-id> --format md --out parallel-schedule.md
+```
+
+**输出内容**：
+1. **最大并行度**：可同时启动的最大 Agent 数量
+2. **分层执行清单**：Layer 0（无依赖）→ Layer 1（依赖 Layer 0）→ ...
+3. **关键路径**：串行依赖深度
+4. **启动命令模板**：每个 Slice 的 Agent 启动命令
+5. **溯源信息**：Epic ID、Plan ID、Plan Revision
+
+**使用场景**：
+由于当前 AI 编程工具不支持二级子代理调用，Epic 拆分后需要人类协调多个独立 Agent 并行完成：
+1. 运行 `knife-parallel-schedule.sh` 生成清单
+2. 根据清单的 Layer 0 启动多个独立 Agent
+3. 等待 Layer 0 全部完成后，启动 Layer 1
+4. 重复直到所有 Layer 完成
+5. 运行 `requirements-ledger-derive.sh` 更新账本
+
 ---
 
 ## `devbooks-proposal-author`（Proposal Author）
